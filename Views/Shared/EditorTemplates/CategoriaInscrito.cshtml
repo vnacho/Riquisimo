@@ -1,0 +1,30 @@
+﻿@model CategoriaInscrito
+
+<div class="card mb-4 wow d-print-none">
+    <div class="form-row card-body">
+
+        @if (Model == null || string.IsNullOrWhiteSpace(Model.Id))
+        {
+            <div class="form-group col-md-2">
+                @Html.LabelFor(f => f.Id, new { @class = "small" })
+                @Html.EditorFor(f => f.Id, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+                @Html.ValidationMessageFor(f => f.Id, "", new { @class = "text-danger small" })
+            </div>
+        }
+        else
+        {
+            <div class="form-group col-md-2">
+                @Html.HiddenFor(f => f.Id)
+                @Html.LabelFor(f => f.Id, new { @class = "small" })
+                <input class="form-control form-control-sm text-box single-line" type="text" value="@Model.Id" disabled/>            
+            </div>
+        }
+
+        <div class="w-100"></div>        
+        <div class="form-group col-md-6">
+            @Html.LabelFor(f => f.Nombre, new { @class = "small" })
+            @Html.EditorFor(f => f.Nombre, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.Nombre, "", new { @class = "text-danger small" })
+        </div>
+    </div>
+</div>

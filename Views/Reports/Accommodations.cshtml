@@ -1,0 +1,188 @@
+﻿@model IEnumerable<Ferpuser.Models.Accommodation>
+
+@{
+    ViewData["Title"] = "Listado general de alojados";
+    ViewData["Create"] = false;
+    ViewData["Back"] = false;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+    ViewData["Report"] = true;
+}
+<div class="row d-print-none mb-4">
+    <div class="col-12">
+        <div class="card">
+            <form class="card-body d-flex justify-content-around align-items-center flex-column flex-sm-row">
+                <div class="form-group flex-grow-1">
+                    <label for="CongressId" class="control-label">Congreso</label>
+                    <select id="CongressId" name="CongressId" class="browser-default custom-select select2" asp-items="ViewBag.CongressId">
+                        <option value="">
+                            Todos
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group mx-1">
+                    <label for="Filter" class="control-label">Filtro</label>
+                    <select id="Filter" name="Filter" class="select2">
+                        <option value="0">
+                            Mostrar todo
+                        </option>
+                        <option value="1">
+                            Mostrar "Sólo facturación"
+                        </option>
+                        <option value="2">
+                            Excluir "Sólo facturación"
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group btn-group btn-group-sm mb-0">
+                    <button class="btn btn-primary btn-sm mb-0"><i class="fas fa-sync fa-2x"></i></button>
+                    @if (Model.Any())
+                    {
+                        <button class="btn btn-primary btn-sm mb-0" type="button" onclick="window.print()"><i class="fas fa-print fa-2x"></i></button>
+                        @*<a class="btn btn-primary btn-sm mb-0" asp-action="AccommodationsCsv" asp-route-congressId="@Model.FirstOrDefault().CongressId">
+                <i class="fas fa-file-csv fa-2x"></i>
+            </a>*@
+                        <a class="btn btn-primary btn-sm mb-0" onclick="Csv();">
+                            <i class="fas fa-file-csv fa-2x"></i>
+                        </a>
+                    }
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                @if (Model.GroupBy(r => r.CongressId).Count() == 1)
+                {
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <img src="@Model.FirstOrDefault().Congress.LogoBase64" class="w-50" />
+                        <img src="~/img/sanicongress.jpg" class="w-25" />
+                    </div>
+                }
+
+                <div class="col-12 text-center">
+                    <h1 class="mb-2 mb-sm-0 pt-1 h4">
+                        @ViewData["Title"]
+                    </h1>
+                </div>
+                <div class="card-body">
+
+                    @{
+                        var i = 0;
+                        var pageN = 0;
+                    }
+                    @while (i < Model.Count())
+                    {
+                        var p = 29;
+                        if (pageN == 0)
+                        {
+                            p = 23;
+                        }
+                        pageN++;
+                        <table class="table table-sm">
+                            <thead>
+                                <tr class="font-larger">
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Registrant.Treatment)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Registrant.Name)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Registrant.Surnames)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.RoomType.Name)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Hotel)
+                                    </th>
+                                    <th class="text-right">
+                                        @Html.DisplayNameFor(model => model.StartDate)
+                                    </th>
+                                    <th class="text-right">
+                                        @Html.DisplayNameFor(model => model.EndDate)
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (var j = 0; j < p && i < Model.Count(); j++, i++)
+                                {
+                                    var item = Model.ToArray()[i];
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Registrant.Treatment.Name)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Registrant.Name)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Registrant.Surnames)
+                                        </td>
+                                        <td>
+                                            @item.Hotel
+                                        </td>
+                                        <td>
+                                            @item.RoomType.Name
+                                        </td>
+                                        <td class="text-right">
+                                            @item.StartDate.ToShortDateString()
+                                        </td>
+                                        <td class="text-right">
+                                            @item.EndDate.ToShortDateString()
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="font-larger">
+                                    <th>
+                                        Página @pageN
+                                    </th>
+                                    <th colspan="6" class="text-right">
+                                        @ViewHelpers.PadCongress(Model.FirstOrDefault().Congress.Number)
+                                        @Model.FirstOrDefault().Congress.Name
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    }
+                </div>
+
+                <div class="card-footer text-right d-flex justify-content-end">
+                    <span class="mx-5">
+                        Alojamientos: @Model.Count()
+                    </span>
+                    <span>
+                        Total: @Model.Sum(m => m.Fee)€
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        $(e => {
+            $("#Filter").val(@(ViewData["Filter"])).trigger('change');
+        });
+
+        function Csv() {
+            var filter = $("#Filter").val();
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("AccommodationsCsv", "Reports")" + "?CongressId=@Model.FirstOrDefault()?.CongressId" + "&Filter=" + filter,
+                success: function () {
+                    window.location = "@Url.Action("AccommodationsCsv", "Reports")" + "?CongressId=@Model.FirstOrDefault()?.CongressId" + "&Filter=" + filter;
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,25 @@
+﻿@model VentaAlbaran
+
+<div class="table-responsive">
+    <table class="table table-sm table-hover table-striped">
+        <tr>
+            <td class="text-right">
+                Base Imponible: <br />
+                Total IVA: <br />
+                @*@if (Model != null && Model.TieneRetencion && Model.Retencion_Porcentaje.HasValue && Model.TotalRetencion.HasValue)
+                {
+                    <span>Total Retención (@Model.Retencion_Porcentaje %):</span><br />
+                }*@
+                Total:
+            </td>
+            <td class="text-right bold" style="max-width:140px !important; width:140px !important">
+                <b>@Model.BaseImponible.ToString("C")</b><br />
+                <b>@Model.AlbaranLineas.Sum(f => f.ImporteIVA).ToString("C")</b><br />
+                @*@if (Model != null && Model.TieneRetencion && Model.Retencion_Porcentaje.HasValue && Model.TotalRetencion.HasValue)
+                {
+                    <b>@Model.TotalRetencion.Value.ToString("C")</b>
+                }*@
+                <b>@Model.Total.ToString("C")</b>
+            </tr>
+    </table>
+</div>

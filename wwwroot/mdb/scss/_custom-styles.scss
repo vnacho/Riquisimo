@@ -1,0 +1,305 @@
+// Your custom styles
+body {
+    text-rendering: optimizelegibility;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /*-webkit-text-stroke: 1.2px;*/
+}
+
+.btn-rounded {
+    border-radius: 10em;
+}
+
+.row-card {
+    min-height: calc(100vh - 319px);
+}
+
+.custom-control-input:checked ~ .custom-control-label::before {
+    color: #fff;
+    border-color: $primary-color !important;
+    background-color: $primary-color !important;
+}
+
+.custom-control-input:focus ~ .custom-control-label::before {
+    box-shadow: 0 0 0 .2rem rgba($primary-color, 0.25);
+}
+
+.form-control:focus {
+    border-color: $primary-color;
+    box-shadow: 0 0 0 .2rem rgba($primary-color, 0.25);
+}
+
+.custom-select:focus {
+    border-color: $primary-color;
+    box-shadow: 0 0 0 .2rem rgba($primary-color, 0.25);
+}
+
+.swal2-styled.swal2-confirm {
+    color: #fff;
+    background-color: $primary-color !important;
+    border-radius: 0.125rem;
+    box-shadow: 0 0 0 .2rem rgba($primary-color, 0.25) !important;
+    transition: all 0.2s linear;
+}
+
+.client-list-search-container {
+    overflow-y: auto !important;
+    height: calc(100vh - 205px);
+}
+
+.select2 {
+    display: inline-block !important;
+    width: 100% !important;
+    height: calc(1.5em + .75rem + 2px) !important;
+    padding: .375rem 1.75rem .375rem .75rem !important;
+    font-size: 1rem !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+    color: #495057 !important;
+    vertical-align: middle !important;
+    background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3e%3cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") no-repeat right .75rem center/8px 10px !important;
+    background-color: rgba(0, 0, 0, 0) !important;
+    background-color: #fff !important;
+    border: 1px solid #ced4da !important;
+    border-radius: .25rem !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+}
+
+.select2-container--default .select2-selection--single {
+    background-color: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    display: none !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 1.5 !important;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: $primary-color !important;
+}
+
+.dropdown-item.active, .dropdown-item:active {
+    color: $black;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+@page {
+    size: auto;
+
+    @bottom-left {
+        content: counter(page) "/" counter(pages);
+    }
+}
+
+@media print {
+    .pt-5, .py-5 {
+        padding: 0 !important;
+    }
+
+    .ml-lg-5, .mx-lg-5 {
+        margin: 0 !important;
+    }
+
+    .ml-lg-5, .mx-lg-5 {
+        margin: 0 !important;
+    }
+
+    .mt-5, .my-5 {
+        margin: 0 !important;
+    }
+
+    .mb-4, .my-4 {
+        margin: 0 !important;
+    }
+
+    main {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+}
+
+.dropdown-toggle::after {
+    border: 0;
+    font-family: "Font Awesome 5 Free";
+    content: "\f078";
+    font-weight: 900;
+    font-size: 12px;
+    vertical-align: 0;
+    margin-left: 0.5em;
+    transition: all 0.5s;
+}
+
+.nav-item.dropdown.show > .dropdown-toggle::after {
+    transform: rotate(-180deg);
+    vertical-align: 0.1rem;
+}
+
+.fa, .fab, .fad, .fal, .far, .fas {
+    transition: all 0.5s;
+}
+
+// Indeterminate
+
+.progress {
+    display: flex;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+    height: .25rem;
+}
+
+.progress-bar {
+    border-bottom: .25rem solid $progress-bar-bg;
+
+    @each $color, $values in $theme-colors {
+        &.bg-#{$color} {
+            background-color: transparent !important; // stylelint-disable-line declaration-no-important
+            border-bottom-color: theme-color($color);
+
+            &::after {
+                background-color: theme-color-light($color);
+            }
+        }
+    }
+
+    &::after {
+        background-color: $progress-bg;
+        content: '';
+        display: block;
+        height: .25rem;
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: -1;
+    }
+}
+
+.progress-bar-indeterminate {
+    border-bottom-color: $progress-bg;
+    position: relative;
+    width: 100%;
+
+    @each $color, $values in $theme-colors {
+        &.bg-#{$color} {
+            border-bottom-color: theme-color-light($color);
+
+            &::after,
+            &::before {
+                background-color: theme-color($color);
+            }
+
+            &::before {
+                background-image: none;
+            }
+        }
+    }
+
+    &::after,
+    &::before {
+        border-radius: .25rem;
+        animation-duration: 2s;
+        animation-iteration-count: infinite;
+        animation-timing-function: linear;
+        background-color: $progress-bar-bg;
+        width: 0%;
+    }
+
+    &::after {
+        animation-name: progress-bar-indeterminate-after;
+        bottom: -.25rem;
+        z-index: 0;
+    }
+
+    &::before {
+        animation-name: progress-bar-indeterminate-before;
+        content: '';
+        display: block;
+        height: .25rem;
+        position: absolute;
+        bottom: -.25rem;
+        z-index: 0;
+    }
+}
+
+@keyframes progress-bar-indeterminate-after {
+    0% {
+        left: 0%;
+        width: 0%;
+    }
+
+    50% {
+        left: 25%;
+        width: 75%;
+    }
+
+    75% {
+        left: 100%;
+        width: 0%;
+    }
+}
+
+@keyframes progress-bar-indeterminate-before {
+    0%, 62.5% {
+        left: 0%;
+        width: 0%;
+    }
+
+    71.875% {
+        left: 0%;
+        width: 25%;
+    }
+
+    81.25% {
+        left: 25%;
+        width: 50%;
+    }
+
+    100% {
+        left: 100%;
+        width: 25%;
+    }
+}
+
+.font-larger th {
+    font-size: large;
+}
+
+.expenses {
+    *:not(h1,h2,h3,h4) {
+        font-size: 0.85rem !important;
+    }
+}
+
+.product-name {
+    color: rgba(0, 0, 0, 0.5);
+    font-size: 0.75rem !important;
+}
+.product-select-list:hover .product-name {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.dropdown-submenu {
+    position: relative;
+}
+
+.dropdown-submenu a::after {
+    transform: rotate(-90deg);
+    position: absolute;
+    right: 6px;
+    top: .8em;
+}
+
+.dropdown-submenu .dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-left: .1rem;
+    margin-right: .1rem;
+}

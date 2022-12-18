@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121.
+-->
+<Project>
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+  </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="DefaultConnection">
+      <Value>Server=STREAMME1\SQLEXPRESS%3bDatabase=FerpuserApp%3bUser=soporte%3bPassword=123456%3bMultipleActiveResultSets=true</Value>
+    </DestinationConnectionStrings>
+    <DestinationConnectionStrings Include="Sage">
+      <Value>Server=STREAMME1\SQLSAGE50%3bDatabase={0}%3bUser=soporte%3bPassword=123456%3bMultipleActiveResultSets=true</Value>
+    </DestinationConnectionStrings>
+    <DestinationConnectionStrings Include="SageComu">
+      <Value>Server=STREAMME1\SQLSAGE50%3bDatabase=COMU0001%3bUser=soporte%3bPassword=123456%3bMultipleActiveResultSets=true</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
+</Project>

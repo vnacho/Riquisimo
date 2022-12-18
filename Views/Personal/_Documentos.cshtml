@@ -1,0 +1,22 @@
+﻿@model Personal
+@{
+    TipoDocumento tipo = (TipoDocumento)ViewData["Tipo"];    
+}
+
+<div class="table-responsive mb-3">
+    <table class="table table-sm bg-white my-2">
+        @foreach (var doc in Model.Documentos.Where(f => f.Tipo == tipo).OrderBy(f => f.FicheroNombre))
+        {
+            <tr>
+                <td>
+                    <a class="text-info" download="@doc.FicheroNombre" href="@Url.Content(doc.FicheroUrl)">@doc.FicheroNombre</a>
+                </td>
+                <td class="text-right">
+                    <a href="@Url.Action("BorrarDocumento","Personal", new { Id = doc.Id, PersonalId = Model.Id })" onclick="return confirm('¿Está seguro de querer borrar el documento?')">
+                        <i class="fas fa-times ml-2"></i>
+                    </a>
+                </td>
+            </tr>
+        }
+    </table>
+</div>

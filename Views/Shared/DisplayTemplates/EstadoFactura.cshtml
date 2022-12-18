@@ -1,0 +1,14 @@
+﻿@using Ferpuser.Models.Enums
+@model EstadoFactura
+
+@{
+    switch (Model)
+    {
+        case EstadoFactura.NoTaspasadoSAGE:
+            <span class="badge badge-danger" style="width:100px;">No traspasado</span>
+            break;
+        case EstadoFactura.TaspasadoSAGE:
+            <span class="badge badge-success" style="width: 100px;">Traspasado</span>
+            break;
+    }
+}

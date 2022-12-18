@@ -1,0 +1,86 @@
+﻿@model Ferpuser.ViewModels.HomeViewModel
+@{
+    ViewData["Title"] = "Clientes no sincronizados con SAGE";
+    
+    ViewData["Back"] = false;
+    ViewData["Create"] = false;
+    ViewData["OneCard"] = false;
+    ViewData["DataTable"] = true;
+    ViewData["ImportClients"] = true;
+    ViewData["Swal"] = true;
+}
+@if (Model.NewClients.Any())
+{
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-body">
+                <table class="table table-striped table-hover table-sm table-borderless">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.NewClients.FirstOrDefault().BusinessName)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.NewClients.FirstOrDefault().NIF)
+                            </th>
+                            <th data-orderable="false"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var client in Model.NewClients)
+                        {
+                            <tr>
+                                <td>
+                                    @client.BusinessName
+                                </td>
+                                <td>
+                                    @client.NIF
+                                </td>
+                                <td class="text-right">
+                                    <a class="mx-2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </a>
+
+                                    <div class="dropdown-menu">
+                                        @{
+                                            var registrations = Model.NewClientRegistrations.FirstOrDefault(ncr => ncr.Key.Equals(client?.Id));
+                                            if (registrations != null)
+                                            {
+                                                <h6 class="dropdown-header">Inscripciones</h6>
+                                                foreach (var r in registrations)
+                                                {
+                                                    <a class="dropdown-item" asp-action="Edit" asp-controller="Registrations" asp-route-id="@r.Id" asp-route-returnUrl="@Context.Request.Path" >@r.Registrant.FullName</a>
+                                                }
+                                            }
+                                        }
+                                        @{
+                                            var accommodations = Model.NewClientAccommodations.FirstOrDefault(ncr => ncr.Key.Equals(client?.Id));
+                                            if (accommodations != null)
+                                            {
+                                                if (registrations != null)
+                                                {
+                                                    <div class="dropdown-divider"></div>
+                                                }
+                                                <h6 class="dropdown-header">Alojamientos</h6>
+                                                foreach (var r in accommodations)
+                                                {
+                                                    <a class="dropdown-item" asp-action="Edit" asp-controller="Accommodations" asp-route-id="@r.Id" asp-route-returnUrl="@Context.Request.Path" >@r.Registrant.FullName</a>
+                                                }
+
+                                            }
+
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item export" data-client-name="@client.BusinessName" data-client-id="@client.Id">
+                                                Exportar
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

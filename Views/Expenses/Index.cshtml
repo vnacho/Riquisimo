@@ -1,0 +1,304 @@
+﻿@model IEnumerable<Expense>
+
+@{
+    ViewData["Title"] = "Listado de Facturas de Venta";
+    ViewData["Select2"] = true;
+    ViewData["DatePicker"] = true;
+    ViewData["Report"] = true;
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+}
+
+<div class="card mb-4 wow d-print-none">
+    <div class="card-body row justify-content-between align-items-center py-2">
+        <div class="col-12 col-md-4">
+            <h5 class="mb-2 mb-sm-0 pt-1">
+                @ViewData["Title"]
+            </h5>
+        </div>
+        <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+            <a asp-action="Create" asp-controller="Expenses" class="btn btn-secondary btn-sm text-nowrap">Nuevo <i class="fas fa-plus ml-2"></i></a>
+            @*<a asp-action="Sync" asp-controller="Expenses" class="btn btn-deep-orange btn-sm text-nowrap">Sincronizar pagos con SAGE <i class="fas fa-sync ml-2"></i></a>
+            <small class="align-self-center">Última actualización: N/D</small>*@
+        </div>
+    </div>
+</div>
+
+
+<div class="d-none d-print-block text-center text-uppercase">
+    <h1 class="mb-2 mb-sm-0 pt-1 h4">
+        Relación de facturas
+    </h1>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <table id="expenses" class="table-100 table-lg-responsive table-striped">
+
+                    <thead>
+                        <tr class="d-none d-print-table-row border-bottom">
+                            <th class="">T doc</th>
+                            <th class="text-right">N doc</th>
+                            <th class="text-right">Fecha</th>
+                            <th>Cliente</th>
+                            <th class="text-right">Importe</th>
+                            <th>Congreso</th>
+                            <th class="text-center">Pagado</th>
+                        </tr>
+                        <tr class="d-print-none">
+                            <th>
+                                <select class="browser-default custom-select select2 d-print-none">
+                                    <option value="" selected>
+                                        @Html.DisplayNameFor(model => model.DocumentType)
+                                    </option>
+                                    @foreach (var i in Model.Select(m => m.DocumentType).Distinct().OrderBy(i => i.Name))
+                                    {
+                                        <option value="@i.Id">
+                                            @i.Name
+                                        </option>
+                                    }
+                                </select>
+
+                            </th>
+                            <th class="text-right">
+                                <select class="browser-default custom-select select2 d-print-none">
+                                    <option value="" selected>
+                                        # Documento
+                                    </option>
+                                    @foreach (var i in Model.Select(m => m.InvoiceNumber).Distinct().OrderBy(i => i))
+                                    {
+                                        var v = "";
+                                        @if (string.IsNullOrWhiteSpace(i))
+                                        {
+                                            v = "No disponible";
+                                        }
+                                        else
+                                        {
+                                            v = i;
+                                        }
+                                        <option value="@v">
+                                            @v
+                                        </option>
+                                    }
+                                    @foreach (var i in Model.Where(m => string.IsNullOrWhiteSpace(m.InvoiceNumber)).Select(m => m.Number).Distinct().OrderBy(i => i))
+                                    {
+                                        var v = ViewHelpers.PadCongress(i);
+                                        <option value="@v">
+                                            @v
+                                        </option>
+                                    }
+                                </select>
+                            </th>
+                            <th class="text-right">
+                                <div class="d-flex flex-column d-print-none">
+                                    <div class="input-group date" data-target-input="nearest">
+                                        <input id="start" type="text" class="form-control datetimepicker" />
+                                        <div class="input-group-append" data-target="#start" data-toggle="datetimepicker">
+                                            <div class="input-group-text"><i class="fa fa-step-backward"></i></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="input-group date" data-target-input="nearest">
+                                        <input id="end" type="text" class="form-control datetimepicker" />
+                                        <div class="input-group-append" data-target="#end" data-toggle="datetimepicker">
+                                            <div class="input-group-text"><i class="fa fa-step-forward"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th>
+                                <select class="browser-default custom-select select2 d-print-none">
+                                    <option value="" selected>
+                                        @Html.DisplayNameFor(model => model.Client)
+                                    </option>
+                                    @foreach (var i in Model.Select(m => m.Client.BusinessName).Distinct().OrderBy(i => i))
+                                    {
+                                        <option value="@i">
+                                            @i
+                                        </option>
+                                    }
+                                </select>
+                            </th>
+                            <th class="text-right">
+                                <span class="d-print-none">
+                                    Importe
+                                </span>
+                            </th>
+                            <th>
+                                <select class="browser-default custom-select select2 d-print-none">
+                                    <option value="" selected>
+                                        @Html.DisplayNameFor(model => model.Congress)
+                                    </option>
+                                    @foreach (var i in Model.Select(m => m.Congress).Distinct().OrderByDescending(i => i.Number))
+                                    {
+                                        <option value="@i.Id">
+                                            @i.Number @i.Name
+                                        </option>
+                                    }
+                                </select>
+                            </th>
+                            <th class="text-center">
+                                <select class="browser-default custom-select select2 d-print-none">
+                                    <option value="" selected>
+                                        Todas
+                                    </option>
+                                    <option value="true">
+                                        Pagadas
+                                    </option>
+                                    <option value="false">
+                                        Sin pagar
+                                    </option>
+                                </select>
+                            </th>
+                            <th data-orderable="false" class="d-print-none"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="dblclick" data-id="@item.Id">
+                                <td>
+                                    <span class="d-none">@item.DocumentTypeId</span>@item.DocumentType.Name
+                                </td>
+                                <td class="text-right">
+                                    @if (string.IsNullOrWhiteSpace(item.InvoiceNumber))
+                                    {
+                                        <span class="d-none">No disponible</span>
+                                        @ViewHelpers.PadCongress(item.Number)
+                                    }
+                                    else
+                                    {
+                                        @item.InvoiceNumber
+                                    }
+                                </td>
+                                <td class="text-right">
+                                    @if (item.InvoiceDate.HasValue)
+                                    {
+                                        <span class="d-none">@item.InvoiceDate.Value.ToString("yyyy/MM/dd")</span> @item.InvoiceDate.Value.ToString("dd/MM/yyyy")
+                                    }
+                                    else
+                                    {
+                                        <span class="d-none">@item.Modified.ToString("yyyy/MM/dd")</span> @item.Modified.ToString("dd/MM/yyyy")
+                                    }
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Client.BusinessName)
+                                </td>
+                                <td class="text-right">
+                                    @item.TotalVAT.ToString("N")
+                                </td>
+                                <td>
+                                    @item.Congress.Number @item.Congress.Name <span class="d-none">@item.Congress.Id</span>
+                                </td>
+
+                                <td class="text-center">
+                                    <span class="d-none">@item.Paid</span>
+                                    @if (item.Paid)
+                                    {
+                                        <span>Pagada</span>
+                                    }
+                                </td>
+                                <td class="text-right d-print-none">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="text-info mx-2" id="edit-@item.Id">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <th class="text-right"><span id="sum">@Model.Sum(m => m.TotalVAT).ToString("N")</span></th>
+                            <td></td>
+                            <td></td>
+                            <td class="d-print-none"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <a href="#" id="print" class="btn btn-primary d-print-none">
+                    Imprimir <i class="fas fa-print"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+
+    <script type="text/javascript" src="~/mdb/js/addons/datatables.min.js"></script>
+    <script type="text/javascript" src="~/mdb/js/addons/datatables-select.min.js"></script>
+    <script type="text/javascript" src="~/js/diacritics-sort.js"></script>
+
+    <script>
+
+        function addCommas(nStr) {
+            nStr = parseFloat(nStr).toFixed(2);
+            var x = nStr.split('.');
+            var x1 = x[0];
+            var x2 = x.length > 1 ? ',' + x[1] : ',00';
+            var rgx = /(\d+)(\d{3})/;
+            while (rgx.test(x1)) {
+                x1 = x1.replace(rgx, '$1' + '.' + '$2');
+            }
+            return x1 + x2;
+        }
+
+        $(function () {
+
+            $(".dblclick").dblclick(e => {
+                var id = "edit-" + $(e.currentTarget).attr("data-id");
+                document.getElementById(id).click();
+            });
+
+            function setTotal(table) {
+                var s = table.column(4, { "filter": "applied" }).data();
+                var total = 0;
+                for (var i = 0; i < s.length; i++) {
+                    total += parseFloat(s[i].split(".").join("").split(",").join("."));
+                }
+                $("#sum").text(addCommas(total));
+            }
+            $("#print").click(e => {
+                e.preventDefault();
+                $("#expenses_length select").val(-1);
+                $("#expenses_length select").trigger("change");
+
+                window.print();
+            });
+
+            // DataTable
+            const table = $('#expenses').DataTable({
+                "language": {
+                    "url": "/mdb/js/addons/Spanish.json"
+                },
+                dateFormat: "dd/mm/yyyy",
+                lengthMenu: [[10, 20, 40, 60, 100, -1], [10, 20, 40, 60, 100, "Todos"]],
+                pageLength: 40,
+                initComplete: function () {
+                    // Apply the search
+                    this.api().columns().every(function () {
+                        var that = this;
+                        $('select', this.header()).on('keyup change clear', function () {
+                            if (that.search() !== this.value) {
+                                that.search(this.value).draw();
+                                setTotal(table);
+                            }
+                        });
+                        $('input', this.header()).on('keyup change clear change.datetimepicker', function () {
+                            that.draw();
+                            setTotal(table);
+                        });
+                        $("#expenses_filter input").on('keyup change clear', function () {
+                            setTotal(table);
+                        });
+                    });
+                }
+            });
+        });
+    </script>
+}

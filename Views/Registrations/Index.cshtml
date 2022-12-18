@@ -1,0 +1,163 @@
+﻿@using Ferpuser.BLL.Filters
+@using Ferpuser.Models.Core
+@using Ferpuser.Models.Enums
+@model IEnumerable<Ferpuser.Models.Registration>
+
+@{
+    ViewData["Title"] = "Inscripciones";
+    //ViewData["DataTable"] = true;
+    ViewData["Back"] = false;
+    //ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+
+    TableHeaderSortable th;
+    var pager = ViewData["Pager"];
+    RegistrationFilter filter = ViewData["Filter"] as RegistrationFilter;
+    if (filter == null)
+        filter = new RegistrationFilter();
+}
+
+<form>
+
+    <input type="hidden" name="currentsort" id="currentsort" value="@ViewData["Sort"].ToString()" />
+
+    <div class="form-row">
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.Registrant, new { @class = "small" })
+            @Html.EditorFor(f => filter.Registrant, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => filter.Registrant, "", new { @class = "text-danger small" })
+        </div>        
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => filter.CodigoEvento, new { @class = "small" })
+            @Html.HiddenFor(f => filter.CodigoEvento)
+            <partial name="~/Views/Eventos/BuscadorEvento.cshtml" />
+            @Html.ValidationMessageFor(f => filter.CodigoEvento, "", new { @class = "text-danger small" })
+        </div>        
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => filter.ClientId, new { @class = "small" })
+            @Html.HiddenFor(f => filter.ClientId)
+            <partial name="~/Views/Clients/BuscadorCliente.cshtml" />
+            @Html.ValidationMessageFor(f => filter.ClientId, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.InvoiceNumber, new { @class = "small" })
+            @Html.EditorFor(f => filter.InvoiceNumber, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => filter.InvoiceNumber, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.Estado, new { @class = "small" })
+            @Html.DropDownListFor(f => filter.Estado, new SelectList(Html.GetEnumSelectList<EstadoCostCenterProduct>(), "Value", "Text", Model == null ? null : filter.Estado), "-Seleccionar-", new { @class = "form-control form-control-sm" })
+            @Html.ValidationMessageFor(f => filter.Estado, "", new { @class = "text-danger small" })
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="col text-right">
+            <button type="submit" id="btnFiltrar" class="btn btn-sm btn-blue-grey">Filtrar <i class="fas fa-search ml-2"></i></button>
+            <a href="@Url.Action("Index","Registrations")" class="btn btn-sm btn-grey">Limpiar <i class="fas fa-eraser ml-2"></i></a>
+        </div>
+    </div>
+
+    <hr />
+
+    <partial name="_Pager" model="pager" />
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive mt-2">
+            <table class="table table-sm table-hover table-striped bg-white ">
+                <thead class="font-weight-bolder">
+                    <tr>
+                        <th scope="col" class="text-center">
+                            @*Estado*@
+                        </th>
+                        @*<th scope="col">
+            @{ th = new TableHeaderSortable() { Property = "Number", Display = "Nº Doc.", CurrentSort = ViewData["Sort"].ToString() }; }
+            <partial name="_TableHeaderSortable" model="th" />
+        </th>*@
+                        <th scope="col">
+                            @{ th = new TableHeaderSortable() { Property = "Number", Display = "# Inscripción", CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col">
+                            @{ th = new TableHeaderSortable() { Property = "Registrant.Surnames", Display = Html.DisplayNameFor(f => f.Registrant).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col">
+                            @{ th = new TableHeaderSortable() { Property = "Congress.Number", Display = "Evento", CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col" class="text-center">
+                            @{ th = new TableHeaderSortable() { Property = "InvoiceNumber", Display = Html.DisplayNameFor(f => f.InvoiceNumber).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col" class="text-right">
+                            @{ th = new TableHeaderSortable() { Property = "Fee", Display = Html.DisplayNameFor(f => f.Fee).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col">
+                            @{ th = new TableHeaderSortable() { Property = "Client.BusinessName", Display = Html.DisplayNameFor(f => f.Client).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (Registration item in Model)
+                    {
+                        <tr class="small">
+                            <td class="text-center">@item.GetStatus()</td>
+                            @*<td class="text-center">@item.Number</td>*@
+                            <td class="text-center">@ViewHelpers.PadCongress(item.Number)</td>
+                            <td>@Html.DisplayFor(f => item.Registrant.FullName)</td>
+                            <td>@item.Congress?.Number @item.Congress?.Name <span class="d-none">@item.Congress?.Code</span></td>
+                            <td class="text-center">@(item.InvoiceNumber ?? "N/D")</td>
+                            <td class="text-right">@Html.DisplayFor(modelItem => item.Fee)</td>
+                            <td>@Html.DisplayFor(f => item.Client.BusinessName)</td>
+                            <td class="text-right text-nowrap">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="text-info mx-2">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+                                <a class="mx-2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </a>
+
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" asp-action="Credentials" asp-route-id="@item.Id">Sin código de barras</a>
+                                    <a class="dropdown-item" asp-action="Credentials" asp-route-id="@item.Id" asp-route-useBarcode="true">Con código de barras</a>
+                                    <a class="dropdown-item" href="#">Carteras</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#">Diplomas</a>
+                                    <a class="dropdown-item" asp-action="CreditsCertificate" asp-route-id="@item.Id">Créditos</a>
+                                    <a class="dropdown-item" href="#">Sobres</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <partial name="_Empty" model="string.Empty" />
+    }
+
+    <partial name="_Pager" model="pager" />
+
+</form>
+
+@section Scripts {
+    <script>
+        function EventoSeleccionado(codigo, nombre) {
+            $("#filter_CodigoEvento").val(codigo);
+            $("#BuscadorEventoTexto").val(nombre);
+            $("#BuscadorEventoModal").modal("hide");
+        }
+
+        function ClienteSeleccionado(codigo, nombre) {
+            $("#filter_ClientId").val(codigo);
+            $("#BuscadorClienteTexto").val(nombre);
+            $("#BuscadorClienteModal").modal("hide");
+        }
+    </script>
+}

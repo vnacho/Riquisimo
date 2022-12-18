@@ -1,0 +1,23 @@
+﻿@using Ferpuser.Models.Sage
+@model             IEnumerable<Ferpuser.Models.Sage.ProveedorSage>
+@{
+    Layout = null;
+}
+
+@if (Model != null && Model.Any())
+{
+    <div class="list-group list-group-flush w-100">
+        @foreach (var item in Model)
+        {
+            <a href="#" class="list-group-item text-dark client-search-item" onclick="ProveedorSeleccionado('@item.CODIGO','@item.NOMBRE')">
+                @item.NOMBRE
+            </a>
+        }
+    </div>
+}
+else
+{
+    <div class="text-left mt-3 text-info">
+        No se encontraron resultados
+    </div>
+}

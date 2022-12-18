@@ -1,0 +1,139 @@
+﻿@using Ferpuser.Models.Core
+@using Ferpuser.BLL.Filters
+@using Ferpuser.Models
+@model IEnumerable<MovimientosArticulosAlmacen>
+@{
+    List<KeyValuePair<string, string>> tipos = new List<KeyValuePair<string, string>>();
+    tipos.Add(new KeyValuePair<string, string>("E", "Entrada"));
+    tipos.Add(new KeyValuePair<string, string>("S", "Salida"));
+
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+
+    TableHeaderSortable th;
+    var pager = ViewData["Pager"];
+    MovimientosArticulosAlmacenFilter filter = new MovimientosArticulosAlmacenFilter();
+}
+<form>
+    <input type="hidden" name="currentsort" id="currentsort" value="@ViewData["Sort"].ToString()" />
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Listado movimientos articulos almacen
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                <a asp-action="Create" asp-controller="MovimientosArticulosAlmacen" class="btn btn-secondary btn-sm text-nowrap">Nuevo <i class="fas fa-plus ml-2"></i>
+                </a>
+                <button type="submit" class="btn btn-grey btn-sm text-nowrap" asp-action="ExportPdf" asp-controller="MovimientosArticulosAlmacen">
+                    Imprimir <i class="fas fa-print ml-2"></i>
+                </button>
+                <button type="submit" class="btn btn-grey btn-sm text-nowrap" asp-action="ExportCsv" asp-controller="MovimientosArticulosAlmacen">
+                    Exportar <i class="fas fa-file-csv ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.Tipo , new { @class = "control-label" })
+            @Html.DropDownListFor(f => filter.Tipo, new SelectList(tipos, "Key", "Value"), "-Seleccionar-", new { @class = "form-control"})
+            @Html.ValidationMessageFor(f => filter.Tipo, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group col-md-1">
+            @Html.LabelFor(f => filter.FechaDesde, new { @class = "small" })
+            @Html.EditorFor(f => filter.FechaDesde, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => filter.FechaDesde, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-1">
+            @Html.LabelFor(f => filter.FechaHasta, new { @class = "small" })
+            @Html.EditorFor(f => filter.FechaHasta, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => filter.FechaHasta, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => filter.ArticulosAlmacenId, new { @class = "small" })
+            @Html.DropDownListFor(f => filter.ArticulosAlmacenId, new SelectList(ViewBag.ArticulosAlmacen, "Id", "Display"), "-Seleccionar-", new { @class = "form-control form-control-sm select2" })
+            @Html.ValidationMessageFor(f => filter.ArticulosAlmacenId, "", new { @class = "text-danger small" })
+        </div>        
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => filter.RateFiltro, new { @class = "small" })
+            @Html.DropDownListFor(f => filter.RateFiltro, new SelectList(ViewBag.TiposTaria, "Rate", "Rate"), "-Seleccionar-", new { @class = "form-control form-control-sm select2" })
+            @Html.ValidationMessageFor(f => filter.RateFiltro, "", new { @class = "text-danger small" })
+        </div>         
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => filter.CentroId, new { @class = "small" })
+            @Html.DropDownListFor(f => filter.CentroId, new SelectList(ViewBag.CentrosCoste, "Id", "Display"), "-Seleccionar-", new { @class = "form-control form-control-sm select2" })
+            @Html.ValidationMessageFor(f => filter.CentroId, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3 text-right">
+            <br />
+            <button type="submit" id="btnFiltrar" class="btn btn-sm btn-blue-grey">Filtrar <i class="fas fa-search ml-2"></i></button>
+            <a href="@Url.Action("Index")" class="btn btn-sm btn-grey">Limpiar <i class="fas fa-eraser ml-2"></i></a>
+        </div>
+    </div>
+    <hr />
+    <partial name="_Pager" model="pager" />
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive mt-2">
+            <table class="table table-sm table-hover table-striped bg-white">
+                <thead class="font-weight-bolder">
+                    <tr>
+                        <th scope="col" class="text-left px-0">
+                            @{ th = new TableHeaderSortable() { Property = "ProductCode", Display = Html.DisplayNameFor(f => f.ArticulosAlmacenId).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col" class="text-center px-0">
+                            @{ th = new TableHeaderSortable() { Property = "Movimiento", Display = Html.DisplayNameFor(f => f.movimiento).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col" class="text-center px-0">
+                            @{ th = new TableHeaderSortable() { Property = "Fecha movimiento", Display = Html.DisplayNameFor(f => f.FechaMovimiento).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col" class="text-left px-0">
+                            @{ th = new TableHeaderSortable() { Property = "CentroCosteId", Display = Html.DisplayNameFor(f => f.CentroCosteId).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th> 
+                        <th scope="col" class="text-center px-0">
+                            @{ th = new TableHeaderSortable() { Property = "RATE", Display = "TIPO UNIDAD" }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>                        
+                        <th scope="col" class="text-right px-0">
+                            @{ th = new TableHeaderSortable() { Property = "Unidades", Display = Html.DisplayNameFor(f => f.Unidades).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>                        
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (MovimientosArticulosAlmacen item in Model)
+                {
+                    <tr>
+                        <td class="text-left">@item.ArticulosAlmacen.ProductCode</td>
+                        <td class="text-center">@item.movimiento.ToString()</td>
+                        <td class="text-center">@item.FechaMovimiento.ToShortDateString()</td>
+                        <td class="text-left">@item.CentroCoste.Display</td>
+                        <td class="text-center">@item.ArticulosAlmacen.Rate.ToString()</td>
+                        <td class="text-right">@item.Unidades.ToString()</td>
+                        <td class="text-right text-nowrap">
+                            <a class="text-info mx-2" href="@Url.Action("Edit", "MovimientosArticulosAlmacen", new { Id = item.Id })">
+                                <i class="fas fa-pencil-alt"></i>
+                            </a>
+                            <a class="text-danger mr-2" asp-controller="MovimientosArticulosAlmacen" asp-action="Delete" asp-route-id="@item.Id" onclick="return confirm('¿Está seguro de que quiere eliminar este registro?');">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <partial name="_Empty" model="string.Empty" />
+    }
+    <partial name="_Pager" model="pager" />
+</form>

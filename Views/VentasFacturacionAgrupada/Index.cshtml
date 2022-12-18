@@ -1,0 +1,155 @@
+﻿@using Ferpuser.Controllers
+@model VentasFacturacionAgrupadaViewModel
+
+@{
+    ViewData["Title"] = "Facturación agrupada de inscripciones";
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+}
+
+<form method="post">
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    @ViewData["Title"]
+                </h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.Filter.CongressId, new { @class = "small" })
+            @Html.DropDownListFor(f => f.Filter.CongressId, new SelectList(ViewBag.Eventos, "Id", "DisplayName", Model == null ? null : Model?.Filter.CongressId), "-Seleccionar-", new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(f => f.Filter.CongressId, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.Filter.TipoInscripcionId, new { @class = "small" })            
+            @Html.DropDownListFor(f => f.Filter.TipoInscripcionId, new SelectList(ViewBag.TiposInscripcion, "Id", "Name", Model == null ? null : Model?.Filter.TipoInscripcionId), "-Seleccionar-", new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(f => f.Filter.TipoInscripcionId, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.Filter.ClientId, new { @class = "small" })            
+            @Html.DropDownListFor(f => f.Filter.ClientId, new SelectList(ViewBag.Clientes, "Id", "BusinessName", Model == null ? null : Model?.Filter.ClientId), "-Seleccionar-", new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(f => f.Filter.ClientId, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3 text-right">
+            <br />
+            <button type="submit" id="btnFiltrar" class="btn btn-sm btn-blue-grey">Filtrar <i class="fas fa-search ml-2"></i></button>
+            <a href="@Url.Action("Index","VentasFacturacionAgrupada")" class="btn btn-sm btn-grey">Limpiar <i class="fas fa-eraser ml-2"></i></a>
+        </div>
+    </div>
+
+    <hr />
+
+    @if (Model != null && Model.Items.Any())
+    {
+            
+        
+        <div class="row">
+            <div class="col-8 text-left form-row">
+                <div class="form-group col-md-2">
+                    @Html.LabelFor(f => f.Serie, new { @class = "small" })
+                    @Html.DropDownListFor(f => f.Serie, new SelectList(ViewBag.Series, "Serie", "Serie"), "-Seleccionar-", new { @class = "form-control form-control-sm" })
+                    @Html.ValidationMessageFor(f => f.Serie, "", new { @class = "text-danger small" })
+                </div>            
+                <div class="form-group col-md-4">                
+                    @Html.LabelFor(f => f.CodigoOperario, new { @class = "small" })
+                    @Html.DropDownListFor(model => model.CodigoOperario, new SelectList(ViewBag.Operarios, "CODIGO", "NOMBRE", Model == null ? null : Model.CodigoOperario), "-Seleccionar-", new { @class = "form-control form-control-sm" })
+                    @Html.ValidationMessageFor(f => f.CodigoOperario, "", new { @class = "text-danger small" })
+                </div>
+                <div class="form-group col-md-6">
+                    <br>                    
+                    <button type="submit" name="facturar" value="true" class="btn btn-sm btn-deep-orange" onclick="return confirm('Se facturarán las inscripciones seleccionadas. ¿Desea continuar?');">Facturar seleccionados</button>                    
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger small" })
+                </div>                
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col text-right">
+                <span class="small"><b>@Model.Items.Count.ToString("N0")</b> elementos encontrados.</span>
+            </div>
+        </div>
+        <div class="table-responsive mt-2">
+            <table class="table table-sm table-hover table-striped bg-white">
+                <thead class="font-weight-bolder">
+                    <tr>
+                        <th scope="col" class="text-center">
+                            Cód. Evento
+                        </th>
+                        <th scope="col" class="text-left">
+                            @Html.DisplayNameFor(f => f.Items.First().CongressId)
+                        </th>
+                        <th scope="col" class="text-left">
+                            @Html.DisplayNameFor(f => f.Items.First().ClientId)
+                        </th>
+                        <th scope="col" class="text-center">
+                            # Inscripción
+                        </th>
+                        <th scope="col" class="text-left">
+                            Nombre del inscrito
+                        </th>
+                        <th scope="col" class="text-right">
+                            Importe de la inscripción
+                        </th>
+                        <th scope="col" class="text-center">
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="" id="cbxAll" onchange="change_all(this)">
+                              <label class="form-check-label" for="cbxAll">
+                                Seleccionar/quitar todos
+                              </label>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int i = 0;
+                    foreach (Registration item in Model.Items)
+                    {
+                        <tr>
+                            <td class="text-center">@item.Congress.Number</td>
+                            <td class="text-left">@item.Congress.Name</td>
+                            <td class="text-left">@item.Client?.BusinessName</td>
+                            <td class="text-center">@item.Number</td>
+                            <td class="text-left">@item.Registrant?.FullName</td>
+                            <td class="text-right font-weight-bold">@item.Fee.ToString("C")</td>
+                            <td class="text-center">
+                                @if (item.IsCheckedHelper)
+                                {
+                                    <input type="checkbox" name="Selected" value="@item.Id" checked="checked" class="cbxEvento" />
+                                }
+                                else
+                                {
+                                    <input type="checkbox" name="Selected" value="@item.Id" class="cbxEvento" />                                    
+                                }                                    
+                            </td>
+                        </tr>
+
+                        i++;
+                    }
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <partial name="_Empty" model="string.Empty" />
+    }
+</form>
+
+@section scripts
+{
+    <script>
+        function change_all(cbxAll)
+        {
+            var checked = cbxAll.checked;
+            $('.cbxEvento').prop('checked', checked);
+        }
+    </script>
+}
+

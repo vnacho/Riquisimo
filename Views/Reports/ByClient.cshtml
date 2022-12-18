@@ -1,0 +1,175 @@
+﻿@model IEnumerable<Ferpuser.Controllers.ByClientModel>
+
+@{
+    ViewData["Title"] = "Informes/Relación de facturadores";
+    ViewData["Create"] = false;
+    ViewData["Back"] = false;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+    ViewData["Report"] = true;
+}
+<div class="row d-print-none mb-4">
+    <div class="col-12">
+        <div class="card">
+            <form class="card-body d-flex justify-content-around align-items-center flex-column flex-sm-row">
+                <div class="form-group flex-grow-1">
+                    <label for="CongressId" class="control-label">Congreso</label>
+                    <select id="CongressId" name="CongressId" class="browser-default custom-select select2" asp-items="ViewBag.CongressId">
+                        <option value="">
+                            Todos
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group btn-group btn-group-sm mb-0">
+                    <button class="btn btn-primary btn-sm mb-0"><i class="fas fa-sync fa-2x"></i></button>
+                    
+                    @if (Model.Any())
+                    {
+                        <button class="btn btn-primary btn-sm mb-0" type="button" onclick="window.print()"><i class="fas fa-print fa-2x"></i></button>
+                        <a class="btn btn-primary btn-sm mb-0" asp-action="ByClientCsv" asp-route-congressId="@Model.FirstOrDefault().CongressId">
+                            <i class="fas fa-file-csv fa-2x"></i>
+                        </a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                @if (Model.GroupBy(r => r.CongressId).Count() == 1)
+                {
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <img src="@Model.FirstOrDefault().LogoBase64" class="w-50" />
+                        <img src="~/img/sanicongress.jpg" class="w-25" />
+
+                    </div>
+                }
+                <div class="col-12 text-center">
+                    <h1 class="mb-2 mb-sm-0 pt-1 h4">
+                        @ViewData["Title"]
+                    </h1>
+                </div>
+                <div class="card-body py-0">
+
+                    @{
+                        var i = 0;
+                        var pageN = 0;
+                    }
+                    @while (i < Model.Count())
+                    {
+                        var p = 35;
+                        if (pageN == 0)
+                        {
+                            p = 29;
+                        }
+                        pageN++;
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr class="font-larger">
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.RegistrationBusinessName)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Name)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Surnames)
+                                    </th>
+                                    <th class="text-right">
+                                        @Html.DisplayNameFor(model => model.RegistrationFee)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.RegistrationPaid)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.AccommodationPaid)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.AccommodationBusinessName)
+                                    </th>
+                                    <th class="text-right">
+                                        @Html.DisplayNameFor(model => model.AccommodationFee)
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (var j = 0; j < p && i < Model.Count(); j++, i++)
+                                {
+                                    var item = Model.ToArray()[i];
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.RegistrationBusinessName)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Name)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Surnames)
+                                        </td>
+                                        <td class="text-right">
+                                            @Html.DisplayFor(modelItem => item.RegistrationFee)
+                                        </td>
+                                        <td class="text-center">
+                                            @if (item.RegistrationPaid.HasValue)
+                                            {
+                                                if (item.RegistrationPaid.Value)
+                                                {
+                                                    <i class="fas fa-check"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="fas fa-times"></i>
+                                                }
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            @if (item.AccommodationPaid.HasValue)
+                                            {
+                                                if (item.AccommodationPaid.Value)
+                                                {
+                                                    <i class="fas fa-check"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="fas fa-times"></i>
+                                                }
+                                            }
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.AccommodationBusinessName)
+                                        </td>
+                                        <td class="text-right">
+                                            @Html.DisplayFor(modelItem => item.AccommodationFee)
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="font-larger">
+
+                                    <th>
+                                        Página @pageN
+                                    </th>
+                                    <th colspan="7" class="text-right">
+                                        @ViewHelpers.PadCongress(Model.FirstOrDefault().CongressNumber)
+
+                                        @Model.FirstOrDefault().CongressName
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    }
+                </div>
+
+                <div class="card-footer text-right">
+                    Inscritos: @Model.Count()
+                </div>
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,239 @@
+﻿
+
+<script>
+    function AddFacturaLinea() {
+        var codigoEvento = $("#CodigoEvento").val();
+        $("#divFacturaLinea").load('@Url.Action("AddLinea", "ComprasFactura")' + '?CodigoEvento=' + codigoEvento);
+    }
+
+    function EditFacturaLinea(orden) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("EditLinea", "ComprasFactura")" + "?orden=" + orden,
+            data: $('#form').serialize(),
+            success: function (response) {
+                $("#divFacturaLinea").html(response);
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    }
+
+    function SaveLinea() {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("SaveLinea", "ComprasFactura")",
+            data: $('#form').serialize(),
+            dataType: 'JSON',
+            success: function (response) {
+                if (response.status == 1) {
+                    $("#divLineas").html(response.data);
+                    $('#NuevaLineaModal').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                    $('[data-toggle="tooltip"]').tooltip();
+                }
+                else {
+                    $("#divFacturaLinea").html(response.data);
+                }
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    }
+
+    function DeleteLinea(orden) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("DeleteLinea", "ComprasFactura")" + "?orden=" + orden,
+            data: $('#form').serialize(),
+            success: function (response) {
+                $("#divLineas").html(response);
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    }
+
+    function DeleteAlbaran(CodigoAlbaran) {
+         $.ajax({
+            type: "POST",
+            url: "@Url.Action("DeleteAlbaran", "ComprasFactura")" + "?CodigoAlbaran=" + CodigoAlbaran,
+            data: $('#form').serialize(),
+            success: function (response) {
+                $("#divLineas").html(response);
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    }
+
+    function AddLineasDesdeAlbaran() {
+        var codigoProveedor = $("#CodigoProveedor").val();
+        if (codigoProveedor != '') {
+            var url = "@Url.Action("Buscador", "ComprasAlbaran")" + "?CodigoProveedor=" + codigoProveedor + "&EstadoAlbaran=0";
+            $("#divAlbaranes").load(url);
+            $("#NuevaLineaDesdeAlbaranModal").modal('show');
+        }
+        else {
+            alert('Para añadir un albarán es necesario seleccionar primero el proveedor.')
+            return false;
+        }
+    }
+
+    function AddLineasDesdePedido() {
+        var codigoProveedor = $("#CodigoProveedor").val();
+        if (codigoProveedor != '') {
+            var url = "@Url.Action("Buscador", "ComprasPedido")" + "?CodigoProveedor=" + codigoProveedor + "&EstadosPedido[0]=0&EstadosPedido[1]=1";
+            $("#divPedidos").load(url);
+            $("#NuevaLineaDesdePedidoModal").modal('show');
+        }
+        else {
+            alert('Para añadir líneas desde pedido es necesario seleccionar primero el proveedor.')
+            return false;
+        }
+    }
+
+    function AlbaranSeleccionado(idAlbaranSeleccionado) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("SaveLineasDesdeAlbaran", "ComprasFactura")" + "?IdAlbaran=" + idAlbaranSeleccionado,
+            data: $('#form').serialize(),
+            dataType: 'JSON',
+            success: function (response) {
+                if (response.status == 1) {
+                    $("#divLineas").html(response.data);
+                    $('#NuevaLineaModal').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                    $('[data-toggle="tooltip"]').tooltip();
+                }
+                else {
+                    $("#divFacturaLinea").html(response.data);
+                }
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    }
+
+    function PedidoSeleccionado(idPedidoSeleccionado) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("SaveLineasDesdePedido", "ComprasFactura")" + "?IdPedido=" + idPedidoSeleccionado,
+            data: $('#form').serialize(),
+            dataType: 'JSON',
+            success: function (response) {
+                if (response.status == 1) {
+                    $("#divLineas").html(response.data);
+                    $('#NuevaLineaDesdePedidoModal').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                    $('[data-toggle="tooltip"]').tooltip();
+                }
+                else {
+                    $("#divPedidoLinea").html(response.data);
+                }
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        }); 
+    }
+
+    function AutocompletarArticuloSeleccionado(codigo) {
+        $("#linea_CodigoArticulo").val(codigo);
+
+        var codigoArticulo = $("#linea_CodigoArticulo").val();
+        var codigoProveedor = $("#CodigoProveedor").val();
+
+        if (codigoArticulo != '' && codigoProveedor != '') {
+            //Obtener el precio según el proveedor
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetFirstOrDefault", "PreciosProveed")" + "?codigoArticulo=" + codigoArticulo + "&codigoProveedor=" + codigoProveedor,
+                data: $('#form').serialize(),
+                dataType: 'JSON',
+                success: function (response) {
+                    if (response != null) {
+                        $("#linea_BaseImponiblePrecioUnitario").val(response.pcompra.toString().replace(".",","));
+                    }
+                    else {
+                        $("#linea_BaseImponiblePrecioUnitario").val('');
+                    }
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        }
+
+        if (codigoArticulo != '') {
+            //Obtener el IVA por defecto del artículo
+            $.ajax({
+                url: "@Url.Action("GetFirstOrDefault", "TipoIVA")" + "?codigoArticulo=" + codigoArticulo,
+                success: function (response) {
+                    if (response != null) {
+                        $("#linea_CodigoTipoIVA").val(response.codigotipoiva);
+                    }
+                    else {
+                        $("#linea_CodigoTipoIVA").val('');
+                    }
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        }
+
+    }
+    function AutocompletarEventoSeleccionado(codigo) {
+        $("#linea_CodigoEvento").val(codigo);
+    }
+
+    function ChangeTieneRetencion() {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("RecargarPartialTotalFactura", "ComprasFactura")",
+            data: $('#form').serialize(),
+            success: function (response) {
+                $("#divTotalFactura").html(response);
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    }
+</script>

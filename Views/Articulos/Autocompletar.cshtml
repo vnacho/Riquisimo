@@ -1,0 +1,29 @@
+﻿<input type="text" id="AutocompletarArticulo" name="AutocompletarArticulo" value="@ViewBag.ArticuloNombre" placeholder="Escriba algo" class="form-control form-control-sm" />
+
+<script>
+    $(function () {
+        $("#AutocompletarArticulo").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "@Url.Action("BuscadorJson", "Articulos")",
+                    dataType: "json",
+                    data: {
+                        query: request.term
+                    },
+                    success: function (data) {
+                        response($.parseJSON(data));
+                    },
+                    error: function (xhr, status, error) {
+                        var err = eval("(" + xhr.responseText + ")" + "(" + status + ")" + "(" + error + ")");
+                        alert(err);
+                    }
+                });
+            },
+            select: function (event, ui) {
+                AutocompletarArticuloSeleccionado(ui.item.value)
+                $("#AutocompletarArticulo").val(ui.item.label);
+                return false;
+            }
+        });
+    });    
+</script>

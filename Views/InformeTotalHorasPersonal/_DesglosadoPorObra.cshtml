@@ -1,0 +1,112 @@
+﻿@using Ferpuser.Models.ViewModels
+@model InformeTotalHorasPersonalViewModel
+@{
+    DateTime tmp = Model.FechaDesde.Value;
+    var obras = Model.Items.OrderBy(f => f.CentroCoste.Nombre).Select(f => f.CentroCosteId).Distinct();
+
+    ///Obtiene la clase según el datetime
+    string GetSaturdaySundayClass(DateTime dt)
+    {
+        if (dt.DayOfWeek == DayOfWeek.Sunday || dt.DayOfWeek == DayOfWeek.Saturday)
+            return "bg-warning-light";
+        return string.Empty;
+    }
+}
+
+<div class="table-responsive mt-2">
+    <table class="table table-sm table-hover table-striped bg-white table-bordered">
+        <thead class="font-weight-bolder">
+            <tr>
+                <th scope="col" class="text-left pl-2 font-weight-bold">
+                    TRABAJADOR
+                </th>
+                @while (tmp <= Model.FechaHasta.Value)
+                {                    
+                    <th scope="col" class="text-center px-0 font-weight-bold @GetSaturdaySundayClass(tmp)">
+                        @tmp.Day
+                    </th>
+                    tmp = tmp.AddDays(1);
+                }
+                <th scope="col" class="text-center px-0 font-weight-bold">
+                    TOT
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                foreach (var obra in obras)
+                {
+                    var personal = Model.Items.Where(f => f.CentroCosteId == obra).OrderBy(f => f.Personal.Nombre).Select(f => f.PersonalId).Distinct();
+                    foreach (var p in personal)
+                    {
+                        tmp = Model.FechaDesde.Value;
+                        <tr>
+                            <td class="text-left font-weight-bold">@Model.Items.First(f => f.PersonalId == p).Personal.Nombre</td>
+                            @while (tmp <= Model.FechaHasta.Value)
+                            {
+                                decimal parcial = Model.Items.Where(f => f.CentroCosteId == obra && f.PersonalId == p && f.Fecha == tmp).Sum(f => f.Unidades);
+                                <td class="text-center px-0 @GetSaturdaySundayClass(tmp)">
+                                    @if (parcial != 0)
+                        {
+                            <span>@parcial.ToString("N1")</span>
+                        }
+                                </td>
+
+                                tmp = tmp.AddDays(1);
+                            }
+                            <td class="text-center font-weight-bold px-0">
+                                @Model.Items.Where(f => f.CentroCosteId == obra && f.PersonalId == p).Sum(f => f.Unidades)
+                            </td>
+                        </tr>
+                    }
+        <tr class="text-primary">
+            <td>@Model.Items.First(f => f.CentroCosteId == obra).CentroCoste.Nombre</td>
+            @{
+                tmp = Model.FechaDesde.Value;
+            }
+            @while (tmp <= Model.FechaHasta.Value)
+            {
+                decimal parcial = Model.Items.Where(f => f.CentroCosteId == obra && f.Fecha == tmp).Sum(f => f.Unidades);
+                <td class="text-center px-0 @GetSaturdaySundayClass(tmp)">
+                    @if (parcial != 0)
+                    {
+                        <span>@parcial.ToString("N1")</span>
+                    }
+                </td>
+
+                tmp = tmp.AddDays(1);
+            }
+            <td class="text-center font-weight-bold px-0">
+                @Model.Items.Where(f => f.CentroCosteId == obra).Sum(f => f.Unidades)
+            </td>
+        </tr>
+        }
+    }
+        </tbody>
+        <tfoot class="font-weight-bolder">
+            <tr>
+                <th scope="col" class="text-left font-weight-bold">
+                    &nbsp;
+                </th>
+
+                @{
+                    tmp = Model.FechaDesde.Value;
+                    while (tmp <= Model.FechaHasta.Value)
+                    {                        
+                        decimal parcial = Model.Items.Where(f => f.Fecha == tmp).Sum(f => f.Unidades);
+                        <th scope="col" class="text-center px-0 font-weight-bold @GetSaturdaySundayClass(tmp)">
+                            @if (parcial != 0)
+                {
+                    <span>@parcial.ToString("N1")</span>
+                }
+                        </th>
+                        tmp = tmp.AddDays(1);
+                    }
+                }
+                <th scope="col" class="text-center px-0 font-weight-bold">
+                    @Model.Items.Sum(f => f.Unidades)
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>

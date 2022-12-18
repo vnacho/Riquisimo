@@ -1,0 +1,72 @@
+﻿@model IEnumerable<Ferpuser.Models.Registrant>
+
+@{
+    ViewData["Title"] = "Personas inscritas";
+    ViewData["DataTable"] = true;
+    ViewData["Back"] = false;
+    ViewData["Create"] = false;
+}
+
+<table class="table table-striped table-hover table-sm table-borderless">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Position)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ProfessionalCategory)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Workplace)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Location)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NIF)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Email)
+            </th>
+            <th data-orderable="false"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Treatment.Name)
+                @Html.DisplayFor(modelItem => item.Name)
+                @Html.DisplayFor(modelItem => item.Surnames)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Position)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ProfessionalCategory)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Workplace)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Location.Address)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NIF)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td class="text-right">
+                <a asp-action="Edit" asp-route-id="@item.Id" class="text-info mx-2">
+                    <i class="fas fa-pencil-alt"></i>
+                </a>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>

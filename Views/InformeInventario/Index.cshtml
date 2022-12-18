@@ -1,0 +1,171 @@
+﻿@inject Microsoft.Extensions.Options.IOptions<AppSettings> AppSettings
+@using Ferpuser.Models.Core
+@using Ferpuser.Models.ViewModels
+@model InformeInventarioViewModel
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+    var contadorItems = 0;
+}
+
+@section Styles
+{
+    <link href="/css/site.css" rel="stylesheet" />
+    <style type="text/css" media="print">
+        @@page {
+            size: landscape;
+        }
+
+        #divResultados th, td {
+            font-size: 0.5rem !important;
+            padding: 0px !important;
+        }
+    </style>
+}
+
+<form method="post">
+
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Inventario Almacen
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                @if (Model != null) // && Model.ItemsDirectos != null && Model.ItemsDirectos.Any())
+                {
+                    <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                        <button class="btn btn-grey btn-sm text-nowrap" onclick="window.print();">
+                            Imprimir informe <i class="fas fa-print ml-2"></i>
+                        </button>
+                    </div>
+                    <button type="submit" class="btn btn-grey btn-sm text-nowrap" asp-action="ExportPdf" asp-controller="InformeInventario">
+                            Imprimir <i class="fas fa-print ml-2"></i>
+                        </button>
+                        <button type="submit" class="btn btn-grey btn-sm text-nowrap" asp-action="ExportCsv" asp-controller="InformeInventario">
+                        Exportar <i class="fas fa-file-csv ml-2"></i>
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row d-print-none">
+        <div class="form-group col-md-1">
+            @Html.LabelFor(f => f.FechaDesde, new { @class = "small" })
+            @Html.EditorFor(f => f.FechaDesde, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.FechaDesde, "", new { @class = "text-danger small" })
+        </div>
+@*        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.CentroCosteId, new { @class = "small" })
+            @Html.DropDownListFor(f => f.CentroCosteId, new SelectList(ViewBag.CentrosCoste, "Id", "Display"), "-Seleccionar-", new { @class = "form-control form-control-sm select2" })
+            @Html.ValidationMessageFor(f => f.CentroCosteId, "", new { @class = "text-danger small" })
+        </div>*@
+
+@*        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.Month, new { @class = "small" })
+            @Html.EditorFor(f => f.Month)
+            @Html.ValidationMessageFor(f => f.Month, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.Year, new { @class = "small" })
+            @Html.EditorFor(f => f.Year, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.Year, "", new { @class = "text-danger small" })
+        </div>*@
+        <div class="form-group col-md-8 text-right">
+            <br />
+            <button type="submit" id="btnFiltrar" class="btn btn-sm btn-blue-grey">Filtrar <i class="fas fa-search ml-2"></i></button>
+            <a href="@Url.Action("Index","InformeInventario")" class="btn btn-sm btn-grey">Limpiar <i class="fas fa-eraser ml-2"></i></a>
+        </div>
+    </div>
+
+    <div class="d-none d-print-block small">
+        <div class="row">
+            <div class="col-1">
+                <img src="~/img/logo_informes.png" style="width:100%" />
+            </div>
+            <div class="col-11">
+                <h3 class="font-weight-bold">@AppSettings.Value.Empresa.ToUpper()</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+@*                @if (Model != null && Model.Month.HasValue)
+                {
+                    <span>Mes: @Model.Month</span>
+                }
+                @if (Model != null && Model.Year.HasValue)
+                {
+                    <span>Año: @Model.Year</span>
+                }*@
+                <span>@Model.FechaDesde</span>
+            </div>
+        </div>
+    </div>
+
+    <hr class="d-print-none" />
+
+    <div id="divResultados">
+        @if (Model != null && Model.Items != null)
+        {
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-striped bg-white small">
+                    <thead>
+                        <tr>
+                            <td class="text-center border"></td>
+                            <td class="font-weight-bold text-center ">INFORME ALMACEN</td>
+                            <td class="text-center border"></td>
+                            <td class="text-center border"></td>
+                            <td class="text-center border"></td>
+                            <td class="font-weight-bold text-center " >@Model.FechaDesde.Value.ToString("dd-MM-yyyy") </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center border"></td>
+                            <td class="text-center border"></td>
+                            <td class="text-center border"></td>
+                            <td class="text-center border"></td>
+                            <td class="text-center border"></td>
+                            <td class="text-center border"></td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold text-center border">CODIGO</td>
+                            <td class="font-weight-bold text-center border">DESCRIPCION ARTICULO</td>
+                            <td class="font-weight-bold text-center border">EX INICIAL</td>
+                            <td class="font-weight-bold text-center border">SALIDAS</td>
+                            <td class="font-weight-bold text-center border">ENTRADAS</td>
+                            <td class="font-weight-bold text-center border">EX FINAL</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td class="text-center border">@item.ProductCode.ToString()</td>
+                                <td class="text-left border">@item.ProductDescription.ToString()</td>
+                                <td class="text-right border">@item.ExInicial.ToString("N2")</td>
+                                <td class="text-right border">@item.Salidas.ToString("N2")</td>
+                                <td class="text-right border">@item.Entradas.ToString("N2")</td>
+                                <td class="text-right border">@item.ExFinal.ToString("N2")</td>
+                            </tr>
+                            <input type="hidden" id="Items[@contadorItems].ProductCode" name='Items[@contadorItems].ProductCode' value="@item.ProductCode" />
+                            <input type="hidden" id="Items[@contadorItems].ProductDescription" name='Items[@contadorItems].ProductDescription' value="@item.ProductDescription" />
+                            <input type="hidden" id="Items[@contadorItems].ExInicial" name='Items[@contadorItems].ExInicial' value="@item.ExInicial" />
+                            <input type="hidden" id="Items[@contadorItems].Salidas" name='Items[@contadorItems].Salidas' value="@item.Salidas" />
+                            <input type="hidden" id="Items[@contadorItems].Entradas" name='Items[@contadorItems].Entradas' value="@item.Entradas" />
+                            <input type="hidden" id="Items[@contadorItems].ExFinal" name='Items[@contadorItems].ExFinal' value="@item.ExFinal" />
+                            contadorItems++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+           
+            }
+            else
+            {
+            <partial name="_Empty" model="string.Empty" />
+            }
+    </div>
+
+</form>

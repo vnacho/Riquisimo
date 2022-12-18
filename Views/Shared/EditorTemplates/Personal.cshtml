@@ -1,0 +1,129 @@
+﻿@model Personal
+
+@Html.HiddenFor(f => f.Id)
+<div class="card mb-4 wow d-print-none">
+    <div class="form-row card-body">
+        @if (Model != null && Model.Id != 0)
+        {
+            <div class="form-group col-md-12">
+                <span class="badge badge-danger">Id: @Model.Id</span>
+            </div>
+        }
+        <div class="form-group col-md-4">
+            @Html.LabelFor(f => f.Nombre, new { @class = "small" })
+            @Html.EditorFor(f => f.Nombre, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.Nombre, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-1">
+            @Html.LabelFor(f => f.NIF, new { @class = "small" })
+            @Html.EditorFor(f => f.NIF, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.NIF, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-1">
+            @Html.LabelFor(f => f.FechaNacimiento, new { @class = "small" })
+            @Html.EditorFor(f => f.FechaNacimiento, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.FechaNacimiento, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.FechaValidezNIF, new { @class = "small" })
+            @Html.EditorFor(f => f.FechaValidezNIF, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.FechaValidezNIF, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(f => f.Categoria, new { @class = "small" })
+            @Html.EditorFor(f => f.Categoria, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.Categoria, "", new { @class = "text-danger small" })
+        </div>
+        <div class="w-100"></div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.FechaUltimaRevisionMedica, new { @class = "small" })
+            @Html.EditorFor(f => f.FechaUltimaRevisionMedica, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.FechaUltimaRevisionMedica, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.RevisionMedica, new { @class = "small" })
+            @Html.EditorFor(f => f.RevisionMedica, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.RevisionMedica, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-1">
+            @Html.LabelFor(f => f.SAP, new { @class = "small" })
+            @Html.EditorFor(f => f.SAP, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.SAP, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-1">
+            @Html.LabelFor(f => f.FechaApto, new { @class = "small" })
+            @Html.EditorFor(f => f.FechaApto, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.FechaApto, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.FechaEntregaEpi, new { @class = "small" })
+            @Html.EditorFor(f => f.FechaEntregaEpi, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.FechaEntregaEpi, "", new { @class = "text-danger small" })
+        </div>
+        <div class="w-100"></div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.FechaAlta, new { @class = "small" })
+            @Html.EditorFor(f => f.FechaAlta, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.FechaAlta, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(f => f.ObraId, new { @class = "small" })
+            @Html.DropDownListFor(f => f.ObraId, new SelectList(ViewBag.CentrosCoste, "Id", "Display"), "-Seleccionar-", new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(f => f.ObraId, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.FechaBaja, new { @class = "small" })
+            @Html.EditorFor(f => f.FechaBaja, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.FechaBaja, "", new { @class = "text-danger small" })
+        </div>
+        <div class="w-100"></div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.PrecioHora, new { @class = "small" })
+            @Html.EditorFor(f => f.PrecioHora, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.PrecioHora, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.CosteEstandar, new { @class = "small" })
+            @Html.EditorFor(f => f.CosteEstandar, new { htmlAttributes = new { @class = "form-control", onkeyup = "ReplaceDotByComma(this);" } })
+            @Html.ValidationMessageFor(f => f.CosteEstandar, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.Venta, new { @class = "small" })
+            @Html.EditorFor(f => f.Venta, new { htmlAttributes = new { @class = "form-control", onkeyup = "ReplaceDotByComma(this);" } })
+            @Html.ValidationMessageFor(f => f.Venta, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.TipoTarifaId, new { @class = "small" })
+            @Html.DropDownListFor(f => f.TipoTarifaId, new SelectList(ViewBag.TiposTarifa, "Id", "Nombre"), "-Seleccionar-", new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(f => f.TipoTarifaId, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.CentroCosteId, new { @class = "small" })
+            @Html.DropDownListFor(f => f.CentroCosteId, new SelectList(ViewBag.CentrosCoste, "Id", "Display"), "-Seleccionar-", new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(f => f.CentroCosteId, "", new { @class = "text-danger small" })
+        </div>
+        <div class="w-100"></div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(f => f.IBAN, new { @class = "small" })
+            @Html.EditorFor(f => f.IBAN, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.IBAN, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            <div class="form-check">
+                @Html.EditorFor(f => f.CT, new { htmlAttributes = new { type = "checkbox", @class = "form-check-input" } })
+                @Html.LabelFor(f => f.CT, new { @class = "small form-check-label" })
+            </div>
+            @Html.ValidationMessageFor(f => f.CT, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(f => f.TipoUltimoContratoId, new { @class = "small" })
+            @Html.DropDownListFor(f => f.TipoUltimoContratoId, new SelectList(ViewBag.TiposContratos, "Id", "Nombre"), "-Seleccionar-", new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(f => f.TipoUltimoContratoId, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.FechaUltimoContrato, new { @class = "small" })
+            @Html.EditorFor(f => f.FechaUltimoContrato, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.FechaUltimoContrato, "", new { @class = "text-danger small" })
+        </div>
+    </div>
+</div>

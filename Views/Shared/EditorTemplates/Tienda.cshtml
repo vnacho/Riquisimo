@@ -1,0 +1,12 @@
+﻿
+@model Tienda
+@Html.HiddenFor(f => f.Id)
+<div class="card mb-4 wow d-print-none">
+    <div class="form-row card-body">
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.nombre, new { @class = "small" })
+            @Html.EditorFor(f => f.nombre, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.nombre, "", new { @class = "text-danger small" })
+        </div>
+    </div>
+</div>

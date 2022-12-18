@@ -1,0 +1,147 @@
+﻿@model IEnumerable<Ferpuser.Models.Registration>
+
+@{
+    ViewData["Title"] = "Listado por tipo de inscripción";
+    ViewData["Create"] = false;
+    ViewData["Back"] = false;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+    ViewData["Report"] = true;
+}
+<div class="row d-print-none mb-4">
+    <div class="col-12">
+        <div class="card">
+            <form class="card-body d-flex justify-content-around align-items-end flex-column flex-sm-row">
+                <div class="form-group flex-grow-1">
+                    <label for="CongressId" class="control-label">Congreso</label>
+                    <select id="CongressId" name="CongressId" class="browser-default custom-select select2" asp-items="ViewBag.CongressId">
+                        <option value="">
+                            Todos
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group flex-grow-1 ml-2">
+                    <label for="InscriptionTypeId" class="control-label">Tipo de inscripción</label>
+                    <select id="InscriptionTypeId" name="InscriptionTypeId" class="browser-default custom-select select2" asp-items="ViewBag.InscriptionTypeId">
+                        <option value="">
+                            Todos
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group btn-group btn-group-sm mb-2">
+                    <button class="btn btn-primary btn-sm"><i class="fas fa-sync fa-2x"></i></button>
+                    <button class="btn btn-primary btn-sm" type="button" onclick="window.print()"><i class="fas fa-print fa-2x"></i></button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                @if (Model.GroupBy(r => r.CongressId).Count() == 1)
+                {
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <img src="@Model.FirstOrDefault().Congress.LogoBase64" class="w-50" />
+                        <img src="~/img/sanicongress.jpg" class="w-25" />
+                    </div>
+                }
+
+                <div class="col-12 text-center">
+                    <h1 class="mb-2 mb-sm-0 pt-1 h4">
+                        @ViewData["Title"]
+                    </h1>
+                </div>
+                <div class="card-body">
+                    @{
+                        var i = 0;
+                        var pageN = 0;
+                    }
+                    @while (i < Model.Count())
+                    {
+                        var p = 30;
+                        if (pageN == 0)
+                        {
+                            p = 22;
+                        }
+                        pageN++;
+                        <table class="table table-sm">
+                            <thead>
+                                <tr class="font-larger">
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Number)
+                                    </th>
+                                    <th>
+                                        Tipo de inscripción
+                                    </th>
+                                    <th>
+                                        Categoría
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Registrant.Surnames)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Registrant.Name)
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (var j = 0; j < p && i < Model.Count(); j++, i++)
+                                {
+                                    var item = Model.ToArray()[i];
+                                    <tr>
+                                        <td>
+                                            @ViewHelpers.PadCongress(item.Number)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.RegistrationType.Name)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Registrant.Category)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Registrant.Surnames)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Registrant.Treatment.Name) @Html.DisplayFor(modelItem => item.Registrant.Name)
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="font-larger">
+                                    <th>
+                                        Página @pageN
+                                    </th>
+                                    <th colspan="4" class="text-right">
+                                        @ViewHelpers.PadCongress(Model.FirstOrDefault().Congress.Number)
+                                        @Model.FirstOrDefault().Congress.Name
+
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    }
+                    </div>
+                <div class="card-footer text-right">
+                    Inscripciones: @Model.Count()
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#CongressId").change(function () {
+                $("#InscriptionTypeId")[0].selectedIndex = 0;
+                $("#InscriptionTypeId").trigger("change");
+            });
+        });
+    </script>
+}

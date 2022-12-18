@@ -1,0 +1,89 @@
+﻿@model IEnumerable<Accommodation>
+
+@{
+    ViewData["Title"] = "Alojamientos";
+
+    ViewData["DataTable"] = true;
+    ViewData["Back"] = false;
+}
+
+<table class="table table-striped table-hover table-sm table-borderless">
+    <thead>
+        <tr>
+            <th>
+                Estado
+            </th>
+            <th class="text-right">
+                @Html.DisplayNameFor(model => model.Number)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Registrant)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Congress)
+            </th>
+            <th class="text-right">
+                @Html.DisplayNameFor(model => model.StartDate)
+            </th>
+            <th class="text-right">
+                @Html.DisplayNameFor(model => model.EndDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RoomType.Name)
+            </th>
+            <th class="text-right">
+                @Html.DisplayNameFor(model => model.RoomType.Occupants)
+            </th>
+            <th class="text-right">
+                @Html.DisplayNameFor(model => model.Fee)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Client)
+            </th>
+            <th data-orderable="false"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td class="text-center">
+                    @item.GetStatus()
+                </td>
+                <td class="text-right">
+                    @item.Number
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Registrant.FullName)
+                </td>
+
+                <td>
+                    @item.Congress.Number @item.Congress.Name <span class="d-none">@item.Congress.Code</span>
+                </td>
+                <td class="text-right">
+                    @item.StartDate.ToShortDateString()
+                </td>
+                <td class="text-right">
+                    @item.EndDate.ToShortDateString()
+                </td>
+                <td>
+                    @item.RoomType.Name
+                </td>
+                <td class="text-right">
+                    @item.RoomType.Occupants
+                </td>
+                <td class="text-right">
+                    @Html.DisplayFor(modelItem => item.Fee)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Client.BusinessName)
+                </td>
+                <td class="text-right">
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="text-info mx-2">
+                        <i class="fas fa-pencil-alt"></i>
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

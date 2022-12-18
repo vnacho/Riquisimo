@@ -1,0 +1,24 @@
+﻿@using Microsoft.AspNetCore.Routing
+@model int?
+
+@{
+    var htmlAttributes = new RouteValueDictionary(new { @class = "form-control form-control-sm" });
+    RouteValueDictionary attributes = new RouteValueDictionary(htmlAttributes);
+    var list = new List<KeyValuePair<string, int>>();
+    list.Add(new KeyValuePair<string, int>("Enero", 1));
+    list.Add(new KeyValuePair<string, int>("Febrero", 2));
+    list.Add(new KeyValuePair<string, int>("Marzo", 3));
+    list.Add(new KeyValuePair<string, int>("Abril", 4));
+    list.Add(new KeyValuePair<string, int>("Mayo", 5));
+    list.Add(new KeyValuePair<string, int>("Junio", 6));
+    list.Add(new KeyValuePair<string, int>("Julio", 7));
+    list.Add(new KeyValuePair<string, int>("Agosto", 8));
+    list.Add(new KeyValuePair<string, int>("Septiembre", 9));
+    list.Add(new KeyValuePair<string, int>("Octubre", 10));
+    list.Add(new KeyValuePair<string, int>("Noviembre", 11));
+    list.Add(new KeyValuePair<string, int>("Diciembre", 12));
+}
+
+<div class="input-group">
+    @Html.DropDownListFor(f => Model, new SelectList(list, "Value", "Key", Model == null ? null : Model), "-Seleccionar-", new RouteValueDictionary(attributes))
+</div>

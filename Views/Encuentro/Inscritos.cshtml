@@ -1,0 +1,104 @@
+﻿@model Ferpuser.Models.ViewModels.InscritosEncuentroViewModel
+
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    //ViewData["Select2"] = true;
+}
+
+<form method="post" id="form">
+
+    @Html.HiddenFor(f => f.Filter.EncuentroId)
+
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Listado de inscritos 
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                <button class="btn btn-grey btn-sm text-nowrap" type="button" onclick="window.print()">Imprimir <i class="fas fa-print ml-2"></i></button>
+                <button id="exportCsv" class="btn btn-grey btn-sm text-nowrap" asp-action="InscritosCsv">
+                    Exportar <i class="fas fa-file-csv ml-2"></i>
+                </button>
+                <a asp-action="Index" class="btn btn-grey btn-sm text-nowrap">Volver <i class="fas fa-arrow-left ml-2"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <table>
+        <tr>
+            <td><b>Restauración:</b> @Model.Encuentro.Nombre </td>
+        </tr>
+        <tr>
+            <td><b>Evento:</b> @Model.Encuentro.Congress.DisplayName</td>
+        </tr>
+    </table>
+
+    <hr />
+
+     <div class="form-row">
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.Filter.Term, new { @class = "small" })
+            @Html.EditorFor(f => f.Filter.Term, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.Filter.Term, "", new { @class = "text-danger small" })
+        </div>      
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.Filter.NumeroMesa, new { @class = "small" })
+            @Html.EditorFor(f => f.Filter.NumeroMesa, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.Filter.NumeroMesa, "", new { @class = "text-danger small" })
+        </div>  
+        <div class="form-group col-md-6 text-right  d-print-none">
+            <br />
+            <button type="submit" id="btnFiltrar" class="btn btn-sm btn-blue-grey">Filtrar <i class="fas fa-search ml-2"></i></button>
+            <a href="@Url.Action("Inscritos")" class="btn btn-sm btn-grey">Limpiar <i class="fas fa-eraser ml-2"></i></a>
+        </div>
+    </div>
+    
+    <hr />
+
+    
+    @if (Model.Inscritos != null && Model.Inscritos.Any())
+    {
+        <div class="table-responsive mt-2">
+            <table class="table table-sm table-hover table-striped bg-white">
+                <thead class="font-weight-bolder">
+                    <tr>                        
+                        <th scope="col" class="text-left">       
+                            Apellidos
+                        </th>
+                        <th scope="col" class="text-left">                        
+                            Nombre
+                        </th>
+                        <th scope="col" class="text-left">                        
+                            NIF
+                        </th>
+                        <th scope="col" class="text-center">                        
+                            Nº de mesa
+                        </th>
+                        @*<th scope="col"></th>*@
+                    </tr>
+                </thead>
+                <tbody>   
+                    
+                    @foreach (var registration in Model.Inscritos)
+                    {
+                        <tr>
+                            <td>@registration.registration.Registrant.Surnames</td>
+                            <td>@registration.registration.Registrant.Name</td>
+                            <td>@registration.registration.Registrant.NIF</td>
+                            <td class="text-center">@registration.NumeroMesa</td>
+                        </tr>
+                    }    
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <partial name="_Empty" model="string.Empty" />
+    }
+
+
+</form>

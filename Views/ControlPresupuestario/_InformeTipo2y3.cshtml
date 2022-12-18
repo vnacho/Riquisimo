@@ -1,0 +1,122 @@
+﻿@using Ferpuser.ViewModels
+@model ControlPresupuestarioViewModel
+
+@{ 
+    IEnumerable<string> enumTipoCosteCodes = Model?.Items?.Select(f => f.TipoCosteCode).Distinct();
+    string TituloInforme = Model.Filter.Tipo == Ferpuser.Models.Enums.TipoInformeControlPresupuestario.N2 ? "N2" : "N3";
+}
+
+<div class="table-responsive">
+    <table class="table table-sm table-hover table-striped bg-white">
+        <thead class="font-weight-bolder">
+            <tr>
+                @if (Model.Filter.FechaDesde.HasValue && Model.Filter.FechaHasta.HasValue)
+                {
+                    <td class="pl-3 border-0">
+                        <label>Desde <b>@Model.Filter.FechaDesde.Value.ToShortDateString()</b> hasta <b>@Model.Filter.FechaHasta.Value.ToShortDateString()</b></label>
+                    </td>
+                }
+                else if (Model.Filter.FechaDesde.HasValue)
+                {
+                    <td class="pl-3 border-0">
+                        <label>Desde <b>@Model.Filter.FechaDesde.Value.ToShortDateString()</b></label>
+                    </td>
+                }
+                else if (Model.Filter.FechaHasta.HasValue)
+                {
+                    <td class="pl-3 border-0">
+                        <label>Hasta <b>@Model.Filter.FechaHasta.Value.ToShortDateString()</b></label>
+                    </td>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.Filter.TipoCosteCode))
+                {
+                    <td class="pl-3 border-0">
+                        <label>Tipo de coste: <b>@Model.Filter.TipoCosteCode @ViewBag.TipoCosteNombre</b></label>
+                    </td>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.Filter.CentroCosteCode))
+                {
+                    <td class="pl-3 border-0">
+                        <label>Centro de coste: <b>@Model.Filter.CentroCosteCode @ViewBag.CentroCosteNombre</b></label>
+                    </td>
+                }
+
+                <th scope="col" class="text-right border-0">
+                    <label class="font-weight-bold bg-light px-5">@TituloInforme</label>
+                </th>
+            </tr>
+        </thead>
+        </table>
+    </div>
+
+<div class="table-responsive">
+    <table class="table table-sm table-borderless bg-white">
+
+        @foreach (string TipoCosteCode in enumTipoCosteCodes)
+        {
+            var listA = Model.Items.Where(f => f.TipoCosteCode == TipoCosteCode);
+            IEnumerable<string> enumCentrosCosteCodes = listA.Select(f => f.CentroCosteCode).Distinct();
+
+            @*<tr>
+                <td colspan="8"></td>
+            </tr>*@
+            <tr class="text-capitalize">
+                <td class="font-weight-bold pl-4"><u>@TipoCosteCode</u></td>
+                <td class="font-weight-bold" colspan="7"><u>@listA.FirstOrDefault()?.TipoCosteNombre</u></td>
+            </tr>
+
+            foreach (string CentroCosteCode in enumCentrosCosteCodes)
+            {
+                var listB = listA.Where(f => f.TipoCosteCode == TipoCosteCode && f.CentroCosteCode == CentroCosteCode);
+
+                var ingresos = listB.Sum(f => f.Haber);
+                var gastos = listB.Sum(f => f.Debe);
+                var rtdo = listB.Sum(f => f.RTDO);
+                var tasaRendimiento = ingresos == 0 ? 0 : rtdo / ingresos * 100;
+
+                <tr class="text-capitalize">
+                    <td></td>
+                    <td class="border border-left-0 border-right-0 border-top-0 border-dark font-weight-bold"><u>@CentroCosteCode</u></td>
+                    <td class="border border-left-0 border-right-0 border-top-0 border-dark font-weight-bold"><u>@listB.FirstOrDefault()?.CentroCosteNombre</u></td>
+                    <td class="border border-left-0 border-top-0 border-dark font-weight-bold bg-light px-3 text-center">INGRESOS</td>
+                    <td class="border border-left-0 border-top-0 border-dark font-weight-bold bg-light px-3 text-center">GASTOS</td>
+                    <td class="border border-left-0 border-top-0 border-dark font-weight-bold bg-light px-3 text-center">RTDO</td>
+                    <td class="border border-left-0 border-top-0 border-right-0 border-dark font-weight-bold bg-light px-3 text-center">%</td>
+                    <td class="border-0"></td>
+                </tr>
+
+                @foreach (var item in listB.OrderBy(f =>  f.CuentaCode))
+                {
+                    <tr>
+                        <td></td>
+                        <td class="">@item.CuentaCode</td>
+                        <td class="">@item.CuentaNombre</td>
+                        <td class="text-right">@item.Haber.ToString("N2")</td>
+                        <td class="text-right">@item.Debe.ToString("N2")</td>
+                        <td colspan="3"></td>
+                    </tr>
+                }
+
+                <tr>
+                    <td colspan="2"></td>
+                    <td class="font-weight-bold"><u>TOTAL</u></td>
+                    <td class="font-weight-bold text-right"><u>@ingresos.ToString("N2")</u></td>
+                    <td class="font-weight-bold text-right"><u>@gastos.ToString("N2")</u></td>
+                    <td class="font-weight-bold text-right"><u>@rtdo.ToString("N2")</u></td>
+                    <td class="font-weight-bold text-right"><u>@tasaRendimiento.ToString("N2")%</u></td>
+                    <td></td>
+                </tr>
+                <tr class="d-none d-print-block">
+                    <td colspan="7">&nbsp;</td>
+                </tr>
+
+                <tr>
+                    <td colspan="8"></td>
+                </tr>
+            }
+        }
+
+    </table>
+</div>

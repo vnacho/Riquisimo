@@ -1,0 +1,105 @@
+﻿@using Ferpuser.BLL.Filters
+@using Ferpuser.Models.Core
+@model IEnumerable<Ferpuser.Models.Congress>
+
+@{
+    List<KeyValuePair<string, string>> tipos = new List<KeyValuePair<string, string>>();
+    tipos.Add(new KeyValuePair<string, string>(Consts.CODIGO_TIPO_EVENTO_CONGRESO, "Congreso"));
+    tipos.Add(new KeyValuePair<string, string>(Consts.CODIGO_TIPO_EVENTO_OBRA, "Obra"));
+    tipos.Add(new KeyValuePair<string, string>(Consts.CODIGO_TIPO_EVENTO_CENTRO_COSTE, "Centro de coste"));
+
+    @if (User.Claims.Any(c => c.Type.Equals("AccessCollaborations")))
+    {
+        ViewData["Title"] = "Listado de Eventos";
+        
+        ViewData["CreateCostCenter"] = false;
+        ViewData["FiltroEventos"] = true;
+    }
+    else
+    {
+        ViewData["Title"] = "Congresos";
+    }
+
+    CongressesFilter filter = ViewData["Filter"] as CongressesFilter;
+    
+    if (filter == null)
+        filter = new CongressesFilter();
+}
+<form>
+    <div id="divPartePersonal" class="form-row">
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.TipoCongreso , new { @class = "control-label" })
+            @Html.DropDownListFor(f => filter.TipoCongreso, new SelectList(tipos, "Key", "Value"), "-Seleccionar-", new { @class = "form-control"})
+            @Html.ValidationMessageFor(f => filter.TipoCongreso, "", new { @class = "text-danger" })
+        </div>
+@*
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.Number, new { @class = "small" })
+            @Html.EditorFor(f => filter.Number, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => filter.Number, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.Code, new { @class = "small" })
+            @Html.EditorFor(f => filter.Code, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => filter.Code, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.Place, new { @class = "small" })
+            @Html.EditorFor(f => filter.Place, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => filter.Place, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.Name, new { @class = "small" })
+            @Html.EditorFor(f => filter.Name, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => filter.Name, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-1">
+            @Html.LabelFor(f => filter.FechaDesde, new { @class = "small" })
+            @Html.EditorFor(f => filter.FechaDesde, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => filter.FechaDesde, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-1">
+            @Html.LabelFor(f => filter.FechaHasta, new { @class = "small" })
+            @Html.EditorFor(f => filter.FechaHasta, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => filter.FechaHasta, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => filter.ArticulosAlmacenId, new { @class = "small" })
+            @Html.DropDownListFor(f => filter.ArticulosAlmacenId, new SelectList(ViewBag.ArticulosAlmacen, "Id", "ProductCode"), "-Seleccionar-", new { @class = "form-control form-control-sm select2" })
+            @Html.ValidationMessageFor(f => filter.ArticulosAlmacenId, "", new { @class = "text-danger small" })
+        </div>        
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => filter.DestinoId, new { @class = "small" })
+            @Html.DropDownListFor(f => filter.DestinoId, new SelectList(ViewBag.CentrosCoste, "Id", "Display"), "-Seleccionar-", new { @class = "form-control form-control-sm select2" })
+            @Html.ValidationMessageFor(f => filter.DestinoId, "", new { @class = "text-danger small" })
+        </div>*@
+        <div class="form-group col-md-3 text-right">
+            <br />
+            <button type="submit" id="btnFiltrar" class="btn btn-sm btn-blue-grey">Filtrar <i class="fas fa-search ml-2"></i></button>
+            <a href="@Url.Action("Index","Congresses", new {reset = true})" class="btn btn-sm btn-grey">Limpiar <i class="fas fa-eraser ml-2"></i></a>
+        </div>
+    </div>
+     <hr />
+
+@{
+    ViewData["DataTable"] = true;
+    ViewData["Back"] = false;
+}
+
+    @if (Model != null && Model.Any())
+    {
+        if (filter.TipoCongreso == Consts.CODIGO_TIPO_EVENTO_OBRA)
+        {
+            <partial name="_IndexObras" />    
+        }
+        else
+        {
+            <partial name="_IndexGeneral" />    
+        }
+    }
+    else
+    {
+        <partial name="_Empty" model="string.Empty" />
+    }
+
+</form>

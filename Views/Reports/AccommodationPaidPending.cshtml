@@ -1,0 +1,205 @@
+﻿@model IEnumerable<Ferpuser.Models.Accommodation>
+
+@{
+    var paid = ViewData.ContainsKey("Paid") && ViewData["Paid"] is String ? ViewData["Paid"] : "All";
+
+    @if (paid.Equals("Paid"))
+    {
+        ViewData["Title"] = "Alojamientos pagados";
+    }
+    else if (paid.Equals("Unpaid"))
+    {
+        ViewData["Title"] = "Alojamientos pendientes de pago";
+    }
+    else
+    {
+        ViewData["Title"] = "Alojamientos";
+    }
+    ViewData["Create"] = false;
+    ViewData["Back"] = false;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+    ViewData["Report"] = true;
+}
+<div class="row d-print-none mb-4">
+    <div class="col-12">
+        <div class="card">
+            <form class="card-body d-flex justify-content-around align-items-center flex-column flex-sm-row">
+                <div class="form-group flex-grow-1">
+                    <label for="CongressId" class="control-label">Congreso</label>
+                    <select id="CongressId" name="CongressId" class="browser-default custom-select select2" asp-items="ViewBag.CongressId">
+                        <option value="">
+                            Todos
+                        </option>
+                    </select>
+                </div>
+                <div class="custom-control custom-checkbox d-flex align-items-center ml-2">
+                    <div class="form-group flex-grow-1">
+                        <label for="Paid" class="control-label">Estado</label>
+                        <select id="Paid" name="Paid" class="browser-default custom-select select2">
+                            @if (paid.Equals("All"))
+                            {
+                                <option value="All" selected>
+                                    Todos
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="All">
+                                    Todos
+                                </option>
+                            }
+                            @if (paid.Equals("Paid"))
+                            {
+                                <option value="Paid" selected>
+                                    Pagados
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="Paid">
+                                    Pagados
+                                </option>
+                            }
+                            @if (paid.Equals("Unpaid"))
+                            {
+                                <option value="Unpaid" selected>
+                                    Pendientes
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="Unpaid">
+                                    Pendientes
+                                </option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group btn-group btn-group-sm mb-0">
+                    <button class="btn btn-primary btn-sm mb-0"><i class="fas fa-sync fa-2x"></i></button>
+                    <button class="btn btn-primary btn-sm mb-0" type="button" onclick="window.print()"><i class="fas fa-print fa-2x"></i></button>
+                    @if (Model.Any())
+                    {
+                    <button class="btn btn-primary btn-sm mb-0" type="submit" asp-action="AccommodationPaidPendingCsv" asp-controller="Reports"><i class="fas fa-file-csv fa-2x"></i></button>
+                    }
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                @if (Model.GroupBy(r => r.CongressId).Count() == 1)
+                {
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <img src="@Model.FirstOrDefault().Congress.LogoBase64" class="w-50" />
+                        <img src="~/img/sanicongress.jpg" class="w-25" />
+                    </div>
+                }
+
+                <div class="col-12 text-center">
+                    <h1 class="mb-2 mb-sm-0 pt-1 h4">
+                        @ViewData["Title"]
+                    </h1>
+                </div>
+                <div class="card-body">
+                    @{
+                        var i = 0;
+                        var pageN = 0;
+                    }
+                    @while (i < Model.Count())
+                    {
+                        var p = 29;
+                        if (pageN == 0)
+                        {
+                            p = 23;
+                        }
+                        pageN++;
+                        <table class="table table-sm">
+                            <thead>
+                                <tr class="font-larger">
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Registrant.Surnames)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Registrant.Name)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.RoomType.Name)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Hotel)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.InvoiceNumber)
+                                    </th>
+                                    <th class="text-right">
+                                        @Html.DisplayNameFor(model => model.Fee)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Client)
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (var j = 0; j < p && i < Model.Count(); j++, i++)
+                                {
+                                    var item = Model.ToArray()[i];
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Registrant.Surnames)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Registrant.Treatment.Name) @Html.DisplayFor(modelItem => item.Registrant.Name)
+                                    </td>
+                                    <td>
+                                        @item.RoomType.Name
+                                    </td>
+                                    <td>
+                                        @item.Hotel
+                                    </td>
+                                    <td>
+                                        @item.InvoiceNumber
+                                    </td>
+                                    <td class="text-right">
+                                        @Html.DisplayFor(modelItem => item.Fee)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Client.BusinessName)
+                                    </td>
+                                </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="font-larger">
+                                    <th>
+                                        Página @pageN
+                                    </th>
+                                    <th colspan="5" class="text-right">
+                                        @ViewHelpers.PadCongress(Model.FirstOrDefault().Congress.Number)
+                                        @Model.FirstOrDefault().Congress.Name
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    }
+                </div>
+
+                <div class="card-footer text-right d-flex justify-content-end">
+                    <span class="mx-5">
+                        Alojamientos: @Model.Count()
+                    </span>
+                    <span>
+                        Total: @Model.Sum(m => m.Fee)€
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+}

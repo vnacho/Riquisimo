@@ -1,0 +1,73 @@
+﻿<script>
+    $(function () {        
+        $("#linea_NombreArticulo").autocomplete({
+            source: function (request, response) {
+                console.log(request);
+                $.ajax({
+                    url: "@Url.Action("BuscadorJson", "Articulos")",
+                    dataType: "json",
+                    data: {
+                        query: request.term
+                    },
+                    success: function (data) {
+                        response($.parseJSON(data));
+                    },
+                    error: function (xhr, status, error) {
+                        var err = eval("(" + xhr.responseText + ")" + "(" + status + ")" + "(" + error + ")");
+                        alert(err);
+                    }
+                });
+            },
+            select: function (event, ui) {
+                AutocompletarArticuloSeleccionado(ui.item.value)
+                $("#linea_NombreArticulo").val(ui.item.label);
+                return false;
+            }
+        });
+    });    
+
+    function DescripcionAmpliadaChanged(cbx)
+    {
+        if (cbx.checked)
+        {
+            $("#divTextoDescripcionAmpliada").removeClass('d-none');
+
+            //Buscar la descripción ampliada a la tabla artículos
+            var codigoarticulo = $("#linea_CodigoArticulo").val();
+            if (codigoarticulo != null && codigoarticulo != '')
+            {
+                $.ajax({
+                    url: "@Url.Action("GetArticuloJson", "Articulos")",
+                    dataType: "json",
+                    data: {
+                        codigoarticulo: codigoarticulo
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        $("#linea_TextoDescripcionAmpliada").val(data.nombrE2);
+                    },
+                    error: function (xhr, status, error) {
+                        var err = eval("(" + xhr.responseText + ")" + "(" + status + ")" + "(" + error + ")");
+                        alert(err);
+                    }
+                });
+            }
+        }
+        else
+        {
+            $("#divTextoDescripcionAmpliada").addClass('d-none');
+        }
+    }
+
+    function TieneTiempoChanged(cbx)
+    {
+        if (cbx.checked)
+        {
+            $("#divTiempo").removeClass('d-none');
+        }
+        else
+        {
+            $("#divTiempo").addClass('d-none');
+        }
+    }
+</script>

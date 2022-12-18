@@ -1,0 +1,248 @@
+﻿@using Ferpuser.BLL.Helpers
+@using Ferpuser.Models.Core
+@using Ferpuser.ViewModels
+@model VentaFactura
+
+@{
+    Fichero fichero = new Fichero()
+    {
+        CampoNombre = "FicheroNombre",
+        CampoUrl = "FicheroUrl",
+        Url = Model?.FicheroUrl,
+        Nombre = Model?.FicheroNombre
+    };
+
+    var direccion = new DireccionViewModel();
+
+    if (Model != null)
+    {
+        direccion.CodigoPostal = Model.CodigoPostal;
+        direccion.Direccion = Model.Direccion;
+        direccion.Poblacion = Model.Poblacion;
+        direccion.Provincia = Model.Provincia;
+    }
+
+    string origen_display_class_helper = Model.Origen ? "" : "d-none";
+}
+
+@Html.HiddenFor(f => f.Id)
+@Html.HiddenFor(f => f.Total)
+@Html.HiddenFor(f => f.NombreCliente)
+@Html.HiddenFor(f => f.NombreVendedor)
+@Html.HiddenFor(f => f.EstadoFactura)
+@Html.HiddenFor(f => f.CodigoFactura)
+
+@if (Model == null || Model.EstadoFactura != EstadoFactura.TaspasadoSAGE || UserHelper.AccesoAdmin(User))
+{
+    <div class="card mb-4 wow d-print-none">
+        <div class="form-row card-body">
+            <div class="form-group col-md-12">
+                @if (Model != null && Model.Id != 0)
+                {
+                    @Html.HiddenFor(f => f.Serie)
+                    <span class="badge badge-info">@Model.Serie - @Model.CodigoFactura</span>
+                }
+                @Html.DisplayFor(f => f.EstadoFactura)            
+            </div>
+            <div class="form-group col-md-2">
+                @Html.LabelFor(f => f.Fecha, new { @class = "small" })
+                @Html.EditorFor(f => f.Fecha, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+                @Html.ValidationMessageFor(f => f.Fecha, "", new { @class = "text-danger small" })
+            </div>
+            @if (Model == null || Model.Id == 0)
+            {
+            <div class="form-group col-md-2">
+                @Html.LabelFor(f => f.Serie, new { @class = "small" })
+                @Html.DropDownListFor(f => f.Serie, new SelectList(ViewBag.Series, "Codigo", "Display"), "-Seleccionar-", new { @class = "form-control form-control-sm" })
+                @Html.ValidationMessageFor(f => f.Serie, "", new { @class = "text-danger small" })
+            </div>
+            }
+            <div class="form-group col-md-4">
+                @Html.LabelFor(f => f.NombreVendedor, new { @class = "small" })
+                @if (Model == null || string.IsNullOrWhiteSpace(Model.CodigoVendedor) || User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_ADMINISTRACION)))
+                {
+                    @Html.DropDownListFor(model => model.CodigoVendedor, new SelectList(ViewBag.Vendedores, "Codigo", "Nombre", Model == null ? null : Model.CodigoVendedor), "-Seleccionar-", new { @class = "form-control form-control-sm" })
+                }
+                else
+                {
+                    @Html.HiddenFor(model => model.CodigoVendedor)
+                    <input type="text" class="form-control form-control-sm" value="@Model.NombreVendedor" disabled />
+                }
+                @Html.ValidationMessageFor(f => f.CodigoVendedor, "", new { @class = "text-danger small" })
+            </div>
+            <div class="w-100"></div>
+            <div class="form-group col-md-6">
+                @Html.LabelFor(f => f.NombreCliente, new { @class = "small" })
+                @*@Html.DropDownListFor(model => model.CodigoCliente, new SelectList(ViewBag.Clientes, "Codigo", "DisplayNameCIF", Model == null ? null : Model.CodigoCliente), "-Seleccionar-", new { @class = "form-control select2", onchange="ChangeCliente();"  })*@
+                @Html.DropDownListFor(f => f.CodigoCliente, new SelectList(ViewBag.Clientes, "id", "text"), "-Seleccionar-", new { @class = "form-control", onchange="ChangeCliente();" })
+                @Html.ValidationMessageFor(f => f.CodigoCliente, "", new { @class = "text-danger small" })
+            </div>
+            <div class="form-group col-md-1">
+                <label class = "small" >Clave</label>
+                <input class="form-control" type="text" value="@ViewBag.Clave" disabled/>            
+            </div>
+            <div class="form-group col-md-5">
+                @Html.LabelFor(f => f.CodigoEvento, new { @class = "small" })
+                @Html.DropDownListFor(model => model.CodigoEvento, new SelectList(ViewBag.Eventos, "Codigo", "DisplayName", Model == null ? null : Model.CodigoEvento), "-Seleccionar-", new { @class = "form-control select2" })
+                @Html.ValidationMessageFor(f => f.CodigoEvento, "", new { @class = "text-danger small" })
+            </div>
+
+            <div id="divDireccionesEnvio" class="form-group col-md-12">
+                <partial name="_DireccionesCliente" model="direccion" />            
+            </div>
+
+            <div class="form-group col-md-2">
+                <div class="form-check">
+                    @Html.EditorFor(f => f.TieneRetencion, new { htmlAttributes = new { type = "checkbox", @class = "form-check-input", onchange = "ChangeTieneRetencion()" } })
+                    @Html.LabelFor(f => f.TieneRetencion, new { @class = "small form-check-label" })
+                </div>
+                @Html.ValidationMessageFor(f => f.TieneRetencion, "", new { @class = "text-danger small" })
+               
+            </div>
+            <div class="form-group col-md-2">
+                <div class="form-check">
+                    @Html.EditorFor(f => f.IncluirDatosEvento, new { htmlAttributes = new { type = "checkbox", @class = "form-check-input" } })
+                    @Html.LabelFor(f => f.IncluirDatosEvento, new { @class = "small form-check-label" })
+                </div>
+                @Html.ValidationMessageFor(f => f.IncluirDatosEvento, "", new { @class = "text-danger small" })
+            </div>
+            <div class="form-group col-md-2">
+                <div class="form-check">
+                    @Html.EditorFor(f => f.Origen, new { htmlAttributes = new { type = "checkbox", @class = "form-check-input", onchange="OrigenChanged(this)" } })
+                    @Html.LabelFor(f => f.Origen, new { @class = "small form-check-label" })
+                </div>
+                @Html.ValidationMessageFor(f => f.Origen, "", new { @class = "text-danger small" })
+            </div>
+              
+            <div class="w-100"></div>
+            <div class="data-origen form-group col-md-4 @origen_display_class_helper">
+                @Html.LabelFor(f => f.OrigenCodigoArticulo, new { @class = "small" })
+                @Html.DropDownListFor(f => f.OrigenCodigoArticulo, new SelectList(ViewBag.Articulos, "Codigo", "Display"), "-Seleccionar-", new { @class = "form-control form-control-sm select2", onchange="OrigenArticuloChanged(this)" })
+                @Html.ValidationMessageFor(f => f.OrigenCodigoArticulo, "", new { @class = "text-danger small" })
+                @Html.HiddenFor(f => f.OrigenNombreArticulo)
+            </div>  
+            <div class="data-origen form-group col-md-2 @origen_display_class_helper">
+                @Html.LabelFor(f => f.OrigenImporte, new { @class = "small" })
+                @Html.EditorFor(f => f.OrigenImporte, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(f => f.OrigenImporte, "", new { @class = "text-danger small" })                
+            </div>            
+            <div class="form-group col-md-12">
+                @Html.LabelFor(f => f.Observaciones, new { @class = "small" })
+                @Html.EditorFor(f => f.Observaciones, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+                @Html.ValidationMessageFor(f => f.Observaciones, "", new { @class = "text-danger small" })
+            </div>
+            @if (Model.Id > 0)
+            {
+                <div class="col-md-4 form-group">
+                        <input type="hidden" id="tablaID" name="tablaID" value="@Model.Id" />
+                        <div class="card">
+                            <div class="card-body row justify-content-between align-items-center py-2">
+                                <div class="col-md-12">
+                                    <h6 class="text-muted">Ficheros Factura Venta </h6>
+                                </div>
+                                <div class="col-md-12 border-right align-self-start">
+                                    <span class="badge badge-danger">Documentos</span>
+                                    <table id="tablaDocumentos" class="table table-sm bg-white my-2">
+                                    @foreach (var doc in Model.documentos)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a class="text-info" download="@doc.FicheroNombre" href="@Url.Content(doc.FicheroUrl)">@doc.FicheroNombre</a>
+                                            </td>
+                                            <td class="text-right">
+                                                <a href="@Url.Action("BorrarDocumento","VentasFactura", new { IdArchivo = doc.Id, IdTabla = Model.Id })" onclick="return confirm('¿Está seguro de querer borrar el documento?')">
+                                                    <i class="fas fa-times ml-2"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                    </table>
+                                    <div class="form-group col-md-12">
+                                        <label for="Fichero">Adjuntar otros ficheros</label>
+                                        <input type="file" class="form-control form-control-sm" id="fileDocumentacion" name="fileDocumentacion" onchange="SubirDocumento()">
+                                        <input type="hidden" id="hfFicheros" name="hfFicheros" />
+                                        <br />
+                                        <ul id="ulFicheros" class="small"></ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            }
+@*            <div class="form-group col-md-10">
+                @Html.LabelFor(f => f.FicheroNombre, new { @class = "small" })
+                @Html.EditorFor(f => fichero, "File")
+                @Html.ValidationMessageFor(f => f.FicheroUrl, "", new { @class = "text-danger small" })
+            </div>*@
+        </div>
+    </div>
+}
+else
+{
+    <div class="card mb-4 wow d-print-none">
+        <div class="form-row card-body">
+            <div class="form-group col-md-2">
+                @Html.LabelFor(f => f.CodigoFactura, new { @class = "small" })
+                @Html.HiddenFor(f => f.Serie)
+                @Html.HiddenFor(f => f.CodigoFactura)
+                <br />
+                <label class="small font-weight-bold">@Html.DisplayFor(f => f.CodigoFactura)</label>
+            </div>
+            <div class="form-group col-md-2">
+                @Html.LabelFor(f => f.Fecha, new { @class = "small" })
+                @Html.HiddenFor(f => f.Fecha)
+                <br />
+                <label class="small font-weight-bold">@Model.Fecha.ToShortDateString()</label>
+            </div>
+            <div class="form-group col-md-4">
+                @Html.LabelFor(f => f.NombreCliente, new { @class = "small" })
+                @Html.HiddenFor(f => f.NombreCliente)
+                @Html.HiddenFor(f => f.CodigoCliente)
+                <br />
+                <label class="small font-weight-bold">@Html.DisplayFor(f => f.NombreCliente)</label>
+            </div>
+            <div class="form-group col-md-4">
+                @Html.LabelFor(f => f.NombreVendedor, new { @class = "small" })
+                @Html.HiddenFor(f => f.NombreVendedor)
+                @Html.HiddenFor(f => f.CodigoVendedor)
+                <br />
+                <label class="small font-weight-bold">@Html.DisplayFor(f => f.NombreVendedor)</label>
+            </div>
+            <div class="form-group col-md-4">
+                @Html.LabelFor(f => f.CodigoEvento, new { @class = "small" })
+                @Html.HiddenFor(f => f.NombreEvento)
+                @Html.HiddenFor(f => f.CodigoEvento)
+                <br />
+                <label class="small font-weight-bold">@Html.DisplayFor(f => f.NombreEvento)</label>
+            </div>
+            <div class="form-group col-md-4">
+                @Html.LabelFor(f => f.TieneRetencion, new { @class = "small" })
+                @Html.HiddenFor(f => f.TieneRetencion)
+                <br />
+                <label class="small font-weight-bold">@Html.DisplayFor(f => f.TieneRetencion)</label>
+            </div>
+            <div class="form-group col-md-4">
+                @Html.LabelFor(f => f.IncluirDatosEvento, new { @class = "small" })
+                @Html.HiddenFor(f => f.IncluirDatosEvento)
+                <br />
+                <label class="small font-weight-bold">@Html.DisplayFor(f => f.IncluirDatosEvento)</label>
+            </div>
+            <div class="form-group col-md-12">
+                @Html.LabelFor(f => f.Observaciones, new { @class = "small" })
+                @Html.HiddenFor(f => f.Observaciones)
+                <br />
+                <label class="small font-weight-bold">@Html.DisplayFor(f => f.Observaciones)</label>
+            </div>
+@*            <div class="form-group col-md-10">
+                @Html.LabelFor(f => f.FicheroNombre, new { @class = "small" })
+                @Html.EditorFor(f => fichero, "File")
+                @Html.ValidationMessageFor(f => f.FicheroUrl, "", new { @class = "text-danger small" })
+            </div>*@
+            @*<div class="form-group col-md-2 text-right">
+                <span class="badge badge-danger">[Registro] @Model.Registro</span>
+            </div>*@
+        </div>
+    </div>
+}
+
+<partial name="_FacturaLineas" />

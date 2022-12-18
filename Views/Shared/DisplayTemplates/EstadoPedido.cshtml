@@ -1,0 +1,21 @@
+﻿@using Ferpuser.Models.Enums
+@model EstadoPedido
+
+@{
+    switch (Model)
+    {
+        case EstadoPedido.Pendiente:
+            <span class="badge badge-danger" style="width:80px;">Pendiente</span>
+            break;
+        case EstadoPedido.PendienteParcial:
+            <span class="badge badge-warning" style="width:80px;">Parcial</span>
+            break;
+        case EstadoPedido.Servido:
+            <span class="badge badge-success" style="width:80px;">Servido</span>
+            break;
+    }
+}
+
+
+
+

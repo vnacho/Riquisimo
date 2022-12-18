@@ -1,0 +1,17 @@
+﻿@using Microsoft.AspNetCore.Routing 
+@{
+    var htmlAttributes = new RouteValueDictionary(new { @class = "form-control form-control-sm" });
+    //var validationAttributes = Html.GetUnobtrusiveValidationAttributes("");
+    //RouteValueDictionary attributes = new RouteValueDictionary(htmlAttributes.Union(validationAttributes).ToDictionary(k => k.Key, k => k.Value));
+    RouteValueDictionary attributes = new RouteValueDictionary(htmlAttributes);
+}
+
+<div class="input-group">
+    @Html.TextBoxFor(f => Model, new RouteValueDictionary(attributes))
+    <div class="input-group-append">
+        <span class="input-group-text">
+            <i class="fas fa-percent small" aria-hidden="true"></i>
+        </span>
+    </div>
+</div>
+

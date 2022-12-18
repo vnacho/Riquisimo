@@ -1,0 +1,361 @@
+﻿@model Ferpuser.Models.Registration
+
+@{
+    ViewData["Title"] = "Añadir inscripción";
+    ViewData["SearchClient"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Validation"] = true;
+    ViewData["Create"] = false;
+    ViewData["Select2"] = true;
+    ViewData["Swal"] = true;
+    ViewData["Inline"] = false;
+}
+<form asp-action="Create" class="row">
+
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <input asp-for="Modified" class="form-control" />
+                <input asp-for="Deleted" class="form-control" />
+                <input asp-for="Created" class="form-control" />
+                <input hidden asp-for="Id" class="form-control" />
+
+                <div class="d-flex justify-content-between">
+                    <h5><i class="fas fa-sign-in-alt mr-3"></i>Datos de la inscripción</h5>
+                </div>
+                <div asp-validation-summary="All" class="text-danger"></div>
+
+                <div class="row">
+                    <div class="col-md-1 form-group">
+                        <label asp-for="Number" class="control-label"># Inscripción</label>
+                        <input asp-for="Number" value="@ViewHelpers.PadCongress(Model.Number)" class="form-control" type="text" readonly />
+                        <span asp-validation-for="Number" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 form-group">
+                        <label asp-for="CongressId" class="control-label"></label>
+                        <select asp-for="CongressId" class="browser-default custom-select select2" asp-items="ViewBag.CongressId"></select>
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label asp-for="RegistrationTypeId" class="control-label"></label>
+                        <select asp-for="RegistrationTypeId" class="browser-default custom-select select2" asp-items="ViewBag.RegistrationTypeId"></select>
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label asp-for="VATId" class="control-label"></label>
+                        <select asp-for="VATId" class="browser-default custom-select select2" asp-items="ViewBag.VATId"></select>
+                    </div>
+
+                    <div class="col-md-2 form-group">
+                        <label asp-for="AccountId" class="control-label"></label>
+                        @if (User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_ADMINISTRACION)))
+                        {
+                            <select asp-for="AccountId" class="browser-default custom-select select2" asp-items="ViewBag.AccountId"></select>
+
+                        }
+                        else
+                        {
+                            <input asp-for="AccountId" hidden />
+                            <input value="@Model.Account.Name" class="form-control" type="text" readonly />
+                        }
+                    </div>
+                    <div class="col-md-1 form-group">
+                        <label asp-for="Fee" class="control-label"></label>
+                        <input asp-for="Fee" class="form-control" />
+                        <span asp-validation-for="Fee" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="registrant-data" class="col-md-12 mb-5">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h5><i class="fas fa-user mr-3"></i>Persona inscrita</h5>
+                </div>
+                <div class="row mb-4">
+                    <partial name="/Views/Shared/EditorTemplates/Registrant.cshtml" for="Registrant" />
+                </div>
+                <div class="row">
+                    <partial name="/Views/Shared/EditorTemplates/RegistrantLocation.cshtml" for="Registrant.Location" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="billing-container" class="col-md-12">
+        @*<div class="card mb-5">
+                <div class="card-body">
+                    <div class="d-flex flex-column flex-lg-row justify-content-between">
+                        <h5><i class="fas fa-file-invoice-dollar mr-3"></i>Datos de facturación facilitados</h5>
+                        <div class="btn-group btn-group-sm">
+                            <a href="#" id="search-client" class="btn btn-sm btn-primary">Buscar</a>
+                            <a href="#" id="leave-client-empty" class="btn btn-sm btn-primary">Dejar en blanco</a>
+                            <a href="#" id="use-registrant" class="btn btn-sm btn-primary">Copiar</a>
+                        </div>
+                    </div>
+
+                    <div id="client-container" class="row mb-4">
+                        <partial name="/Views/Shared/EditorTemplates/Client.cshtml" for="Client" />
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <h5><i class="fas fa-map-marked mr-3"></i>Dirección de facturación</h5>
+                    </div>
+                    <div id="billing-location-container" class="row mb-4">
+                        <partial name="/Views/Shared/EditorTemplates/ClientLocation.cshtml" for="BillingLocation" />
+                    </div>
+                </div>
+            </div>*@
+        <div class="card mb-5">
+            <div class="card-body">
+                <div class="d-flex flex-column flex-md-row justify-content-between">
+                    <h5><i class="fas fa-file-invoice-dollar mr-3"></i>Datos de facturación facilitados</h5>
+                    <div class="btn-group btn-group-sm">
+                        <a href="#" id="search-client" class="btn btn-sm btn-primary">Buscar</a>
+                        <a href="#" id="leave-client-empty" class="btn btn-sm btn-primary">Dejar en blanco</a>
+                        <a href="#" id="use-registrant" class="btn btn-sm btn-primary">Copiar</a>
+                    </div>
+                </div>
+
+                <div id="client-container" class="row mb-4">
+                    <partial name="/Views/Shared/EditorTemplates/Client.cshtml" for="Client" />
+                </div>
+                <div id="billing-location-container" class="row mb-4">
+                    <partial name="/Views/Shared/EditorTemplates/ClientLocation.cshtml" for="BillingLocation" />
+                </div>
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label asp-for="BillingLocationId" class="control-label"></label>
+                        <select asp-for="BillingLocationId" class="browser-default custom-select select2" asp-items="ViewBag.BillingLocationId">
+                            <option value="@Model.BillingLocation?.Id">
+                                Usar la dirección facilitada
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*
+
+        <partial name="/Views/Shared/EditorTemplates/Location.cshtml" for="BillingLocation" />
+        <partial name="/Views/Shared/EditorTemplates/Location.cshtml" for="AlternateLocation" />*@
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5>Estado</h5>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" asp-for="Notified">
+                    <label class="custom-control-label" asp-for="Notified">@Html.DisplayNameFor(model => model.Notified)</label>
+                </div>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" asp-for="Authorization">
+                    <label class="custom-control-label" asp-for="Authorization">@Html.DisplayNameFor(model => model.Authorization)</label>
+                </div>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" asp-for="OnlyBilling">
+                    <label class="custom-control-label" asp-for="OnlyBilling">@Html.DisplayNameFor(model => model.OnlyBilling)</label>
+                </div>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" asp-for="Exported">
+                    <label class="custom-control-label" asp-for="Exported">@Html.DisplayNameFor(model => model.Exported)</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="form-group">
+                    <label asp-for="Notes" class="control-label"></label>
+                    <textarea asp-for="Notes" class="form-control">@Html.Raw(Model.Notes)</textarea>
+                    <span asp-validation-for="Notes" class="text-danger"></span>
+                </div>
+                <div class="form-group">                    
+                    <div class="form-check">
+                        @Html.EditorFor(f => f.HaAsistido, new { @class = "form-check-input" } )
+                        @Html.LabelFor(f => f.HaAsistido, new { @class = "form-check-label" })
+                    </div>
+                    @Html.ValidationMessageFor(f => f.HaAsistido, "", new { @class = "text-danger small" })            
+
+                    <div class="form-check">
+                        @Html.EditorFor(f => f.Creditos, new { @class = "form-check-input" } )
+                        @Html.LabelFor(f => f.Creditos, new { @class = "form-check-label" })
+                    </div>
+                    @Html.ValidationMessageFor(f => f.Creditos, "", new { @class = "text-danger small" })        
+                </div>
+                
+                <div class="form-group text-right">
+                    <button id="not-available" role="button" class="btn btn-outline-blue-grey d-none">
+                        Marcar no disponibles
+                    </button>
+                    <input type="submit" value="Guardar" class="btn btn-primary" />
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+
+        var lastNif = "";
+        $(function () {
+
+            $("#not-available").click(e => {
+                e.preventDefault();
+                var nd = "N/D";
+                var ndMail = "no.disponible@ferpuser.com"
+                if (!$("#Registrant_Name").val()) {
+                    $("#Registrant_Name").val(nd);
+                }
+                if (!$("#Registrant_Surnames").val()) {
+                    $("#Registrant_Surnames").val(nd);
+                }
+                if (!$("#Registrant_NIF").val()) {
+                    $("#Registrant_NIF").val(nd);
+                }
+                if (!$("#Registrant_Email").val()) {
+                    $("#Registrant_Email").val(ndMail);
+                }
+                if (!$("#Registrant_Location_Address").val()) {
+                    $("#Registrant_Location_Address").val(nd);
+                }
+                if (!$("#Registrant_Location_City").val()) {
+                    $("#Registrant_Location_City").val(nd);
+                }
+                if (!$("#Registrant_Location_ZipCode").val()) {
+                    $("#Registrant_Location_ZipCode").val(nd);
+                }
+                if (!$("#Registrant_Location_Province").val()) {
+                    $("#Registrant_Location_Province").val(nd);
+                }
+                if (!$("#Registrant_Location_Country").val()) {
+                    $("#Registrant_Location_Country").val(nd);
+                }
+                if (!$("#Registrant_Location_Phone").val()) {
+                    $("#Registrant_Location_Phone").val(nd);
+                }
+            });
+
+
+            $("#RegistrationTypeId").on('change', e => {
+                var val = $("#RegistrationTypeId").val();
+                if (val == '0a2ac937-5ddd-458c-8155-b7cc648eb1e0') {
+                    $("#Client_Id").val("");
+                    $("#BillingLocationId").val(-1);
+                    $("#BillingLocation_Id").val("");
+                    $("#billing-container").remove();
+                    $("#not-available").removeClass("d-none");
+                }
+            });
+
+            $("#BillingLocationId").change(e => {
+                if ($("#BillingLocationId")[0].selectedIndex > 0) {
+                    $("#billing-location-container").empty();
+                } else {
+
+                    ga('send', 'pageview', '/Clients/Location');
+                    fetch("/Clients/Location/")
+                        .then(e => {
+                            return e.text()
+                        }).then(html => {
+                            $("#billing-location-container").empty();
+                            $("#billing-location-container").append($(html));
+                            $("#BillingLocation_Id").val(generateUUID());
+                        });
+                }
+            });
+            $("#use-registrant").click(function (e) {
+                e.preventDefault();
+                $("#Client_BusinessName").val($("#Registrant_Surnames").val() + ", " + $("#Registrant_Name").val());
+                $("#Client_NIF").val($("#Registrant_NIF").val());
+                $("#Client_Email").val($("#Registrant_Email").val());
+                $("#Client_Email2").val($("#Registrant_Email2").val());
+                $("#Client_Modified").val(new Date().toISOString());
+                $("#Client_Created").val(new Date().toISOString());
+                $("#Client_Id").val(generateUUID());
+                $("#BillingLocation_Address").val($("#Registrant_Location_Address").val());
+                $("#BillingLocation_City").val($("#Registrant_Location_City").val());
+                $("#BillingLocation_ZipCode").val($("#Registrant_Location_ZipCode").val());
+                $("#BillingLocation_Province").val($("#Registrant_Location_Province").val());
+                $("#BillingLocation_Country").val($("#Registrant_Location_Country").val());
+                $("#BillingLocation_Phone").val($("#Registrant_Location_Phone").val());
+                $("#BillingLocation_Phone2").val($("#Registrant_Location_Phone2").val());
+                $("#BillingLocation_Phone2").val($("#Registrant_Location_Phone2").val());
+                $("#BillingLocation_Modified").val(new Date().toISOString());
+                $("#BillingLocation_Created").val(new Date().toISOString());
+                $("#BillingLocation_Id").val(generateUUID());
+            });
+
+            var leaveClientEmpty = function () {
+
+                $("#Client_Id").val("");
+                $("#BillingLocationId").val(-1);
+                $("#BillingLocation_Id").val("");
+                $("#billing-container").remove();
+                $("#not-available").removeClass("d-none");
+            }
+            @if (Model.RegistrationTypeId.Equals(Guid.Parse("0a2ac937-5ddd-458c-8155-b7cc648eb1e0")))
+            {
+                @:leaveClientEmpty();
+            }
+
+            $("#RegistrationTypeId").on('change', e => {
+                 var val = $("#RegistrationTypeId").val();
+                 if (val == '0a2ac937-5ddd-458c-8155-b7cc648eb1e0') {
+                     leaveClientEmpty();
+                 }
+             });
+
+
+            $("#leave-client-empty").click(function (e) {
+                e.preventDefault();
+                leaveClientEmpty();
+            });
+
+            $("#search-client").click(e => {
+                e.preventDefault();
+                $("#ClientSearchName").val($("#Client_NIF").val());
+                $("#ClientSearchName").trigger("keyup");
+                clientSearchModal();
+            });
+
+            $("body").on("keyup", "#Client_NIF", e => {
+                console.log($("#Client_NIF").val());
+                if ($("#Client_NIF").val().length == 0) {
+                    return;
+                }
+                if (lastNif == $("#Client_NIF").val().trim()) {
+                    return;
+                }
+                lastNif = $("#Client_NIF").val().trim();
+
+                ga('send', 'pageview', '/Clients/ClientNIFExists/' + $("#Client_NIF").val());
+                fetch("/Clients/ClientNIFExists/?NIF=" + $("#Client_NIF").val())
+                    .then(e => {
+                        return e.text()
+                    }).then(id => {
+                        if (id != "false") {
+                            console.log(id);
+                            Swal.fire({
+                                title: "Ya existe un cliente con ese NIF",
+                                text: "¿Importar los datos desde SAGE?",
+                                showCancelButton: true,
+                                confirmButtonText: "Importar",
+                                cancelButtonText: "Cancelar"
+                            }).then(e => {
+                                if (e.value) {
+                                    importClient(id);
+                                } else {
+                                    console.log("Don't import");
+                                }
+                            });
+                        }
+                    });
+            });
+        });
+    </script>
+}

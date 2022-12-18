@@ -1,0 +1,100 @@
+﻿<script>
+    function AddPedidoLinea() {
+        var codigoEvento = $("#CodigoEvento").val();
+        $("#divPedidoLinea").load('@Url.Action("AddLinea", "VentasPedido")' + '?CodigoEvento=' + codigoEvento);
+    }
+
+    function EditPedidoLinea(orden) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("EditLinea", "VentasPedido")" + "?orden=" + orden,
+            data: $('#form').serialize(),
+            success: function (response) {
+                $("#divPedidoLinea").html(response);
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    }
+
+    function SaveLinea() {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("SaveLinea", "VentasPedido")",
+            data: $('#form').serialize(),
+            dataType: 'JSON',
+            success: function (response) {
+                if (response.status == 1) {
+                    $("#divLineas").html(response.data);
+                    $('#NuevaLineaModal').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                }
+                else {
+                    $("#divPedidoLinea").html(response.data);
+                }
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    }
+
+    function DeleteLinea(orden) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("DeleteLinea", "VentasPedido")" + "?orden=" + orden,
+            data: $('#form').serialize(),
+            success: function (response) {
+                $("#divLineas").html(response);
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        }); 
+    }
+
+    function CargarPrecio(codigoArticulo) {
+        var codigoCliente = $("#CodigoCliente").val();
+
+        if (codigoArticulo != '' && codigoCliente != '') {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetPVP", "PreciosCliente")" + "?codigoArticulo=" + codigoArticulo + "&codigoCliente=" + codigoCliente,
+                dataType: 'JSON',
+                success: function (response) {
+                    console.log(response);
+                    if (response != null) {
+                        $("#linea_PrecioUnitario").val(response.pvP1.toString().replace(".", ","));
+                    }
+                    else {
+                        $("#linea_PrecioUnitario").val('');
+                    }
+                },
+                failure: function (response) {
+                    console.log(response.responseText);
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    console.log(response.responseText);
+                    alert(response.responseText);
+                }
+            });
+        }        
+    }    
+
+    function AutocompletarEventoSeleccionado(codigo) {
+        $("#linea_CodigoEvento").val(codigo);
+    }
+
+</script>

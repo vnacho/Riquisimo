@@ -1,0 +1,6 @@
+﻿@model Congress
+@if (Model != null && !string.IsNullOrWhiteSpace(Model.LogoBase64))
+{
+    <img src="@Model.LogoBase64" class="img-fluid" />
+    <hr />
+}

@@ -1,0 +1,178 @@
+﻿@using Ferpuser.Models.Core
+@using Ferpuser.BLL.Filters
+@model IEnumerable<VentaAlbaran>
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+    TableHeaderSortable th;
+    var pager = ViewData["Pager"];
+    VentaAlbaranFilter filter = new VentaAlbaranFilter();
+}
+
+<form>
+
+    <input type="hidden" name="currentsort" id="currentsort" value="@ViewData["Sort"].ToString()" />
+
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Listado de albaranes de venta
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                <a asp-action="Create" asp-controller="VentasAlbaran" class="btn btn-secondary btn-sm text-nowrap">Nuevo <i class="fas fa-plus ml-2"></i></a>
+                <button type="submit" class="btn btn-grey btn-sm text-nowrap" asp-action="ExportPdf" asp-controller="VentasAlbaran">
+                    Imprimir <i class="fas fa-print ml-2"></i>
+                </button>
+                <button type="submit" class="btn btn-grey btn-sm text-nowrap" asp-action="ExportCsv" asp-controller="VentasAlbaran">
+                    Exportar <i class="fas fa-file-csv ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => filter.CodigoCliente, new { @class = "small" })
+            @*@Html.DropDownListFor(f => filter.CodigoCliente, new SelectList(ViewBag.Clientes, "Codigo", "Nombre"), "-Seleccionar-", new { @class = "form-control form-control-sm select2" })*@
+            @Html.DropDownListFor(f => filter.CodigoCliente, new SelectList(ViewBag.Clientes, "id", "text"), "-Seleccionar-", new { @class = "form-control" })
+            @Html.ValidationMessageFor(f => filter.CodigoCliente, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => filter.CodigoEvento, new { @class = "small" })
+            @Html.DropDownListFor(f => filter.CodigoEvento, new SelectList(ViewBag.Eventos, "Codigo", "DisplayName"), "-Seleccionar-", new { @class = "form-control form-control-sm select2" })
+            @Html.ValidationMessageFor(f => filter.CodigoEvento, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.FechaDesde, new { @class = "small" })
+            @Html.EditorFor(f => filter.FechaDesde, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => filter.FechaDesde, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.FechaHasta, new { @class = "small" })
+            @Html.EditorFor(f => filter.FechaHasta, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => filter.FechaHasta, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.EstadoAlbaran, new { @class = "small" })
+            @Html.DropDownListFor(f => filter.EstadoAlbaran, new SelectList(Html.GetEnumSelectList<EstadoAlbaran>(), "Value", "Text", Model == null ? null : filter.EstadoAlbaran), "-Seleccionar-", new { @class = "form-control" })
+            @Html.ValidationMessageFor(f => filter.EstadoAlbaran, "", new { @class = "text-danger small" })
+        </div>        
+    </div>
+
+    <div class="form-row">
+        <div class="col text-right">
+            <button type="submit" id="btnFiltrar" class="btn btn-sm btn-blue-grey">Filtrar <i class="fas fa-search ml-2"></i></button>
+            <a href="@Url.Action("Index","VentasAlbaran")" class="btn btn-sm btn-grey">Limpiar <i class="fas fa-eraser ml-2"></i></a>
+        </div>
+    </div>
+
+    <hr />
+
+    <partial name="_Pager" model="pager" />
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive mt-2">
+            <table class="table table-sm table-hover table-striped bg-white">
+                <thead class="font-weight-bolder">
+                    <tr>
+                        <th scope="col" class="text-center">
+                            @{ th = new TableHeaderSortable() { Property = "Serie", Display = Html.DisplayNameFor(f => f.Serie).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col" class="text-center">
+                            @{ th = new TableHeaderSortable() { Property = "CodigoAlbaran", Display = Html.DisplayNameFor(f => f.CodigoAlbaran).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col" class="text-center">
+                            @{ th = new TableHeaderSortable() { Property = "Fecha", Display = Html.DisplayNameFor(f => f.Fecha).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col">
+                            @{ th = new TableHeaderSortable() { Property = "NombreCliente", Display = Html.DisplayNameFor(f => f.NombreCliente).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col">
+                            @{ th = new TableHeaderSortable() { Property = "NombreOperario", Display = Html.DisplayNameFor(f => f.NombreVendedor).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col" class="text-right">
+                            @{ th = new TableHeaderSortable() { Property = "Total", Display = Html.DisplayNameFor(f => f.BaseImponible).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col" class="text-center">
+                            @{ th = new TableHeaderSortable() { Property = "EstadoAlbaran", Display = Html.DisplayNameFor(f => f.EstadoAlbaran).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (VentaAlbaran item in Model)
+                    {
+                        <tr>
+                            <td class="text-center">@item.Serie</td>
+                            <td class="text-center">@item.CodigoAlbaran</td>
+                            <td class="text-center">@item.Fecha.ToShortDateString()</td>
+                            <td>@item.NombreCliente</td>
+                            <td>@item.NombreVendedor</td>
+                            <td class="text-right font-weight-bold text-nowrap">@item.BaseImponible.ToString("C")</td>
+                            <td class="text-center">@Html.DisplayFor(f => item.EstadoAlbaran)</td>
+                            <td class="text-right text-nowrap">
+                                <a class="text-info mx-2" href="@Url.Action("Edit", "VentasAlbaran", new { Id = item.Id })">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+                                @if (item.EstadoAlbaran != EstadoAlbaran.Facturado)
+                                {
+                                    <a class="text-danger mr-2" asp-controller="VentasAlbaran" asp-action="Delete" asp-route-id="@item.Id" onclick="return confirm('¿Está seguro de que quiere eliminar este registro?');">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <partial name="_Empty" model="string.Empty" />
+    }
+
+    <partial name="_Pager" model="pager" />
+
+</form>
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            $('#filter_CodigoCliente').select2({
+                dropdownAutoWidth: 'true',                
+                minimumInputLength: 3,
+                allowClear: true,
+                language: 'es',            
+                ajax: {
+                    url: "@Url.Action("GetClientesJSON", "Clients")",
+                    dataType: "json",
+                    type: "POST",
+                    params: {
+                        contentType:'application/json; chasert=utf-8'
+                    },
+                    data: function (term, page){
+                        return "{ 'q':'" + term.term + "', 'page_limit': 10}";
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    }
+                },
+                escapeMarkup: function(m){ return m;}
+            });
+        });
+    </script>
+}

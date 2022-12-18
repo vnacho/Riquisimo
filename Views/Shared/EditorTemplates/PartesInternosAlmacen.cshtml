@@ -1,0 +1,101 @@
+﻿@using Ferpuser.BLL.Filters
+@model PartesInternosAlmacen
+<div id="divPartePersonal">
+    @Html.HiddenFor(f => f.Id)
+    <div class="card mb-4 wow d-print-none">
+        <div class="form-row card-body">
+            <div class="form-group col-md-2">
+                @Html.LabelFor(f => f.fecha, new { @class = "small" })
+                @Html.EditorFor(f => f.fecha, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(f => f.fecha, "", new { @class = "text-danger small" })
+            </div>
+            <div class="form-group col-md-5">
+                @Html.LabelFor(f => f.ArticulosAlmacenId, new { @class = "small" })
+                @Html.DropDownListFor(f => f.ArticulosAlmacenId, new SelectList(ViewBag.ArticulosAlmacen, "Id", "Display"), "-Seleccionar-", new { @class = "form-control form-control-sm select2", onchange = "refreshCombo('ArticulosAlmacenId');" })
+                @Html.ValidationMessageFor(f => f.ArticulosAlmacenId, "", new { @class = "text-danger small" })
+            </div>
+            <div class="form-group col-md-5">
+                @Html.LabelFor(f => f.DestinoId, new { @class = "small" })
+                @Html.DropDownListFor(f => f.DestinoId, new SelectList(ViewBag.CentrosCoste, "Id", "Display"), "-Seleccionar-", new { @class = "form-control form-control-sm select2" })
+                @Html.ValidationMessageFor(f => f.DestinoId, "", new { @class = "text-danger small" })
+            </div>
+        </div>
+        <div class="form-row card-body">
+            @if (ViewBag.Tarifa != null)
+            {
+                <div class="form-group col-md-2">
+                    @Html.Label("etiqueta", ViewBag.Tarifa, new { @class = "small" })
+                    @Html.EditorFor(f => f.TariffTypeUnits, new { htmlAttributes = new { @class = "form-control", onchange = "refresh('TariffTypeUnits');" , onkeyup = "ReplaceDotByComma(this);"} })
+                    @Html.ValidationMessageFor(f => f.TariffTypeUnits, "", new { @class = "text-danger small" })
+                </div>
+            }
+            @if (ViewBag.Tarifa2 != null)
+            {
+                <div class="form-group col-md-2">
+                    @Html.Label("ETIQUETA",@ViewBag.Tarifa2, new { @class = "small" })
+                     @Html.EditorFor(f => f.TariffTypeUnits2, new { htmlAttributes = new { @class = "form-control", onchange = "refresh('TariffTypeUnits2');" , onkeyup = "ReplaceDotByComma(this);"} })
+                    @Html.ValidationMessageFor(f => f.TariffTypeUnits2, "", new { @class = "text-danger small" })
+                </div>
+            }
+            <div class="form-group col-md-2">
+                @Html.LabelFor(f => f.Price, new { @class = "small" })
+                @Html.EditorFor(f => f.Price, new { htmlAttributes = new { @class = "form-control",  onchange = "refresh();" , onkeyup = "ReplaceDotByComma(this);" } })
+                @Html.ValidationMessageFor(f => f.Price, "", new { @class = "text-danger small" })
+            </div>
+            <div class="form-group col-md-2">
+                @Html.LabelFor(f => f.Amount, new { @class = "small" })
+                <div class="input-group">
+                    @Html.TextBoxFor(f => f.Amount, new { @class = "form-control text-right", disabled = "disabled" })
+                    <div class="input-group-append">
+                        <span class="input-group-text">
+                            <i class="fas fa-euro-sign small" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                </div>
+                @Html.ValidationMessageFor(f => f.Amount, "", new { @class = "text-danger small" })
+            </div>
+        </div>
+            <script>
+            function refreshCombo(campo) {            
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("Refrescar", "PartesInternosAlmacen")",
+                    data: $('#form').serialize(),
+                    success: function (response) {
+                        $("#divPartePersonal").html(response);
+                        if (campo == 'ArticulosAlmacenId')
+                            $("#TariffTypeUnits").focus();
+                    },
+                    failure: function (response) {
+                        alert("Que paso?? " + response.responseText);
+                    },
+                    error: function (response) {
+                        alert("Hola?? " + response.responseText);
+                    }
+                });
+            }
+            function refresh(campo) {            
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("RefrescarPrecio", "PartesInternosAlmacen")",
+                    data: $('#form').serialize(),
+                    success: function (response) {
+                        $("#divPartePersonal").html(response);
+                        if (campo == 'TariffTypeUnits')
+                            $("#TariffTypeUnits2").focus();
+                        if (campo == 'TariffTypeUnits2')
+                            $("#Price").focus();
+                    },
+                    failure: function (response) {
+                        alert("Que paso?? " + response.responseText);
+                    },
+                    error: function (response) {
+                        alert("Hola?? " + response.responseText);
+                    }
+                });
+            }
+
+        
+        </script>
+    </div>
+</div>

@@ -1,0 +1,60 @@
+﻿@model Ferpuser.Models.Account
+
+@if (Context.User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_ADMINISTRACION)))
+{                    
+    <hr />
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <p class="text-info"><b>Permisos de usuario</b></p>
+        </div>
+        <div class="col-md-2">
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" asp-for="PermisoAdministracion">
+                <label class="custom-control-label" asp-for="PermisoAdministracion">@Html.DisplayNameFor(model => model.PermisoAdministracion)</label>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" asp-for="PermisoEventos">
+                <label class="custom-control-label" asp-for="PermisoEventos">@Html.DisplayNameFor(model => model.PermisoEventos)</label>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" asp-for="PermisoFacturacion">
+                <label class="custom-control-label" asp-for="PermisoFacturacion">@Html.DisplayNameFor(model => model.PermisoFacturacion)</label>
+            </div>
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" asp-for="PermisoVentas">
+                <label class="custom-control-label" asp-for="PermisoVentas">@Html.DisplayNameFor(model => model.PermisoVentas)</label>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" asp-for="PermisoCompras">
+                <label class="custom-control-label" asp-for="PermisoCompras">@Html.DisplayNameFor(model => model.PermisoCompras)</label>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" asp-for="PermisoControlPresupuestario">
+                <label class="custom-control-label" asp-for="PermisoControlPresupuestario">@Html.DisplayNameFor(model => model.PermisoControlPresupuestario)</label>
+            </div>
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" asp-for="PermisoControlAlmacen">
+                <label class="custom-control-label" asp-for="PermisoControlAlmacen">@Html.DisplayNameFor(model => model.PermisoControlAlmacen)</label>
+            </div>
+        </div>
+    </div>
+    <hr />
+}
+else
+{
+    @Html.HiddenFor(f => f.PermisoAdministracion)
+    @Html.HiddenFor(f => f.PermisoEventos)
+    @Html.HiddenFor(f => f.PermisoFacturacion)
+    @Html.HiddenFor(f => f.PermisoVentas)
+    @Html.HiddenFor(f => f.PermisoCompras)
+    @Html.HiddenFor(f => f.PermisoControlPresupuestario)
+    @Html.HiddenFor(f => f.PermisoControlAlmacen)
+}

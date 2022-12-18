@@ -1,0 +1,102 @@
+﻿@model Ferpuser.Models.Client
+@{
+    Layout = null;
+    bool existeSage = ViewData["ExisteSAGE"] == null ? 
+        Model != null && !string.IsNullOrWhiteSpace(Model.SageCode) : Convert.ToBoolean(ViewData["ExisteSAGE"]);
+
+    //10/11/2022. Jose Vicente indica que el mensaje El cliente existe en SAGE pero su código no se ha vinculado con el ERP ya no ha lugar
+    //bool clienteImportadoSAGE = existeSage && Model != null && !string.IsNullOrWhiteSpace(Model.SageCode);
+    bool clienteImportadoSAGE = true;
+}
+<input type="hidden" asp-for="Id" />
+
+<input hidden asp-for="Modified" class="form-control" />
+<input hidden asp-for="Deleted" class="form-control" />
+<input hidden asp-for="Created" class="form-control" />
+<input hidden asp-for="SageCode" class="form-control" />
+
+@if (!existeSage)
+{
+    <div class="col-12">
+        <small class="text-danger">            
+            No existe en SAGE
+        </small>
+    </div>
+}
+else if (!clienteImportadoSAGE)
+{
+<div class="col-12">
+    <small class="text-danger">
+        El cliente existe en SAGE pero su código no se ha vinculado con el ERP.
+    </small>
+</div>
+}
+
+@if (Model != null && Model.Deleted != null)
+{
+    <div class="col-12">
+        <small class="text-danger">
+            Este cliente ha sido borrado de la base de datos
+        </small>
+    </div>
+}
+@if (!ViewBag.Inline)
+{
+    <div class="col-md-3 form-group">
+        <label asp-for="NIF" class="control-label"></label>
+        <input id="Client_NIF" name="Client.NIF" asp-for="NIF" class="form-control" />
+        <span asp-validation-for="NIF" class="text-danger"></span>
+    </div>
+    <div class="col-md-3 form-group">
+        <label asp-for="BusinessName" class="control-label"></label>
+        <input id="Client_BusinessName" name="Client.BusinessName" asp-for="BusinessName" class="form-control" />
+        <span asp-validation-for="BusinessName" class="text-danger"></span>
+    </div>
+    <div class="col-md-3 form-group">
+        <label asp-for="Email" class="control-label"></label>
+        <input id="Client_Email" name="Client.Email" asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="col-md-3 form-group">
+        <label asp-for="Email2" class="control-label"></label>
+        <input id="Client_Email2" name="Client.Email2" asp-for="Email2" class="form-control" />
+        <span asp-validation-for="Email2" class="text-danger"></span>
+    </div>
+}
+else
+{
+    <div class="row">
+        <label asp-for="NIF" class="control-label col-xl-3"></label>
+        <div class="col-xl-6">
+            <input id="Client_NIF" name="Client.NIF" asp-for="NIF" class="form-control" readonly />
+        </div>
+        <div class="col-xl-2">
+            <a href="#" id="search-client" class="btn btn-sm btn-primary m-0 px-2 py-1">Buscar</a>
+        </div>
+        <span asp-validation-for="NIF" class="text-danger"></span>
+    </div>
+
+    <div class="row">
+        <label asp-for="BusinessName" class="control-label col-xl-3"></label>
+        <div class="col-xl-9">
+            <input id="Client_BusinessName" name="Client.BusinessName" asp-for="BusinessName" class="form-control" />
+        </div>
+        <span asp-validation-for="BusinessName" class="text-danger"></span>
+    </div>
+
+    <div class="row">
+        <label asp-for="Email" class="control-label col-xl-3">Email</label>
+        <div class="col-xl-9">
+            <input id="Client_Email" name="Client.Email" asp-for="Email" class="form-control" />
+        </div>
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="row">
+        <label asp-for="Email2" class="control-label col-xl-3">Email Alt. </label>
+        <div class="col-xl-9">
+            <input id="Client_Email2" name="Client.Email2" asp-for="Email2" class="form-control" />
+        </div>
+        <span asp-validation-for="Email2" class="text-danger"></span>
+    </div>
+}

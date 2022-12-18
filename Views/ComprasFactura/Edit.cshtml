@@ -1,0 +1,92 @@
+﻿@model CompraFactura
+
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+
+    string mensajeconfirmacion = "Los cambios que no hayan sido guardados no se exportarán. ¿Desea continuar?";
+    if (Model.Fecha.Year != ViewBag.EjercicioSeleccionado)
+    {
+        mensajeconfirmacion = $"El ejercicio seleccionado {ViewBag.EjercicioSeleccionado} no se corresponde a la fecha de la factura. ¿Desea continuar?";
+    }
+}
+
+<form method="post" id="form" enctype="multipart/form-data">
+
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Detalle de factura de compra
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+
+                <button type="submit" name="guardar" class="btn btn-secondary btn-sm text-nowrap">Guardar <i class="fas fa-save ml-2"></i></button>
+                <button type="submit" name="guardar" value="continuar" class="btn btn-secondary btn-sm text-nowrap">Guardar y continuar <i class="fas fa-save ml-2"></i></button>
+                @if (Model.EstadoFactura != EstadoFactura.TaspasadoSAGE)
+                {
+                    <a href="@Url.Action("Traspasar", "ComprasFactura", new { id = Model.Id, guardar = "nueva" })" class="btn btn-deep-orange btn-sm text-nowrap">
+                        Traspasar y Nueva<i class="fas fa-plus ml-2"></i>
+                    </a>
+                    <a href="@Url.Action("Traspasar", "ComprasFactura", new { id = Model.Id, guardar = "" })" class="btn btn-deep-orange btn-sm text-nowrap">
+                        Traspasar a SAGE<i class="fas fa-random ml-2"></i>
+                    </a>
+                    @*<a href="@Url.Action("Traspasar", "ComprasFactura", new { id = Model.Id })" class="btn btn-deep-orange btn-sm text-nowrap" onclick="return confirm('@mensajeconfirmacion');">
+                Traspasar a SAGE<i class="fas fa-random ml-2"></i>
+            </a>*@
+                }
+                <a asp-action="Index" class="btn btn-grey btn-sm text-nowrap">Volver <i class="fas fa-arrow-left ml-2"></i></a>
+            </div>
+        </div>
+    </div>
+
+    @Html.EditorForModel()
+
+</form>
+
+<partial name="_ComprasFacturaScript" />
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/lib/jqueryui/jqueryui/jquery-ui.min.css">
+}
+@section Scripts
+{
+    <script>
+        $('[data-toggle="tooltip"]').tooltip();
+        
+        function SubirDocumento() {
+            const inputFichero = document.getElementById('fileDocumentacion');
+            const inputID = document.getElementById('tablaID');
+            var datosForm = new FormData();
+            datosForm.append('tablaID', inputID.value);
+            datosForm.append('fileDocumentacion', inputFichero.files[0]);
+            fetch("/ComprasFactura/EnviarDocumento", {
+                method: 'POST',                
+                body: datosForm
+            }).then(res => {
+                console.log(res);
+                var data = res.json();
+                console.log(data);
+                if (!res.ok) {
+                    data.then(function (result) {
+                        console.log(result);
+                        alert("Lo sentimos, el fichero no se ha podido subir. " + result);
+                    });
+                    return;
+                }
+                //Recuperamos la promesa
+                data.then(function (result) {
+                    console.log(result);
+                    //$("#hfFicheros").val($("#hfFicheros").val() + result.Path + ';' );
+                    $("#tablaDocumentos").append('<tr><td><a class="text-info" download="' + result.FileName + '" href="Url.Content("' + result.Path + '")">' + result.FileName + '</a></td><td class="text-right"><a href="/ComprasFactura/BorrarDocumento?IdArchivo='+result.idDoc+'&amp;IdTabla='+inputID.value+'"onclick="return confirm(\'¿Está seguro de querer borrar el documento?\')"><i class="fas fa-times ml-2"></i></a></td></tr>');
+                });
+            });
+        }
+    </script>
+    <script src="~/lib/jqueryui/jqueryui/jquery-ui.min.js"></script>
+}
+
+<td class="text-right"><a href="/ComprasFactura/BorrarDocumento?IdArchivo=3991&amp;IdTabla=1352" onclick="return confirm('¿Está seguro de querer borrar el documento?')"><i class="fas fa-times ml-2"></i></a></td>

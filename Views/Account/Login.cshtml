@@ -1,0 +1,29 @@
+﻿@model Ferpuser.Controllers.LoginViewModel
+@{
+    ViewData["DefaultView"] = false;
+    ViewData["Title"] = "Iniciar sesión";
+}
+<div class="row m-5">
+    <div class="col-12 col-xl-4 offset-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">
+                    Iniciar sesión
+                </h4>
+                <form method="post">
+                    <div class="form-group">
+                        <label asp-for="Name" class="control-label"></label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Password" class="control-label"></label>
+                        <input asp-for="Password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <button class="btn btn-primary">Iniciar sesión</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

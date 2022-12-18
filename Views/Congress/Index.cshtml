@@ -1,0 +1,319 @@
+﻿@model Ferpuser.ViewModels.HomeViewModel
+@{
+    ViewData["Title"] = "Inicio";
+
+    ViewData["Back"] = false;
+    ViewData["Create"] = false;
+    ViewData["OneCard"] = false;
+    ViewData["DataTable"] = true;
+    ViewData["ImportClients"] = true;
+    ViewData["Swal"] = true;
+}
+<div class="row">
+
+    @if (Model.Unsent != null)
+    {
+        @if (Model.NewClients != null && Model.NewClients.Any())
+            {
+                <div class="col-12">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4 class="card-title">
+                                Clientes no sincronizados con SAGE
+                            </h4>
+                            <table class="table table-striped table-hover table-sm table-borderless">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.NewClients.FirstOrDefault().BusinessName)
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.NewClients.FirstOrDefault().NIF)
+                                        </th>
+                                        <th data-orderable="false"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var client in Model.NewClients)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @client.BusinessName
+                                            </td>
+                                            <td>
+                                                @client.NIF
+                                            </td>
+                                            <td class="text-right">
+                                                <a class="mx-2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </a>
+
+                                                <div class="dropdown-menu">
+                                                    @{
+                                                        var registrations = Model.NewClientRegistrations.FirstOrDefault(ncr => ncr.Key.Equals(client?.Id));
+                                                        if (registrations != null)
+                                                        {
+                                                            <h6 class="dropdown-header">Inscripciones</h6>
+                                                            foreach (var r in registrations)
+                                                            {
+                                                                <a class="dropdown-item" asp-action="Edit" asp-controller="Registrations" asp-route-id="@r.Id">@r.Registrant.FullName</a>
+                                                            }
+                                                        }
+                                                    }
+                                                    @{
+                                                        var accommodations = Model.NewClientAccommodations.FirstOrDefault(ncr => ncr.Key.Equals(client?.Id));
+                                                        if (accommodations != null)
+                                                        {
+                                                            if (registrations != null)
+                                                            {
+                                                                <div class="dropdown-divider"></div>
+                                                            }
+                                                            <h6 class="dropdown-header">Alojamientos</h6>
+                                                            foreach (var r in accommodations)
+                                                            {
+                                                                <a class="dropdown-item" asp-action="Edit" asp-controller="Accommodations" asp-route-id="@r.Id">@r.Registrant.FullName</a>
+                                                            }
+
+                                                        }
+
+                                                        <div class="dropdown-divider"></div>
+                                                        <a class="dropdown-item export" data-client-name="@client.BusinessName" data-client-id="@client.Id">
+                                                            Exportar
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        <div class="col-md-6">
+            @if (Model.Unreviewed.Any())
+            {
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            Inscripciones no revisadas
+                        </h4>
+                        <table class="table table-striped table-hover table-sm table-borderless">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Unreviewed.FirstOrDefault().Registrant)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Unreviewed.FirstOrDefault().Congress)
+                                    </th>
+                                    <th class="text-right">
+                                        @Html.DisplayNameFor(model => model.Unreviewed.FirstOrDefault().Fee)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Unreviewed.FirstOrDefault().Client)
+                                    </th>
+                                    <th data-orderable="false"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Unreviewed.OrderBy(m => m.Registrant.Surnames))
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Registrant.Surnames), @Html.DisplayFor(modelItem => item.Registrant.Name)
+                                        </td>
+
+                                        <td>
+                                            @item.Congress.Number @item.Congress.Name <span class="d-none">@item.Congress.Code</span>
+                                        </td>
+                                        <td class="text-right">
+                                            @Html.DisplayFor(modelItem => item.Fee)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Client.BusinessName)
+                                        </td>
+
+                                        <td class="text-right">
+                                            <a asp-action="Edit" asp-controller="Registrations" asp-route-id="@item.Id" asp-route-returnUrl="@Context.Request.Path" class="text-info mx-2">
+                                                <i class="fas fa-pencil-alt"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+            @if (Model.Unsent.Any())
+            {
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            Inscripciones no exportadas a SAGE
+                        </h4>
+                        <table class="table table-striped table-hover table-sm table-borderless">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Unsent.FirstOrDefault().Registrant)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Unsent.FirstOrDefault().Congress)
+                                    </th>
+                                    <th class="text-right">
+                                        @Html.DisplayNameFor(model => model.Unsent.FirstOrDefault().Fee)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Unsent.FirstOrDefault().Client)
+                                    </th>
+                                    <th data-orderable="false"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Unsent.OrderBy(m => m.Registrant.Surnames))
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Registrant.Surnames), @Html.DisplayFor(modelItem => item.Registrant.Name)
+                                        </td>
+
+                                        <td>
+                                            @item.Congress.Number @item.Congress.Name <span class="d-none">@item.Congress.Code</span>
+                                        </td>
+                                        <td class="text-right">
+                                            @Html.DisplayFor(modelItem => item.Fee)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Client.BusinessName)
+                                        </td>
+
+                                        <td class="text-right">
+                                            <a asp-action="Edit" asp-controller="Registrations" asp-route-id="@item.Id" asp-route-returnUrl="@Context.Request.Path" class="text-info mx-2">
+                                                <i class="fas fa-pencil-alt"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="col-md-6">
+            @if (Model.UnreviewedAcc.Any())
+            {
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            Alojamientos no revisados
+                        </h4>
+                        <table class="table table-striped table-hover table-sm table-borderless">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.UnreviewedAcc.FirstOrDefault().Registrant)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.UnreviewedAcc.FirstOrDefault().Congress)
+                                    </th>
+                                    <th class="text-right">
+                                        @Html.DisplayNameFor(model => model.UnreviewedAcc.FirstOrDefault().Fee)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.UnreviewedAcc.FirstOrDefault().Client)
+                                    </th>
+                                    <th data-orderable="false"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.UnreviewedAcc.OrderBy(m => m.Registrant.Surnames))
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Registrant.Surnames), @Html.DisplayFor(modelItem => item.Registrant.Name)
+                                        </td>
+
+                                        <td>
+                                            @item.Congress.Number @item.Congress.Name <span class="d-none">@item.Congress.Code</span>
+                                        </td>
+                                        <td class="text-right">
+                                            @Html.DisplayFor(modelItem => item.Fee)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Client.BusinessName)
+                                        </td>
+
+                                        <td class="text-right">
+                                            <a asp-action="Edit" asp-controller="Accommodations" asp-route-id="@item.Id" asp-route-returnUrl="@Context.Request.Path" class="text-info mx-2">
+                                                <i class="fas fa-pencil-alt"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+            @if (Model.UnsentAcc.Any())
+            {
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            Alojamientos no exportados a SAGE
+                        </h4>
+                        <table class="table table-striped table-hover table-sm table-borderless">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.UnsentAcc.FirstOrDefault().Registrant)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.UnsentAcc.FirstOrDefault().Congress)
+                                    </th>
+                                    <th class="text-right">
+                                        @Html.DisplayNameFor(model => model.UnsentAcc.FirstOrDefault().Fee)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.UnsentAcc.FirstOrDefault().Client)
+                                    </th>
+                                    <th data-orderable="false"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.UnsentAcc.OrderBy(m => m.Registrant.Surnames.ToLower()))
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Registrant.Surnames), @Html.DisplayFor(modelItem => item.Registrant.Name)
+                                        </td>
+
+                                        <td>
+                                            @item.Congress.Number @item.Congress.Name <span class="d-none">@item.Congress.Code</span>
+                                        </td>
+                                        <td class="text-right">
+                                            @Html.DisplayFor(modelItem => item.Fee)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Client.BusinessName)
+                                        </td>
+
+                                        <td class="text-right">
+                                            <a asp-action="Edit" asp-controller="Accomodations" asp-route-id="@item.Id" asp-route-returnUrl="@Context.Request.Path" class="text-info mx-2">
+                                                <i class="fas fa-pencil-alt"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

@@ -1,0 +1,40 @@
+﻿@model string 
+
+<div class="modal-header">
+    <h5 class="modal-title" id="MailModalLabel"><i class="fas fa-envelope mr-2 text-muted"></i>Enviar mail</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <div class="form-group">
+        <label for="Mails">Introduzca direcciones de correo electrónico separadas por ;</label>
+        <input type="text" value="@Model" class="form-control form-control-sm" id="Mails" placeholder="Introduzca direcciones de correo electrónico separadas por ;">
+    </div>
+    <div id='divMailBody'>
+        <div class='main'><p>Estimado cliente,</p><p>Adjuntamos pedido</p><p>Atentamente,</p></div>
+    </div>
+    <br />
+    <div class="form-group">
+        <label for="Fichero">Adjuntar otros ficheros</label>
+        <input type="file" class="form-control form-control-sm" id="Fichero" name="Fichero" onchange="SubirFichero()" placeholder="Introduzca direcciones de correo electrónico separadas por ;">
+        <input type="hidden" id="hfFicheros" name="hfFicheros" />
+        <br />
+        <ul id="ulFicheros" class="small"></ul>
+    </div>
+</div>
+<div class="modal-footer">
+    <div id="divBotonera">
+        <button type="button" id="btnEnviarMail" name="btnEnviarMail" class="btn btn-sm btn-deep-orange text-nowrap">
+            Enviar <i class="fas fa-envelope ml-2"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-grey text-nowrap" data-dismiss="modal">
+            Cancelar <i class="fas fa-times ml-2"></i>
+        </button>
+    </div>
+
+    <div id="divSpinner" class="d-none">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span class="small">Cargando...</span>
+    </div>
+</div>

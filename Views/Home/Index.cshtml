@@ -1,0 +1,126 @@
+﻿@inject Microsoft.Extensions.Options.IOptions<AppSettings> AppSettings
+@{
+    ViewData["Title"] = $"{AppSettings.Value.Empresa} - {AppSettings.Value.DescripcionAplicacion}";
+    ViewData["OneCard"] = false;
+    ViewData["Create"] = false;
+    ViewData["Back"] = false;
+}
+
+<div class="row justify-content-center">
+    @if (User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_EVENTOS)))
+    {
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h4 class="card-title">Mantenimiento de Eventos</h4>
+                    <a href="/Congresses" class="btn btn-primary">Ir a Eventos</a>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="col-md-3"></div>
+    }
+@*    @if (User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_FACTURACION)))
+    {
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h4 class="card-title">Facturación de ventas</h4>
+                    <a href="/Expenses" class="btn btn-primary">Ir a ventas</a>
+                </div>
+            </div>
+        </div>
+    }*@
+    @if (User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_VENTAS)))
+    {
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h4 class="card-title">Facturación de ventas</h4>
+                    <a href="@Url.Action("Index","VentasFactura")" class="btn btn-primary">Ir a ventas</a>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="col-md-3"></div>
+    }
+    @if (User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_COMPRAS)))
+    {
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h4 class="card-title">Facturación de compras</h4>
+                    <a href="@Url.Action("Index","ComprasFactura")" class="btn btn-primary">Ir a compras</a>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="col-md-3"></div>
+    }
+    @if (User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_CONTROL_PRESUPUESTARIO)))
+    {
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h4 class="card-title">Control Casa</h4>
+                    <a href="@Url.Action("Index","Tikects")" class="btn btn-primary">Gastos</a>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="col-md-3"></div>
+    }
+    @if (User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERFIL_USUARIO_CLIENTE)))
+    {
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h4 class="card-title">Inscripciones pagadas/pendientes</h4>
+                    <a href="@Url.Action("Index","Inscripciones")" class="btn btn-primary">Inscripciones</a>
+                </div>
+            </div>
+        </div>
+        @*<div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h4 class="card-title">Alojamientos pagados/pendientes</h4>
+                    <a href="@Url.Action("AccommodationPaidPending","Reports")" class="btn btn-primary">Alojamientos pagados/pendientes</a>
+                </div>
+            </div>
+        </div>*@
+    }
+    else
+    {
+        <div class="col-md-3"></div>
+    }
+
+</div>
+
+<div class="row mt-3 justify-content-center">
+    <div class="col-md-3"></div>
+    <div class="col-md-3"></div>
+    <div class="col-md-3"></div>
+    @if (User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_CONTROL_ALMACEN)))
+    {
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h4 class="card-title">Almacenes</h4>
+                    <a href="@Url.Action("Index","PartesInternosAlmacen")" class="btn btn-primary">Ir a control almacenes</a>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="col-md-3"></div>
+    }
+</div>

@@ -1,0 +1,182 @@
+﻿@using Ferpuser.BLL.Filters 
+@model List<Congress>
+
+@{
+    ViewData["Title"] = "Sincronización web";
+    ViewData["Back"] = false;
+    ViewData["Create"] = false;
+    ViewData["Select2"] = true;
+
+    CongressFilter filter = new CongressFilter();
+}
+
+<div class="row mb-4">
+    <div class="col">        
+        <button id="sync-all-btn" class="btn btn-outline-primary btn-sm">
+            Sincronizar todo
+        </button>        
+    </div>
+    <div class="col-6 text-right">       
+        <form method="post">
+            @Html.DropDownListFor(model => filter.Number, new SelectList(ViewBag.Congress, "Number", "DisplayName"), "-Seleccionar-", new { @class = "form-control select2 text-left", onchange = "this.form.submit()" })
+            @Html.ValidationMessageFor(f => filter.Number, "", new { @class = "text-danger small" })
+        </form>
+    </div>
+</div>
+
+<div class="list-group list-group-flush">
+    @foreach (var c in Model.OrderBy(c => c.DisplayName))
+    {
+        <div class="list-group-item align-items-center justify-content-start">
+            <div id="@c.Id" class="row import-container">
+                <div class="col-4">
+                    @c.DisplayName
+                </div>
+                <div class="col-4">
+                    @if (!string.IsNullOrWhiteSpace(c.NewConnectionString) && !string.IsNullOrWhiteSpace(c.DatabasePrefix))
+                    {
+                        <button data-id="@c.Id" class="btn btn-outline-primary btn-sm import-btn">
+                            Sincronizar
+                        </button>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger mx-2">
+                            Faltan datos de conexión
+                        </span>
+                    }
+
+                </div>
+                <div class="col-8 d-none">
+                    Importando
+                </div>
+                <div class="col-8 d-none">
+                    <span class="badge badge-success">
+                        Sincronizado
+                    </span>
+                </div>
+                <div class="col-8 d-none">
+                    <span class="badge badge-danger mx-2">
+                        Error al sincronizar
+                    </span>
+                </div>
+                <div class="col-12 d-none">
+                    <div class="progress mt-4">
+                        <div class="progress-bar progress-bar-indeterminate" role="progressbar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts
+{
+    <script>
+        var isImporting = false;
+        var importIdx = -1;
+        var importCongress = function (id, trigger) {
+            if ($("#" + id).hasClass("imported")) {
+                if (trigger) {
+                    $(document).trigger("importFinished");
+                }
+                return;
+            }
+
+            isImporting = true;
+            $($("#" + id).children()[2]).toggleClass("d-none");
+            $($("#" + id).children()[5]).toggleClass("d-none");
+            $($("#" + id).children()[1]).toggleClass("d-none");
+            
+            ga('send', 'pageview', '/Sync/SetCongress' + id);
+            fetch("/Sync/SetCongress/" + id).then(res => {
+                if (!res.ok) {
+                    isImporting = false;
+                    $($("#" + id).children()[2]).toggleClass("d-none");
+                    if (trigger) {
+                        $(document).trigger("importFinished");
+                    }
+                    return;
+                }
+                fetch("/FerpuserTransfer/FromWeb/" + id).then(res => {
+                    if (!res.ok) {
+                        console.log(res);
+                        isImporting = false;
+                        $($("#" + id).children()[2]).addClass("d-none");
+                        $($("#" + id).children()[4]).removeClass("d-none");
+                        $($("#" + id).children()[5]).addClass("d-none");
+                        if (trigger) {
+                            $(document).trigger("importFinished");
+                        }
+                        return res.text();
+                    }
+
+                    //Imported ok
+                    $("#" + id).addClass("imported");
+                    $($("#" + id).children()[2]).addClass("d-none");
+                    $($("#" + id).children()[3]).removeClass("d-none");
+                    $($("#" + id).children()[5]).addClass("d-none");
+                    if (trigger) {
+                        $(document).trigger("importFinished");
+                    }
+                    isImporting = false;
+
+                }).then(e => {
+                    if (e) {
+                        $($("#" + id).children()[4]).append(e);
+                    }
+                }).catch(e => {
+                    console.error(e);
+                    isImporting = false;
+                    $($("#" + id).children()[2]).addClass("d-none");
+                    $($("#" + id).children()[4]).removeClass("d-none");
+                    $($("#" + id).children()[5]).addClass("d-none");
+                    if (trigger) {
+                        $(document).trigger("importFinished");
+                    }
+                });
+            }).catch(e => {
+                console.error(e);
+                isImporting = false;
+                $($("#" + id).children()[2]).addClass("d-none");
+                $($("#" + id).children()[4]).removeClass("d-none");
+                $($("#" + id).children()[5]).addClass("d-none");
+                if (trigger) {
+                    $(document).trigger("importFinished");
+                }
+            });
+        }
+
+        var importNextCongress = function () {
+            importIdx++;
+            if (importIdx >= $(".import-container").length) {
+                return;
+            }
+            importCongress($(".import-container")[importIdx].id, true);
+        }
+
+        $(e => {
+            $(document).on("importFinished", function () {
+                importNextCongress();
+            });
+
+            $(".import-btn").click(e => {
+                e.preventDefault();
+                if (isImporting) {
+                    return;
+                }
+                var id = $(e.target).attr("data-id");
+                importCongress(id, false);
+            });
+
+            $("#sync-all-btn").click(e => {
+                e.preventDefault();
+                if (isImporting) {
+                    return;
+                }
+                $(document).trigger("importFinished");
+            });
+        });
+    </script>
+
+}

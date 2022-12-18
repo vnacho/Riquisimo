@@ -1,0 +1,180 @@
+﻿@using Ferpuser.Controllers
+@model InscripcionesViewModel
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+    ViewData["Report"] = true;
+
+    List<KeyValuePair<bool, string>> ListFiltroEstadoPago = new List<KeyValuePair<bool, string>>();
+    ListFiltroEstadoPago.Add(new KeyValuePair<bool, string>(true, "Pagadas"));
+    ListFiltroEstadoPago.Add(new KeyValuePair<bool, string>(false, "Pendientes"));
+
+    List<KeyValuePair<bool, string>> ListFiltroFacturacion = new List<KeyValuePair<bool, string>>();
+    ListFiltroFacturacion.Add(new KeyValuePair<bool, string>(true, "Mostrar 'Sólo facturación'"));
+    ListFiltroFacturacion.Add(new KeyValuePair<bool, string>(false, "Excluir 'Sólo facturación'"));
+}
+
+<form method="post">
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Inscripciones
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                @if (Model != null && Model.Items.Any())
+                {
+                    <button type="button" onclick="window.print()" class="btn btn-grey btn-sm text-nowrap">
+                        Imprimir <i class="fas fa-print ml-2"></i>
+                    </button>
+                    <button type="submit" class="btn btn-grey btn-sm text-nowrap" asp-action="ExportCsv" asp-controller="Inscripciones">
+                        Exportar <i class="fas fa-file-csv ml-2"></i>
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row d-print-none">
+        <div class="form-group col-md-5">
+            @Html.LabelFor(f => f.Filter.CongressId, new { @class = "small" })
+            @Html.DropDownListFor(f => f.Filter.CongressId, new SelectList(ViewBag.Eventos, "Id", "DisplayName"), "-Seleccionar-", new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(f => f.Filter.CongressId, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.Filter.EstadoPagada, new { @class = "small" })
+            @Html.DropDownListFor(f => f.Filter.EstadoPagada, new SelectList(ListFiltroEstadoPago, "Key", "Value"), "-Seleccionar-", new { @class = "form-control select2" })          
+            @Html.ValidationMessageFor(f => f.Filter.EstadoPagada, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.Filter.FiltroFacturacion, new { @class = "small" })
+            @Html.DropDownListFor(f => f.Filter.FiltroFacturacion, new SelectList(ListFiltroFacturacion, "Key", "Value"), "-Seleccionar-", new { @class = "form-control select2" })          
+            @Html.ValidationMessageFor(f => f.Filter.FiltroFacturacion, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3 text-right">
+            <br />
+            <button type="submit" id="btnFiltrar" class="btn btn-sm btn-blue-grey">Filtrar <i class="fas fa-search ml-2"></i></button>
+            <a href="@Url.Action("Index","Inscripciones")" class="btn btn-sm btn-grey">Limpiar <i class="fas fa-eraser ml-2"></i></a>
+        </div>
+    </div>
+</form>
+
+@if (Model != null && Model.Items.Any())
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                @if (Model.Items.GroupBy(f => f.CongressId).Count() == 1)
+                {
+
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <img src="@Model.Items.First().Congress.LogoBase64" class="w-50" />
+                        <img src="~/img/sanicongress.jpg" class="w-25" />
+                    </div>
+                }
+                <div class="col-12 text-center">
+                    <h1 class="mb-2 mb-sm-0 pt-1 h4">
+                        @ViewData["Title"]
+                    </h1>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr class="font-larger">
+                                <th>
+                                    @Html.DisplayNameFor(f => f.Items.First().Registrant.NIF)
+                                </th>                                
+                                <th>
+                                    @Html.DisplayNameFor(f => f.Items.First().Registrant.Surnames)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(f => f.Items.First().Registrant.Name)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(f => f.Items.First().Registrant.Especialidad)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(f => f.Items.First().Registrant.Location.Province)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(f => f.Items.First().Registrant.Email)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(f => f.Items.First().RegistrationType)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(f => f.Items.First().InvoiceNumber)
+                                </th>
+                                <th class="text-right">
+                                    @Html.DisplayNameFor(f => f.Items.First().Fee)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(f => f.Items.First().Registrant.Laboratorio)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(f => f.Items.First().Client)
+                                </th>
+                                <th class="text-center">
+                                    @Html.DisplayNameFor(f => f.Items.First().Paid)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(f => item.Registrant.NIF)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(f => item.Registrant.Surnames)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(f => item.Registrant.Treatment.Name) @Html.DisplayFor(f => item.Registrant.Name)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(f => item.Registrant.Especialidad)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(f => item.Registrant.Location.Province)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(f => item.Registrant.Email)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(f => item.RegistrationType.Name)
+                                    </td>                                    
+                                    <td>
+                                        @Html.DisplayFor(f => item.InvoiceNumber)
+                                    </td>
+                                    <td class="text-right">
+                                        @Html.DisplayFor(f => item.Fee)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(f => item.Registrant.Laboratorio)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(f => item.Client.BusinessName)
+                                    </td>
+                                    <td class="text-center">
+                                        @Html.DisplayFor(f => item.Paid)
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer text-right d-flex justify-content-end">
+                    <span class="mx-5">
+                        Inscripciones: @Model.Items.Count()
+                    </span>
+                    <span>
+                        Total: @Model.Items.Sum(m => m.Fee)€
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+}

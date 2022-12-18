@@ -1,0 +1,47 @@
+﻿@model Ferpuser.Models.ViewModels.RestauracionEncuentrosViewModel
+@{
+    Layout = "_LayoutRestauracion";
+    string emptyMessage = "Actualmente no hay restauraciones programadas.";
+}
+
+<partial name="_CabeceraRestauracion" model="@Model.Congress" />
+@Html.HiddenFor(f => f.NIF)
+
+<h4>Listado de restauración</h4>
+<p>
+    <b>@Model.Congress.Name</b><br />
+</p>
+
+@if (Model.Encuentros == null || !Model.Encuentros.Any())
+{
+    <partial name="_Empty" model="emptyMessage"></partial>
+}
+else
+{
+    <form method="post">
+        <div class="row">                
+            @foreach (var encuentro in Model.Encuentros)
+            {
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h4 class="text-muted">@encuentro.Nombre</h4>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                <b>Fecha:</b> @encuentro.Fecha.ToShortDateString() @encuentro.Fecha.ToString("HH:mm")<br />
+                                <b>Lugar:</b> @encuentro.Lugar<br />
+                                @*<b>Plazas libres:</b> @encuentro.Libres*@
+                            </p>
+                            <p>
+                                <a asp-action="ReservaSeleccionada" asp-route-CongressId="@Model.CongressId" asp-route-EncuentroId="@encuentro.Id" class="btn btn-sm btn-info">
+                                    Reservar<i class="fas fa-check-circle ml-2"></i>
+                                </a>  
+                            </p>
+                        </div>
+                    </div>                
+                </div>
+            }          
+        </div>        
+    </form>
+}

@@ -1,0 +1,19 @@
+﻿@*Requiere dropify (js, css, fonts)*@
+@model string
+@{
+    string name = Html.NameFor(m => m); //Obtenemos el identificador del elemento html
+    string inputFileName = $"_{name}";
+}
+
+@Html.HiddenFor(f => f)
+
+@if (ViewData["ImageUrl"] != null && !string.IsNullOrWhiteSpace((string)ViewData["ImageUrl"]))
+{
+    <input name="@inputFileName" type="file" class="dropify" data-allowed-file-extensions="jpg png" data-default-file="@Url.Content((string)ViewData["FileUrl"])" />
+}
+else
+{
+    <input name="@inputFileName" type="file" class="dropify" data-allowed-file-extensions="jpg png" />
+}
+
+

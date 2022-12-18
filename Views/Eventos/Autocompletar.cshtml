@@ -1,0 +1,29 @@
+﻿<input type="text" id="AutocompletarEvento" name="AutocompletarEvento" value="@ViewBag.LineaEventoNombre" placeholder="Escriba algo" class="form-control form-control-sm" />
+
+<script>
+    $(function () {
+        $("#AutocompletarEvento").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "@Url.Action("BuscadorJson", "Eventos")",
+                    dataType: "json",
+                    data: {
+                        query: request.term
+                    },
+                    success: function (data) {
+                        response($.parseJSON(data));
+                    },
+                    error: function (xhr, status, error) {
+                        var err = eval("(" + xhr.responseText + ")" + "(" + status + ")" + "(" + error + ")");
+                        alert(err);
+                    }
+                });
+            },
+            select: function (event, ui) {
+                AutocompletarEventoSeleccionado(ui.item.value)
+                $("#AutocompletarEvento").val(ui.item.label);
+                return false;
+            }
+        });
+    });    
+</script>

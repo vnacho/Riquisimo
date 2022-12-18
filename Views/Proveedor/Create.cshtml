@@ -1,0 +1,470 @@
+﻿@model Proveedor
+
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+    ViewData["Swal"] = true;
+    
+    CompraFactura factura = ViewBag.factura;
+    CompraPedido pedido = ViewBag.pedido;
+
+    List<KeyValuePair<bool, string>> listaRetencion = new List<KeyValuePair<bool, string>>();
+    listaRetencion.Add(new KeyValuePair<bool, string>(true, "Sobre la base"));
+    listaRetencion.Add(new KeyValuePair<bool, string>(false, "Sobre total factura"));
+   
+}
+
+<form method="post" id="form">
+    <input type="hidden" name="origen" id="origen" value="@ViewData["origen"].ToString()" />
+    
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Nuevo proveedor
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                <button type="submit" name="guardar" class="btn btn-secondary btn-sm text-nowrap">Guardar <i class="fas fa-save ml-2"></i></button>
+                @if (ViewData["origen"].ToString()=="proveedor"){
+                    <a asp-action="Index" class="btn btn-grey btn-sm text-nowrap">Volver <i class="fas fa-arrow-left ml-2"></i></a>
+                }
+                else{
+                    <a asp-action="Volver" asp-route-origen="@ViewData["origen"].ToString()" class="btn btn-grey btn-sm text-nowrap">Volver <i class="fas fa-arrow-left ml-2"></i></a>
+                }
+            </div>
+        </div>
+    </div>
+
+@*    @Html.EditorForModel()*@    
+    <div id="proveedor-container" class="card mb-4 wow d-print-none">
+        <div class="form-row card-body">
+           <div class="row col-md-12">
+                <div class="form-group col-md-1">
+                    @Html.LabelFor(f => f.CUENTACONTABLE, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.CUENTACONTABLE, new { htmlAttributes = new { @class = "form-control  ", @readonly = "true"}})
+                    @Html.ValidationMessageFor(f => f.CUENTACONTABLE, "", new { @class = "text-danger small" })
+                </div>
+                <div class="col-md-1 form-group">
+                    <label asp-for="NIF" class="control-label"></label>
+                    <input id="NIF" name="NIF" asp-for="NIF" class="form-control " />
+                    <span asp-validation-for="NIF" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.NOMBRECOMERCIAL, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.NOMBRECOMERCIAL, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.NOMBRECOMERCIAL, "", new { @class = "text-danger small" })
+                </div>
+                <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.RAZONSOCIAL, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.RAZONSOCIAL, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.RAZONSOCIAL, "", new { @class = "text-danger small" })
+                </div>
+            </div>
+           <div class="row col-md-12">
+                <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.DIRECCION, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.DIRECCION, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.DIRECCION, "", new { @class = "text-danger small" })
+                </div>
+                <div class="form-group col-md-2">
+                    @Html.LabelFor(f => f.CODPOST, new { @class = "control-label" })
+                    @Html.DropDownListFor(f => f.CODPOST, new SelectList(ViewBag.CodPost, "CODIGO",  "CODIGO"), "-Seleccionar-", new { @class = "form-control  select2-postal", id="idCODPOST", name="idCODPOST" })
+                    @Html.ValidationMessageFor(f => f.CODPOST, "", new { @class = "text-danger small" })
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="LOCALIDAD" class="control-label"></label>
+                    <input asp-for="LOCALIDAD" class="form-control" />
+                    <span asp-validation-for="LOCALIDAD" class="text-danger"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="PROVINCIA" class="control-label"></label>
+                    <input asp-for="PROVINCIA" class="form-control" />
+                    <span asp-validation-for="PROVINCIA" class="text-danger"></span>
+                </div>
+            </div>
+           <div class="row col-md-12">
+                <div class="form-group col-md-2">
+                    @Html.LabelFor(f => f.PAIS, new { @class = "control-label" })
+                    @Html.DropDownListFor(f => f.PAIS, new SelectList(ViewBag.Paises, "CODIGO", "NOMBRE", Model == null ? null : Model.PAIS), "-Seleccionar-", new { @class = "form-control  select2-otros" })
+                    @Html.ValidationMessageFor(f => f.PAIS, "", new { @class = "text-danger small" })
+                </div>        
+            </div>        
+           <div class="row col-md-12">
+                <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.PERSONACONTACTO, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.PERSONACONTACTO, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.PERSONACONTACTO, "", new { @class = "text-danger small" })
+                </div>
+                <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.CARGO, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.CARGO, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.CARGO, "", new { @class = "text-danger small" })
+                </div>
+            </div>
+           <div class="row col-md-12">
+                <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.EMAIL, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.EMAIL, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.EMAIL, "", new { @class = "text-danger small" })
+                </div>
+                <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.TELEFONO, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.TELEFONO, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.TELEFONO, "", new { @class = "text-danger small" })
+                </div>
+                <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.TELEFONO2, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.TELEFONO2, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.TELEFONO2, "", new { @class = "text-danger small" })
+                </div>
+                <div class="w-100"></div>
+                <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.PAGINAWEB, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.PAGINAWEB, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.PAGINAWEB, "", new { @class = "text-danger small" })
+                </div>
+            </div>
+            <div class="row col-md-12">
+                <div class="form-group col-md-2">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" asp-for="TIPO_RET">
+                        <label class="custom-control-label" asp-for="TIPO_RET">@Html.DisplayNameFor(model => model.TIPO_RET)</label>
+                    </div>
+                </div>
+            </div>
+            <div class="w-100"></div>
+            <div class="row col-md-12" id="grupoRetencion" aria-hidden="true">
+                <div class="form-group col-md-2">
+                    @Html.LabelFor(f => f.MODO_RET, new { @class = "control-label" })
+                    @Html.DropDownListFor(f => f.MODO_RET, new SelectList(listaRetencion, "Key", "Value", Model == null ? false : Model.MODO_RET), "-Seleccionar-", new { @class = "form-control select2-otros" })      
+                    @Html.ValidationMessageFor(f => f.MODO_RET, "", new { @class = "text-danger small" })
+                </div>
+                <div class="form-group col-md-2">
+                    @Html.LabelFor(f => f.RETENCION, new { @class = "control-label" })
+                    @Html.DropDownListFor(f => f.RETENCION, new SelectList(ViewBag.TipoRet,"CODIGO", "NOMBRE", Model == null ? "" : Model.RETENCION), "-Seleccionar-", new { @class = "form-control select2-otros" })      
+                    @Html.ValidationMessageFor(f => f.RETENCION, "", new { @class = "text-danger small" })
+                </div>
+            </div>
+            <div class="row col-md-12">
+                <div class="form-group col-md-2">
+                    @Html.LabelFor(f => f.FORMAPAGO, new { @class = "control-label" })
+                    @Html.DropDownListFor(f => f.FORMAPAGO, new SelectList(ViewBag.FPago,"Codigo", "Nombre", Model == null ? "" : Model.FORMAPAGO), "-Seleccionar-", new { @class = "form-control select2-otros" })      
+                    @Html.ValidationMessageFor(f => f.FORMAPAGO, "", new { @class = "text-danger small" })
+                </div>
+                <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.COMISIONES, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.COMISIONES, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.COMISIONES, "", new { @class = "text-danger small" })
+                </div>        
+            </div>        
+            <div class="form-group col-md-12">
+                @Html.LabelFor(f => f.OBSERVACIONES, new { @class = "control-label" })
+                @Html.EditorFor(f => f.OBSERVACIONES, new { htmlAttributes = new { @class = "form-control " } })
+                @Html.ValidationMessageFor(f => f.OBSERVACIONES, "", new { @class = "text-danger small" })
+            </div>
+        </div>
+    </div>
+
+</form>
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/lib/jqueryui/jqueryui/jquery-ui.min.css">
+}
+
+@section Scripts {
+    <script src="~/lib/jqueryui/jqueryui/jquery-ui.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $('[data-toggle="tooltip"]').tooltip();
+
+        var lastCode = "";
+        $(document).ready(function () {
+
+            $("#TIPO_RET").click(function () {
+                if($(this).is(':checked'))
+                    $("#grupoRetencion").show();
+                else
+                    $('#grupoRetencion').hide();
+            });
+
+            if($("#TIPO_RET").is(':checked'))
+                $("#grupoRetencion").show();
+            else
+                $('#grupoRetencion').hide();
+
+            Combos();
+
+            $("body").on("keyup", "#NIF", e => {
+                console.log($("#NIF").val());
+                if ($("#NIF").val().length == 0) {
+                    return;
+                }
+                if (lastCode == $("#NIF").val().trim()) {
+                    return;
+                }
+                lastCode = $("#NIF").val().trim();
+                
+                ga('send', 'pageview', '/Proveedor/ProveedorNIFExistsCreate/' + $("#NIF").val());
+
+                fetch("/Proveedor/ProveedorNIFExistsCreate/?NIF=" + $("#NIF").val())
+                    .then(e => {
+                        return e.text()
+                    }).then(id => {
+                        if (id == "borrar"){
+                            Swal.fire({
+                                title: "Ya existe un proveedor con ese NIF ",
+                                text: "No se puede usar.",
+                                showCancelButton: false,
+                                confirmButtonText: "Aceptar"
+                            }).then(e => {
+                                $('#NIF').val("");
+                                $('#NIF').text("");
+                                $('#NIF').focus();
+                            });
+                        }
+                        if (id == "false"){
+
+                        }
+                        if (id != "false" && id != "borrar") {
+                            var json = $.parseJSON(id);
+                            Swal.fire({
+                                title: "Ya existe un cliente con ese NIF",
+                                text: "¿Importar los datos desde SAGE?",
+                                showCancelButton: true,
+                                confirmButtonText: "Importar",
+                                cancelButtonText: "Cancelar"
+                            }).then(e => {
+                                if (e.value) {
+                                    $('#CUENTACONTABLE').val(json.CUENTACONTABLE);
+                                    $('#NIF').val(json.NIF);
+                                    $('#NIF').attr('readonly',true);
+                                    $('#RAZONSOCIAL').val(json.RAZONSOCIAL);
+                                    $('#RAZONSOCIAL').attr('readonly',true);
+                                    $('#NOMBRECOMERCIAL').val(json.NOMBRECOMERCIAL);
+                                    $('#NOMBRECOMERCIAL').attr('readonly',true);
+                                    $('#DIRECCION').val(json.DIRECCION);
+                                    $('#DIRECCION').attr('readonly',true)
+                                    if (json.CODPOST=="")
+                                        json.CODPOST="0"
+                                    var data = {
+                                        id: json.CODPOST,
+                                        text: json.CODPOST + " " + json.LOCALIDAD + "->" + json.PROVINCIA
+                                    };
+                                    var newOption = new Option(data.text, data.id, true, true);
+                                    $('#idCODPOST').append(newOption);
+                                    $('#idCODPOST').trigger('change');
+                                    $('#idCODPOST').prop("disabled", true);
+                                    $('#PAIS').val(json.PAIS).trigger('change');
+                                    if (json.PAIS!="")
+                                        $('#PAIS').attr("disabled", true);
+    
+                                    $('#FORMAPAGO').val(json.FORMAPAGO).trigger('change');
+                                    $('#FORMAPAGO').attr("disabled", true);
+                                    $('#RETENCION').val(json.RETENCION).trigger('change');
+                                    $('#RETENCION').attr("disabled", true);
+
+                                    if (json.MODO_RET)
+                                        $('#MODO_RET').val('True').trigger('change');
+                                    else
+                                        $('#MODO_RET').val('False').trigger('change');
+                                        
+                                    $('#MODO_RET').attr("disabled", true);
+
+                                    $('<input>').attr({
+                                        type: 'hidden',
+                                        id: 'PAIS',
+                                        name: 'PAIS',
+                                        value: json.PAIS
+                                    }).appendTo('form');
+                                    //$('<input>').attr({
+                                    //    type: 'hidden',
+                                    //    id: 'CODPOST',
+                                    //    name: 'CODPOST',
+                                    //    value: json.CODPOST
+                                    //}).appendTo('form');
+                                    $('<input>').attr({
+                                        type: 'hidden',
+                                        id: 'FORMAPAGO',
+                                        name: 'FORMAPAGO',
+                                        value: json.FORMAPAGO
+                                    }).appendTo('form');
+                                    $('<input>').attr({
+                                        type: 'hidden',
+                                        id: 'RETENCION',
+                                        name: 'RETENCION',
+                                        value: json.RETENCION
+                                    }).appendTo('form');
+                                    $('<input>').attr({
+                                        type: 'hidden',
+                                        id: 'MODO_RET',
+                                        name: 'MODO_RET',
+                                        value: json.MODO_RET
+                                    }).appendTo('form');
+
+                                    $('#LOCALIDAD').val(json.LOCALIDAD);
+                                    $('#LOCALIDAD').attr('readonly',true);
+                                    $('#PROVINCIA').val(json.PROVINCIA);
+                                    $('#PROVINCIA').attr('readonly',true);
+                                    $('#PERSONACONTACTO').val(json.PERSONACONTACTO);
+                                    $('#PERSONACONTACTO').attr('readonly',true);
+                                    $('#EMAIL').val(json.EMAIL);
+                                    $('#EMAIL').attr('readonly',true);
+                                    $('#TELEFONO').val(json.TELEFONO);
+                                    $('#TELEFONO').attr('readonly',true);
+                                    $('#PAGINAWEB').val(json.PAGINAWEB);
+                                    $('#PAGINAWEB').attr('readonly',true);
+                                    $('#TIPO_RET').prop('checked',json.TIPO_RET);
+                                    $('#TIPO_RET').attr('disabled',true) ;
+                                    if(json.TIPO_RET)
+                                        $("#grupoRetencion").show();
+                                    else
+                                        $('#grupoRetencion').hide();
+
+
+                                } else {
+                                    $('#NIF').val("");
+                                    $('#NIF').text("");
+                                    $('#NIF').focus();
+                                }
+                            });
+                        }
+                });
+            });
+
+            function stringMatch(term, candidate) {
+                return candidate && candidate.toLowerCase().indexOf(term.toLowerCase()) >= 0;
+            }
+
+            function matchCustom(params, data) {
+                // If there are no search terms, return all of the data
+                if ($.trim(params.term) === '') {
+                    return data;
+                }
+                // Do not display the item if there is no 'text' property
+                if (typeof data.text === 'undefined') {
+                    return null;
+                }
+                // Match text of option
+                if (stringMatch(params.term, data.text)) {
+                    return data;
+                }
+                // Match attribute "data-foo" of option
+                if (stringMatch(params.term, $(data.element).attr('data-almacen'))) {
+                    return data;
+                }
+                // Return `null` if the term should not be displayed
+                return null;
+            }
+
+            function formatCustom(state) {
+                return $(
+                    '<div class="product-select-list">' + state.text + '<span class="product-name">'
+                    + '</span></div>'
+                    //+ $(state.element).attr('data-almacen')
+                );
+            }
+        });
+
+        function stringMatch(term, candidate) {
+            return candidate && candidate.toLowerCase().indexOf(term.toLowerCase()) >= 0;
+        }
+
+        function matchCustom(params, data) {
+            // If there are no search terms, return all of the data
+            if ($.trim(params.term) === '') {
+                return data;
+            }
+            // Do not display the item if there is no 'text' property
+            if (typeof data.text === 'undefined') {
+                return null;
+            }
+            // Match text of option
+            if (stringMatch(params.term, data.text)) {
+                return data;
+            }
+            // Match attribute "data-foo" of option
+            if (stringMatch(params.term, $(data.element).attr('data-almacen'))) {
+                return data;
+            }
+            // Return `null` if the term should not be displayed
+            return null;
+        }
+
+        function formatCustom(state) {
+            return $(
+                '<div class="product-select-list">' + state.text + '<span class="product-name">'
+                + '</span></div>'
+                //+ $(state.element).attr('data-almacen')
+            );
+        }
+
+        function Combos(){
+            $(".select2-otros").select2({
+                matcher: matchCustom,
+                templateResult: formatCustom
+            });
+
+            $(".select2-postal").select2({
+                id: function (e) {return e.id},
+                text: function (e) {return e.id},
+                dropdownAutoWidth: 'true',
+                templateSelection: function (e) 
+                                    {
+                                        if(e.id=='')
+                                            return '@Model.CODPOST';
+                                        else
+                                        {
+                                            //var cadenaCompleta = e.params.data.text;
+                                            //var cadenaCompleta = e.params.data.text;
+                                            var cadenaCompleta = e.text;
+                                            var indicePoblacion = cadenaCompleta.indexOf(' ');
+                                            if (indicePoblacion!=null){
+                                                var indiceProvincia = cadenaCompleta.indexOf('->');
+                                                var poblacion = cadenaCompleta.substring(indicePoblacion,indiceProvincia).trim();
+                                                var provincia = cadenaCompleta.substring(indiceProvincia+2);
+                                                var codigoPostal = cadenaCompleta.substring(0,indicePoblacion).trim();
+                                                $('#LOCALIDAD').val(poblacion);
+                                                $('#PROVINCIA').val(provincia);
+                                                $('#idCODPOST').val(codigoPostal);
+                                                //$('<input>').attr({
+                                                //    type: 'hidden',
+                                                //    id: 'CODPOST',
+                                                //    name: 'CODPOST',
+                                                //    value: json.CODPOST
+                                                //}).appendTo('form');
+                                            }
+
+                                            return e.id;
+                                        }
+                                    },
+                minimumInputLength: 3,
+                allowClear: true,
+                languaje: 'es',
+                ajax: {
+                    url: "@Url.Action("FiltrarCodigosPostales", "Proveedor")",
+                    dataType: "json",
+                    type: "POST",
+                    params: {
+                        contentType:'application/json; chasert=utf-8'
+                    },
+                    data: function (term, page){
+                        return "{ 'q':'" + term.term + "', 'page_limit': 10}";
+                    },
+                    processResults: function (data) {
+                      return {
+                        results: data
+                      };
+                    }
+                },
+                templateResult: formatCustom,
+                formatSelection: formatCustom,
+                escapeMarkup: function(m){ return m;}
+            });
+        }
+
+    </script>
+}

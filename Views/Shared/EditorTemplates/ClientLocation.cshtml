@@ -1,0 +1,143 @@
+﻿@model Ferpuser.Models.ClientLocation
+@{
+    Layout = null;
+}
+
+@if (!ViewBag.Inline)
+{
+    <input hidden id="BillingLocation_Id" name="BillingLocation.Id" type="hidden" value="@Model?.Id" />
+
+    <input hidden id="BillingLocation_Modified" name="BillingLocation.Modified" value="@(Model?.Modified ?? DateTime.Now)" class="form-control" />
+    <input hidden id="BillingLocation_Deleted" name="BillingLocation.Deleted" value="@Model?.Deleted" class="form-control" />
+    <input hidden id="BillingLocation_Created" name="BillingLocation.Created" value="@(Model?.Created ?? DateTime.Now)" class="form-control" />
+    <input hidden id="BillingLocation_ClientId" name="BillingLocation.ClientId" value="@Model?.ClientId" class="form-control" />
+    <input hidden id="BillingLocation_SageClient" name="BillingLocation.SageClient" value="@Model?.SageClient" class="form-control" />
+    <input hidden id="BillingLocation_SageLine" name="BillingLocation.SageLine" value="@Model?.SageLine" class="form-control" />
+
+    <div class="col-md-6 form-group">
+        <label for="BillingLocation_Address" class="control-label">@Html.DisplayNameFor(model => Model.Address)</label>
+        <input id="BillingLocation_Address" name="BillingLocation.Address" value="@Model?.Address" class="form-control" />
+        <span data-valmsg-for="BillingLocation.Address" data-valmsg-replace="true" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-3 form-group">
+        <label for="BillingLocation_City" class="control-label">@Html.DisplayNameFor(model => Model.City)</label>
+        <input id="BillingLocation_City" name="BillingLocation.City" value="@Model?.City" class="form-control" />
+        <span data-valmsg-for="BillingLocation.City" data-valmsg-replace="true" classclass="text-danger"></span>
+    </div>
+
+    <div class="col-md-3 form-group">
+        <label for="BillingLocation_ZipCode" class="control-label">@Html.DisplayNameFor(model => Model.ZipCode)</label>
+        <input id="BillingLocation_ZipCode" name="BillingLocation.ZipCode" value="@Model?.ZipCode" class="form-control" />
+        <span data-valmsg-for="BillingLocation.ZipCode" data-valmsg-replace="true" classclass="text-danger"></span>
+    </div>
+
+    <div class="col-md-3 form-group">
+        <label for="BillingLocation_Province" class="control-label">@Html.DisplayNameFor(model => Model.Province)</label>
+        <input id="BillingLocation_Province" name="BillingLocation.Province" value="@Model?.Province" class="form-control" />
+        <span data-valmsg-for="BillingLocation.Province" data-valmsg-replace="true" classclass="text-danger"></span>
+    </div>
+
+    <div class="col-md-3 form-group">
+        <label for="BillingLocation_Country" class="control-label">@Html.DisplayNameFor(model => Model.Country)</label>
+        <input id="BillingLocation_Country" name="BillingLocation.Country" value="@Model?.Country" class="form-control" />
+        <span data-valmsg-for="BillingLocation.Country" data-valmsg-replace="true" classclass="text-danger"></span>
+    </div>
+
+    <div class="col-md-3 form-group">
+        <label for="BillingLocation_Phone" class="control-label">@Html.DisplayNameFor(model => Model.Phone)</label>
+        <input id="BillingLocation_Phone" name="BillingLocation.Phone" value="@Model?.Phone" class="form-control" />
+        <span data-valmsg-for="BillingLocation.Phone" data-valmsg-replace="true" classclass="text-danger"></span>
+    </div>
+
+    <div class="col-md-3 form-group">
+        <label for="BillingLocation_Phone2" class="control-label">@Html.DisplayNameFor(model => Model.Phone2)</label>
+        <input id="BillingLocation_Phone2" name="BillingLocation.Phone2" value="@Model?.Phone2" class="form-control" />
+        <span data-valmsg-for="BillingLocation.Phone2" data-valmsg-replace="true" classclass="text-danger"></span>
+    </div>
+}
+else
+{
+    @*<input hidden id="BillingLocation_Id" name="BillingLocation.Id" type="hidden" value="@Model?.Id" />
+
+    <input hidden id="BillingLocation_Modified" name="BillingLocation.Modified" value="@(Model?.Modified ?? DateTime.Now)" class="form-control" />
+    <input hidden id="BillingLocation_Deleted" name="BillingLocation.Deleted" value="@Model?.Deleted" class="form-control" />
+    <input hidden id="BillingLocation_Created" name="BillingLocation.Created" value="@(Model?.Created ?? DateTime.Now)" class="form-control" />
+    <input hidden id="BillingLocation_ClientId" name="BillingLocation.ClientId" value="@Model?.ClientId" class="form-control" />
+    <input hidden id="BillingLocation_SageClient" name="BillingLocation.SageClient" value="@Model?.SageClient" class="form-control" />
+    <input hidden id="BillingLocation_SageLine" name="BillingLocation.SageLine" value="@Model?.SageLine" class="form-control" />*@
+
+    <div class="col-md-12">
+        <div class="row">
+            <label for="BillingLocation_Address" class="control-label col-xl-2">Direcc.</label>
+            <div class="col-xl-10">
+                <input id="BillingLocation_Address" @*name="BillingLocation.Address"*@ value="@Model?.Address" class="form-control" readonly />
+            </div>
+            @*<div class="col-xl-2">
+                    <a href="#" id="search-address" class="btn btn-sm btn-primary m-0 px-2 py-1">Buscar</a>
+                </div>*@
+            <span data-valmsg-for="BillingLocation.Address" data-valmsg-replace="true" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="col-xl-6">
+        <div class="row">
+            <label for="BillingLocation_City" class="control-label col-xl-4">Poblac.</label>
+            <div class="col-xl-8">
+                <input id="BillingLocation_City" @*name="BillingLocation.City"*@ value="@Model?.City" class="form-control" readonly />
+            </div>
+            <span data-valmsg-for="BillingLocation.City" data-valmsg-replace="true" classclass="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="col-xl-6">
+        <div class="row">
+            <label for="BillingLocation_ZipCode" class="control-label col-xl-4">C Post</label>
+            <div class="col-xl-8">
+                <input id="BillingLocation_ZipCode" @*name="BillingLocation.ZipCode"*@ value="@Model?.ZipCode" class="form-control" readonly />
+            </div>
+            <span data-valmsg-for="BillingLocation.ZipCode" data-valmsg-replace="true" classclass="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="col-xl-6">
+        <div class="row">
+            <label for="BillingLocation_Province" class="control-label col-xl-4">Prov.</label>
+            <div class="col-xl-8">
+                <input id="BillingLocation_Province" @*name="BillingLocation.Province"*@ value="@Model?.Province" class="form-control" readonly />
+            </div>
+            <span data-valmsg-for="BillingLocation.Province" data-valmsg-replace="true" classclass="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="col-xl-6">
+        <div class="row">
+            <label for="BillingLocation_Country" class="control-label col-xl-4">@Html.DisplayNameFor(model => Model.Country)</label>
+            <div class="col-xl-8">
+                <input id="BillingLocation_Country" @*name="BillingLocation.Country"*@ value="@Model?.Country" class="form-control" readonly />
+            </div>
+            <span data-valmsg-for="BillingLocation.Country" data-valmsg-replace="true" classclass="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="col-xl-6">
+        <div class="row">
+            <label for="BillingLocation_Phone" class="control-label col-xl-4">Tlf Móvil</label>
+            <div class="col-xl-8">
+                <input id="BillingLocation_Phone" @*name="BillingLocation.Phone"*@ value="@Model?.Phone" class="form-control" readonly />
+            </div>
+            <span data-valmsg-for="BillingLocation.Phone" data-valmsg-replace="true" classclass="text-danger"></span>
+        </div>
+    </div>
+
+
+    <div class="col-xl-6">
+        <div class="row">
+            <label for="BillingLocation_Phone2" class="control-label col-xl-4">Tlf Fijo</label>
+            <div class="col-xl-8">
+                <input id="BillingLocation_Phone2" @*name="BillingLocation.Phone2"*@ value="@Model?.Phone2" class="form-control" readonly />
+            </div>
+            <span data-valmsg-for="BillingLocation.Phone2" data-valmsg-replace="true" classclass="text-danger"></span>
+        </div>
+    </div>
+}

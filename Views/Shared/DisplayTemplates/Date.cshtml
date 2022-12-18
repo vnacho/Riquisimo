@@ -1,0 +1,6 @@
+﻿@model DateTime?
+
+@if (Model.HasValue)
+{
+    @Html.Raw(Model.Value.ToShortDateString())
+}

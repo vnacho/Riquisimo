@@ -1,0 +1,4 @@
+﻿ImportadorSageController.
+
+Es un controlador para realizar las funciones de importación de sage.
+Por ejemplo, se ha hecho una importación de facturas de venta. /ImportadorSage/FacturasVenta

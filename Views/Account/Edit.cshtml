@@ -1,0 +1,208 @@
+﻿@using Microsoft.AspNetCore.Http
+@model Ferpuser.Models.Account
+
+@{
+    ViewData["Summernote"] = true;
+    ViewData["Title"] = "Editar usuario";
+
+    string empleado_display_helper = Model.PerfilUsuario == PerfilUsuario.Cliente ? "d-none" : "";
+}
+
+    <form asp-action="Edit">
+        <div class="row">
+            <div asp-validation-summary="All" class="text-danger col-12"></div>
+            @if (User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_ADMINISTRACION)))
+            {
+                <div class="form-group col-md-4">
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                @if (Context.User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_ADMINISTRACION)))
+                {
+                    <div class="form-group col-md-4">
+                        <label asp-for="PerfilUsuario" class="control-label"></label>
+                        @Html.DropDownListFor(f => f.PerfilUsuario, new SelectList(Html.GetEnumSelectList<PerfilUsuario>(), "Value", "Text"), null, new { @class = "form-control", onchange="PerfilUsuarioChanged(this)" })
+                        <span asp-validation-for="PerfilUsuario" class="text-danger"></span>
+                </div>
+                }
+                else
+                {
+                    @Html.HiddenFor(f => f.PerfilUsuario)
+                }                
+
+                <div class="form-group col-md-4 empleado @empleado_display_helper">
+                    <label asp-for="Vendedor" class="control-label"></label>
+                    <select asp-for="Vendedor" class="browser-default custom-select select2" asp-items="ViewBag.Vendedor"></select>
+                    <span asp-validation-for="Vendedor" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-4 empleado @empleado_display_helper">
+                    <label asp-for="Operario" class="control-label"></label>
+                    @Html.DropDownListFor(model => model.Operario, new SelectList(ViewBag.Operarios, "CODIGO", "NOMBRE", Model == null ? null : Model.Operario), "-Seleccionar-", new { @class = "browser-default custom-select select2" })
+                    <span asp-validation-for="Operario" class="text-danger"></span>
+                </div>
+
+
+            @if (Context.User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_ADMINISTRACION)))
+            {
+                <div class="col-md-4 empleado @empleado_display_helper">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" asp-for="AccessCongress">
+                        <label class="custom-control-label" asp-for="AccessCongress">@Html.DisplayNameFor(model => model.AccessCongress)</label>
+                    </div>
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" asp-for="AccessCollaborations">
+                        <label class="custom-control-label" asp-for="AccessCollaborations">@Html.DisplayNameFor(model => model.AccessCollaborations)</label>
+                    </div>
+                </div>
+            }
+            else
+            {
+                @Html.HiddenFor(f => f.AccessCongress)
+                @Html.HiddenFor(f => f.AccessCollaborations)
+            }
+            }
+            </div>
+
+
+            <div class="empleado @empleado_display_helper">
+                <partial name="_Permisos" />
+            </div>
+                
+
+                <div class="row mt-4">
+                    <div class="form-group col-md-4">
+                        <label asp-for="Password" class="control-label">Nueva contraseña</label>
+                        <input asp-for="Password" class="form-control" autocomplete="new-password" value="NOT HERE" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label asp-for="Password2" class="control-label"></label>
+                        <input asp-for="Password2" class="form-control" autocomplete="new-password" value="NOT HERE" />
+                        <span asp-validation-for="Password2" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-md-4 empleado @empleado_display_helper">
+                        <label asp-for="Email" class="control-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                        <div class="custom-control custom-checkbox mt-2">
+                            <input type="checkbox" class="custom-control-input" asp-for="SendCopyTo">
+                            <label class="custom-control-label" asp-for="SendCopyTo">@Html.DisplayNameFor(model => model.SendCopyTo)</label>
+                        </div>
+                    </div>
+
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="PasswordHash" />
+
+                    <input asp-for="Created" class="form-control" />
+                    <input asp-for="Modified" class="form-control" />
+                    <input asp-for="Deleted" class="form-control" />
+
+                </div>
+                <div class="row mb-4 mt-3 empleado @empleado_display_helper">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label asp-for="IncomingMailServer" class="control-label"></label>
+                            <input asp-for="IncomingMailServer" class="form-control " />
+                            <span asp-validation-for="IncomingMailServer" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="IncomingMailPort" class="control-label"></label>
+                            <input asp-for="IncomingMailPort" class="form-control " />
+                            <span asp-validation-for="IncomingMailPort" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label asp-for="OutgoingMailServer" class="control-label"></label>
+                            <input asp-for="OutgoingMailServer" class="form-control " />
+                            <span asp-validation-for="OutgoingMailServer" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="OutgoingMailPort" class="control-label"></label>
+                            <input asp-for="OutgoingMailPort" class="form-control " />
+                            <span asp-validation-for="OutgoingMailPort" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="MailUser" class="control-label"></label>
+                            <input asp-for="MailUser" class="form-control " />
+                            <span asp-validation-for="MailUser" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="MailPassword" class="control-label"></label>
+                            <input asp-for="MailPassword" class="form-control " />
+                            <span asp-validation-for="MailPassword" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label for="SignatureSummernote" class="control-label"></label>
+                            <div id="SignatureSummernote">
+                                @Html.Raw(Model.SignatureAfter)
+                            </div>
+                            <textarea asp-for="SignatureAfter" hidden>
+                </textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <input id="save" type="submit" value="Guardar" class="btn btn-primary" />
+                </div>
+</form>
+
+@section Scripts {
+    <script>
+        $(e => {
+            $("#Password,#Password2").click(e => {
+                if ($("#Password").val() == "NOT HERE") {
+                    $("#Password").val("");
+                    $("#Password2").val("");
+                }
+            });
+            $("#save").click(e => {
+                if ($("#Password").val() == "") {
+                    $("#Password").val("NOT HERE");
+                }
+                if ($("#Password2").val() == "") {
+                    $("#Password2").val("NOT HERE");
+                }
+            });
+            $('#save').click(e => {
+                $('#SignatureAfter').text($('#SignatureSummernote').summernote('code'));
+            })
+            $('#SignatureSummernote').summernote(SummernoteConfig);
+        });
+
+        function PerfilUsuarioChanged(PerfilUsuario)
+        {
+            var perfil_code = $("#PerfilUsuario").val().trim();
+            var perfil_name = $("#PerfilUsuario option:selected").text();
+
+            if (perfil_code == @Convert.ToInt32(PerfilUsuario.Cliente))
+            {
+                $(".empleado").addClass("d-none");
+            }
+            else
+            {
+                $(".empleado").removeClass("d-none");
+            }
+        }
+    </script>
+}

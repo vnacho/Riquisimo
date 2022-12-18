@@ -1,0 +1,35 @@
+﻿@model Ferpuser.Models.RoomType
+
+@{
+    ViewData["Title"] = "Añadir tipo de habitación";
+    ViewData["Create"] = false;
+}
+
+<form asp-action="Create">
+    <div class="row">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="col-md-4 form-group">
+            <label asp-for="Name" class="control-label"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 form-group">
+            <label asp-for="Description" class="control-label"></label>
+            <input asp-for="Description" class="form-control" />
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 form-group">
+            <label asp-for="Occupants" class="control-label"></label>
+            <input asp-for="Occupants" class="form-control" />
+            <span asp-validation-for="Occupants" class="text-danger"></span>
+        </div>
+    </div>
+
+    <input asp-for="Created" class="form-control" />
+    <input asp-for="Modified" class="form-control" />
+    <input asp-for="Deleted" class="form-control" />
+    <div class="form-group">
+        <input type="submit" value="Guardar" class="btn btn-primary" />
+    </div>
+</form>
+

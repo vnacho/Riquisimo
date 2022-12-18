@@ -1,0 +1,260 @@
+﻿@using Ferpuser.Models.Enums
+@model VentaPedido
+
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Summernote"] = true;
+    ViewData["Swal"] = true;
+    ViewData["Select2"] = true;
+
+    var mail = string.Empty;    
+    if (ViewBag.EmailTo != null && !string.IsNullOrWhiteSpace(ViewBag.EmailTo))
+        mail = ViewBag.EmailTo;
+
+    FormatoImpresion? FormatoImpresionForzado = null;
+    if (ViewBag.FormatoImpresionForzado != null)
+    {
+        FormatoImpresionForzado = (FormatoImpresion)ViewBag.FormatoImpresionForzado;
+    }
+}
+
+<form method="post" id="form">
+
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Detalle de pedido de compra
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                @if (Model.EstadoPedido == EstadoPedido.Pendiente)
+                {
+                    <button type="submit" class="btn btn-secondary btn-sm text-nowrap">Guardar <i class="fas fa-save ml-2"></i></button>
+                }
+
+                <a href="@Url.Action("Create", "VentasPedido", new { IdPedidoDuplicado = Model.Id })" class="btn btn-secondary btn-sm text-nowrap">
+                    Duplicar <i class="fas fa-copy ml-2"></i>
+                </a>
+
+                @if (Model.EstadoPedido != EstadoPedido.Servido)
+                {
+                    <a href="@Url.Action("Create", "VentasAlbaran", new { idPedido = Model.Id })" class="btn btn-deep-orange btn-sm text-nowrap">
+                        Generar albarán <i class="fas fa-file-alt ml-2"></i>
+                    </a>
+                }
+
+                <a href="@Url.Action("Create", "VentasFactura", new { idPedido = Model.Id })" class="btn btn-deep-orange btn-sm text-nowrap">
+                    Generar factura <i class="fas fa-file-alt ml-2"></i>
+                </a>
+
+                @if (FormatoImpresionForzado.HasValue)
+                {
+                    if (FormatoImpresionForzado.Value == FormatoImpresion.B)
+                    {
+                        <a class="btn btn-grey btn-sm text-nowrap" asp-action="ImprimirPedido" asp-controller="VentasPedido" asp-route-id="@Model.Id" asp-route-formato="@FormatoImpresion.B">
+                            Imprimir (Formato B) <i class="fas fa-print ml-2"></i>
+                        </a>
+                        <button type="button" class="btn btn-grey btn-sm text-nowrap" id="btnMailFormatoB" data-toggle="modal" data-target="#MailModal" onclick="SetFormatoHelper('@FormatoImpresion.B')">
+                            Enviar (Formato B) <i class="fas fa-envelope ml-2"></i>
+                        </button>
+                    }
+                    else if (FormatoImpresionForzado.Value == FormatoImpresion.C)
+                    {
+                        <a class="btn btn-grey btn-sm text-nowrap" asp-action="ImprimirPedido" asp-controller="VentasPedido" asp-route-id="@Model.Id" asp-route-formato="@FormatoImpresion.C">
+                            Imprimir (Formato C) <i class="fas fa-print ml-2"></i>
+                        </a>
+                        <button type="button" class="btn btn-grey btn-sm text-nowrap" id="btnMailFormatoC" data-toggle="modal" data-target="#MailModal" onclick="SetFormatoHelper('@FormatoImpresion.C')">
+                            Enviar (Formato C) <i class="fas fa-envelope ml-2"></i>
+                        </button>
+                    }
+                }
+                else
+                {
+                    <div class="dropdown">
+                      <button class="btn btn-sm btn-grey dropdown-toggle" type="button" id="dropdownMenuImprimir" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Imprimir <i class="fas fa-print ml-2"></i>
+                      </button>
+                      <div class="dropdown-menu" aria-labelledby="dropdownMenuImprimir">
+                        <a class="dropdown-item" asp-action="ImprimirPedido" asp-controller="VentasPedido" asp-route-id="@Model.Id" asp-route-formato="@FormatoImpresion.A">Formato A</a>
+                        <a class="dropdown-item" asp-action="ImprimirPedido" asp-controller="VentasPedido" asp-route-id="@Model.Id" asp-route-formato="@FormatoImpresion.B">Formato B</a>
+                      </div>
+                    </div>
+                    <div class="dropdown">
+                      <button class="btn btn-sm btn-grey dropdown-toggle" type="button" id="dropdownMenuImprimir" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Enviar <i class="fas fa-envelope ml-2"></i>
+                      </button>
+                      <div class="dropdown-menu" aria-labelledby="dropdownMenuImprimir">
+                          <a class="dropdown-item" id="btnMailFormatoA" data-toggle="modal" data-target="#MailModal" href="#" onclick="SetFormatoHelper('@FormatoImpresion.A')">Formato A</a>
+                          <a class="dropdown-item" id="btnMailFormatoB" data-toggle="modal" data-target="#MailModal" href="#" onclick="SetFormatoHelper('@FormatoImpresion.B')">Formato B</a>                        
+                      </div>
+                    </div>
+                }
+
+                <a asp-action="Index" class="btn btn-grey btn-sm text-nowrap">Volver <i class="fas fa-arrow-left ml-2"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" id="hfFormatoHelper" />
+
+    @Html.EditorForModel()
+
+</form>
+
+<!-- Modal -->
+<div class="modal fade" id="MailModal" tabindex="-1" role="dialog" aria-labelledby="MailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <form>
+                <input type="hidden" name="id" id="id" value="@Model.Id" />
+                <partial name="_EnviarMail" model="mail" />               
+            </form>
+        </div>
+    </div>
+</div>
+
+<partial name="_VentasPedidoScript" />
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/lib/jqueryui/jqueryui/jquery-ui.min.css">
+}
+@section Scripts
+{
+    <script src="~/lib/jqueryui/jqueryui/jquery-ui.min.js"></script>
+
+    <partial name="_VentasScriptsPartial" />
+
+    <script>
+        $(function () {           
+            $("#btnEnviarMail").click(evt => {
+                $("#divBotonera").addClass('d-none');
+                $("#divSpinner").removeClass('d-none');
+                var formato = $("#hfFormatoHelper").val();
+
+                fetch("/VentasPedido/EnviarPedido/@Model.Id?formato=" + formato, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        body: $('#divMailBody').summernote('code'),
+                        mails: $("#Mails").val(),
+                        attachments: $("#hfFicheros").val()
+                    })
+                }).then(res => {
+                    $("#divBotonera").removeClass('d-none');
+                    $("#divSpinner").addClass('d-none');
+                    console.log(res);
+                    if (!res.ok) {
+                        var data = res.json();
+                        console.log(data);
+                        data.then(function (result) {
+                            console.log(result);
+                            alert("Lo sentimos, el correo electrónico no ha podido ser enviado. " + result);
+                        });
+                        return;
+                    }
+                    alert("El correo electrónico ha sido enviado correctamente.");
+                    window.location = window.location.href.split("#")[0];
+                });
+            });
+        });
+
+        $('#divMailBody').summernote(SummernoteConfig);
+
+        function SubirDocumento() {
+            const inputFichero = document.getElementById('fileDocumentacion');
+            const inputID = document.getElementById('tablaID');
+            var datosForm = new FormData();
+            datosForm.append('tablaID', inputID.value);
+            datosForm.append('fileDocumentacion', inputFichero.files[0]);
+            fetch("/VentasPedido/EnviarDocumento", {
+                method: 'POST',                
+                body: datosForm
+            }).then(res => {
+                console.log(res);
+                var data = res.json();
+                console.log(data);
+                if (!res.ok) {
+                    data.then(function (result) {
+                        console.log(result);
+                        alert("Lo sentimos, el fichero no se ha podido subir. " + result);
+                    });
+                    return;
+                }
+                //Recuperamos la promesa
+                data.then(function (result) {
+                    console.log(result);
+                    //$("#hfFicheros").val($("#hfFicheros").val() + result.Path + ';' );
+                    //$("#tablaDocumentos").append('<tr><td><a class="text-info" download="' + result.FileName + '" href="Url.Content("' + result.Path + '")">' + result.FileName + '</a></td></tr>');
+                    $("#tablaDocumentos").append('<tr><td><a class="text-info" download="' + result.FileName + '" href="Url.Content("' + result.Path + '")">' + result.FileName + '</a></td><td class="text-right"><a href="/VentasPedido/BorrarDocumento?IdArchivo='+result.idDoc+'&amp;IdTabla='+inputID.value+'"onclick="return confirm(\'¿Está seguro de querer borrar el documento?\')"><i class="fas fa-times ml-2"></i></a></td></tr>');
+                });
+            });
+        }
+
+        function SubirFichero() {
+            const input = document.getElementById('Fichero');
+            var datosForm = new FormData()
+            datosForm.append('Fichero', input.files[0])
+            
+            fetch("/VentasPedido/EnviarPedidoAdjuntarFichero", {
+                method: 'POST',                
+                body: datosForm
+            }).then(res => {
+                console.log(res);
+                var data = res.json();
+                console.log(data);
+                if (!res.ok) {
+                    data.then(function (result) {
+                        console.log(result);
+                        alert("Lo sentimos, el fichero no se ha podido adjuntar. " + result);
+                    });
+                    return;
+                }
+                //Recuperamos la promesa
+                data.then(function (result) {
+                    console.log(result);
+                    $("#hfFicheros").val($("#hfFicheros").val() + result.Path + ';' );
+                    $("#ulFicheros").append('<li>' + result.FileName + '</li>');
+                });
+            });
+        }
+
+        function SetFormatoHelper(formato)
+        {
+            $("#hfFormatoHelper").val(formato);
+        }
+
+         $(document).ready(function () {
+            $('#CodigoCliente').select2({
+                dropdownAutoWidth: 'true',                
+                minimumInputLength: 3,
+                allowClear: true,
+                language: 'es',            
+                ajax: {
+                    url: "@Url.Action("GetClientesJSON", "Clients")",
+                    dataType: "json",
+                    type: "POST",
+                    params: {
+                        contentType:'application/json; chasert=utf-8'
+                    },
+                    data: function (term, page){
+                        return "{ 'q':'" + term.term + "', 'page_limit': 10}";
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    }
+                },
+                escapeMarkup: function(m){ return m;}
+            });
+        });
+
+    </script>
+}
+

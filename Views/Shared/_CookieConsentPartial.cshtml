@@ -1,0 +1,28 @@
+﻿@using Microsoft.AspNetCore.Http.Features
+
+@{
+    var consentFeature = Context.Features.Get<ITrackingConsentFeature>();
+    var showBanner = !consentFeature?.CanTrack ?? false;
+    var cookieString = consentFeature?.CreateConsentCookie();
+}
+
+@if (showBanner)
+{
+    <div class="modal fade top modal-content-clickable show" id="frameModalTopInfoDemo" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="display: block; padding-right: 17px;" aria-modal="true">
+        <div class="modal-dialog modal-frame modal-top modal-notify modal-info" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="row d-flex justify-content-center align-items-center">
+                        <p class="pt-3 pr-2">
+                            Este sitio usa cookies propias y de terceros para mejorar su experiencia.
+                        </p>
+
+                        <a role="button" class="btn btn-outline-info waves-effect" data-dismiss="modal" data-cookie-string="@cookieString">
+                            De acuerdo
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

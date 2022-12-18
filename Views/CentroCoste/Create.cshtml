@@ -1,0 +1,79 @@
+﻿@model CentroCoste
+
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+    ViewData["Swal"] = true;
+}
+
+<form method="post" id="form">
+
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Nuevo centro de coste
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                <button type="submit" name="guardar" class="btn btn-secondary btn-sm text-nowrap">Guardar <i class="fas fa-save ml-2"></i></button>
+                <a asp-action="Index" class="btn btn-grey btn-sm text-nowrap">Volver <i class="fas fa-arrow-left ml-2"></i></a>
+            </div>
+        </div>
+    </div>
+
+    @Html.EditorForModel()
+
+</form>
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/lib/jqueryui/jqueryui/jquery-ui.min.css">
+}
+
+@section Scripts {
+    <script>
+        $('[data-toggle="tooltip"]').tooltip();
+        var lastCode = "";
+        $(document).ready(function () {
+
+             $("body").on("keyup", "#NivelAnalitico2", e => {
+                console.log($("#NivelAnalitico2").val());
+                if ($("#NivelAnalitico2").val().length == 0) {
+                    return;
+                }
+                if (lastCode == $("#NivelAnalitico2").val().trim()) {
+                    return;
+                }
+
+                lastCode = $("#NivelAnalitico2").val().trim();
+                
+                ga('send', 'pageview', '/CentroCoste/NivelAnalitico2ExistsCreate/' + $("#NivelAnalitico2").val());
+
+                fetch("/CentroCoste/NivelAnalitico2ExistsCreate/?NivelAnalitico2=" + $("#NivelAnalitico2").val())
+                    .then(e => {
+                        return e.text()
+                    }).then(id => {
+                        if (id == "borrar"){
+                            Swal.fire({
+                                title: "Ya existe ese NivelAnalitico2 ",
+                                text: "No se puede usar.",
+                                showCancelButton: false,
+                                confirmButtonText: "Aceptar"
+                            }).then(e => {
+                                $('#NivelAnalitico2').val("");
+                                $('#NivelAnalitico2').text("");
+                                $('#NivelAnalitico2').focus();
+                            });
+                        }
+                        
+                });
+            });
+        });
+
+
+    </script>
+    <script src="~/lib/jqueryui/jqueryui/jquery-ui.min.js"></script>
+}
+

@@ -1,0 +1,13 @@
+﻿[
+  {
+    "outputFile": "wwwroot/mdb/css/mdb.lite.css",
+    "inputFile": "wwwroot/mdb/scss/mdb-lite-free.scss",
+    "minify": {
+      "enabled": true
+    },
+    "includeInProject": true,
+    "options": {
+      "sourceMap": true
+    }
+  }
+]

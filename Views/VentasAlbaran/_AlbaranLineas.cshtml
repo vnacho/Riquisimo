@@ -1,0 +1,214 @@
+﻿@model VentaAlbaran
+@{
+    var albaranLinea = new VentaAlbaranLinea();
+    ViewData["AlbaranLinea"] = albaranLinea;
+    string codigoPedido = string.Empty;
+
+    int colspan = 9;
+    if (Model != null && Model.AlbaranLineas != null && Model.AlbaranLineas.Any(f => f.TieneTiempo))
+    {
+        colspan = 10;
+    }
+}
+
+<div id="divLineas" class="card mb-4 wow d-print-none">
+    <div class="card-body">
+        <div class="form-row mb-2">
+            <div class="col-6">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-6 text-right">
+                <a class="btn btn-blue-grey btn-sm text-nowrap" onclick="AddLineasDesdePedido();">Añadir líneas desde pedido <i class="fas fa-plus ml-2"></i></a>
+                <a class="btn btn-blue-grey btn-sm text-nowrap" data-toggle="modal" data-target="#NuevaLineaModal" onclick="AddAlbaranLinea();">Añadir nueva línea <i class="fas fa-plus ml-2"></i></a>
+            </div>
+        </div>
+
+        @if (Model != null && Model.AlbaranLineas != null && Model.AlbaranLineas.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-striped bg-white">
+                    <thead class="font-weight-bolder">
+                        <tr>
+                            <th scope="col" class="text-right">@Html.DisplayNameFor(f => f.AlbaranLineas.First().Unidades)</th>
+                            <th scope="col">@Html.DisplayNameFor(f => f.AlbaranLineas.First().NombreArticulo)</th>
+                            <th scope="col">@Html.DisplayNameFor(f => f.AlbaranLineas.First().NombreEvento)</th>
+                            <th scope="col">@Html.DisplayNameFor(f => f.AlbaranLineas.First().ObservacionesAlbaranLinea)</th>
+                            <th scope="col" class="text-right">@Html.DisplayNameFor(f => f.AlbaranLineas.First().PrecioUnitario)</th>
+                            @if (Model.AlbaranLineas.Any(f => f.TieneTiempo))
+                            {
+                                <th scope="col" class="text-right">@Html.DisplayNameFor(f => f.AlbaranLineas.First().Tiempo)</th>
+                            }
+                            <th scope="col" class="text-right">@Html.DisplayNameFor(f => f.AlbaranLineas.First().Descuento)</th>
+                            <th scope="col" class="text-right">@Html.DisplayNameFor(f => f.AlbaranLineas.First().TotalAlbaranLinea)</th>
+                            <th scope="col" class="text-right">@Html.DisplayNameFor(f => f.AlbaranLineas.First().IVA_Porcentaje)</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var linea in Model.AlbaranLineas.Where(f => !f.VentaPedidoLineaId.HasValue).OrderBy(f => f.Orden))
+                        {
+                            <tr>
+                                <td class="text-right font-weight-bold">
+                                    @linea.Unidades
+                                </td>
+                                <td>@linea.NombreArticulo</td>
+                                <td>@linea.NombreEvento</td>
+                                <td>@linea.ObservacionesAlbaranLinea</td>
+                                <td class="text-right font-weight-bold text-nowrap">@linea.PrecioUnitario.ToString("c")</td>
+                                @if (Model.AlbaranLineas.Any(f => f.TieneTiempo))
+                                {
+                                    <td class="text-right font-weight-bold text-nowrap">@linea.Tiempo</td>
+                                }
+                                <td class="text-right font-weight-bold text-nowrap">@linea.Descuento %</td>
+                                <td class="text-right font-weight-bold text-nowrap">@linea.TotalAlbaranLinea.ToString("c")</td>
+                                <td class="text-right text-nowrap">@Html.DisplayFor(f => linea.IVA_Porcentaje)</td>
+                                <td class="text-right text-nowrap">
+                                    <a href="#" class="text-info mr-2" data-toggle="modal" data-target="#NuevaLineaModal" onclick="EditAlbaranLinea(@linea.Orden);">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
+                                    <a class="text-danger mr-2" href="#" onclick="DeleteLinea(@linea.Orden)">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].IdAlbaranLinea" name='AlbaranLineas[@linea.Orden].IdAlbaranLinea' value="@linea.IdAlbaranLinea" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].Orden" name='AlbaranLineas[@linea.Orden].Orden' value="@linea.Orden" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].CodigoEvento" name='AlbaranLineas[@linea.Orden].CodigoEvento' value="@linea.CodigoEvento" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].NombreEvento" name='AlbaranLineas[@linea.Orden].NombreEvento' value="@linea.NombreEvento" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].CodigoArticulo" name='AlbaranLineas[@linea.Orden].CodigoArticulo' value="@linea.CodigoArticulo" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].NombreArticulo" name='AlbaranLineas[@linea.Orden].NombreArticulo' value="@linea.NombreArticulo" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].ObservacionesAlbaranLinea" name='AlbaranLineas[@linea.Orden].ObservacionesAlbaranLinea' value="@linea.ObservacionesAlbaranLinea" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].Unidades" name='AlbaranLineas[@linea.Orden].Unidades' value="@linea.Unidades" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].PrecioUnitario" name='AlbaranLineas[@linea.Orden].PrecioUnitario' value="@linea.PrecioUnitario" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].TotalAlbaranLinea" name='AlbaranLineas[@linea.Orden].TotalAlbaranLinea' value="@linea.TotalAlbaranLinea" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].VentaPedidoLineaId" name='AlbaranLineas[@linea.Orden].VentaPedidoLineaId' value="@linea.VentaPedidoLineaId" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].UnidadesPendientes" name='AlbaranLineas[@linea.Orden].UnidadesPendientes' value="@linea.UnidadesPendientes" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].CodigoPedido" name='AlbaranLineas[@linea.Orden].CodigoPedido' value="@linea.CodigoPedidoDisplay" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].Descuento" name='AlbaranLineas[@linea.Orden].Descuento' value="@linea.Descuento" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].ImporteDescuento" name='AlbaranLineas[@linea.Orden].ImporteDescuento' value="@linea.ImporteDescuento" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].DescripcionAmpliada" name='AlbaranLineas[@linea.Orden].DescripcionAmpliada' value="@linea.DescripcionAmpliada.ToString()" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].TextoDescripcionAmpliada" name='AlbaranLineas[@linea.Orden].TextoDescripcionAmpliada' value="@linea.TextoDescripcionAmpliada" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].CodigoTipoIVA" name='AlbaranLineas[@linea.Orden].CodigoTipoIVA' value="@linea.CodigoTipoIVA" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].IVA_Porcentaje" name='AlbaranLineas[@linea.Orden].IVA_Porcentaje' value="@linea.IVA_Porcentaje" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].Tiempo" name='AlbaranLineas[@linea.Orden].Tiempo' value="@linea.Tiempo" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].TieneTiempo" name='AlbaranLineas[@linea.Orden].TieneTiempo' value="@linea.TieneTiempo.ToString()" />
+
+                                </td>
+                            </tr>
+                        }
+
+                        @*Líneas que vienen desde albarán*@
+                        @foreach (var linea in Model.AlbaranLineas.Where(f => f.VentaPedidoLineaId.HasValue).OrderBy(f => f.CodigoPedidoDisplay))
+                        {
+                            @if (codigoPedido != linea.CodigoPedidoDisplay)
+                            {
+                                <tr class="bg-light text-dark font-weight-bold">
+                                    <td colspan="@colspan" class="text-right pr-3">
+                                        <i class="fas fa-file mr-2"></i>Pedido nº: @Html.DisplayFor(f => linea.CodigoPedidoDisplay)
+                                    </td>
+                                </tr>
+                                codigoPedido = linea.CodigoPedidoDisplay;
+                            }
+                            <tr>
+                                <td class="text-right font-weight-bold">
+                                    @linea.Unidades
+                                </td>
+                                <td>@linea.NombreArticulo</td>
+                                <td>@linea.NombreEvento</td>
+                                <td>@linea.ObservacionesAlbaranLinea</td>
+                                <td class="text-right font-weight-bold text-nowrap">@linea.PrecioUnitario.ToString("c")</td>
+                                @if (Model.AlbaranLineas.Any(f => f.TieneTiempo))
+                                {
+                                    <td class="text-right font-weight-bold text-nowrap">@linea.Tiempo</td>
+                                }
+                                <td class="text-right font-weight-bold text-nowrap">@linea.Descuento %</td>
+                                <td class="text-right font-weight-bold text-nowrap">@linea.TotalAlbaranLinea.ToString("c")</td>
+                                <td class="text-right text-nowrap">@Html.DisplayFor(f => linea.IVA_Porcentaje)</td>
+                                <td class="text-right text-nowrap">
+                                    <a href="#" class="text-info mr-2" data-toggle="modal" data-target="#NuevaLineaModal" onclick="EditAlbaranLinea(@linea.Orden);">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
+                                    <a class="text-danger mr-2" href="#" onclick="DeleteLinea(@linea.Orden)">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].IdAlbaranLinea" name='AlbaranLineas[@linea.Orden].IdAlbaranLinea' value="@linea.IdAlbaranLinea" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].Orden" name='AlbaranLineas[@linea.Orden].Orden' value="@linea.Orden" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].CodigoEvento" name='AlbaranLineas[@linea.Orden].CodigoEvento' value="@linea.CodigoEvento" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].NombreEvento" name='AlbaranLineas[@linea.Orden].NombreEvento' value="@linea.NombreEvento" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].CodigoArticulo" name='AlbaranLineas[@linea.Orden].CodigoArticulo' value="@linea.CodigoArticulo" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].NombreArticulo" name='AlbaranLineas[@linea.Orden].NombreArticulo' value="@linea.NombreArticulo" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].ObservacionesAlbaranLinea" name='AlbaranLineas[@linea.Orden].ObservacionesAlbaranLinea' value="@linea.ObservacionesAlbaranLinea" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].Unidades" name='AlbaranLineas[@linea.Orden].Unidades' value="@linea.Unidades" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].PrecioUnitario" name='AlbaranLineas[@linea.Orden].PrecioUnitario' value="@linea.PrecioUnitario" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].Descuento" name='AlbaranLineas[@linea.Orden].Descuento' value="@linea.Descuento" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].ImporteDescuento" name='AlbaranLineas[@linea.Orden].ImporteDescuento' value="@linea.ImporteDescuento" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].TotalAlbaranLinea" name='AlbaranLineas[@linea.Orden].TotalAlbaranLinea' value="@linea.TotalAlbaranLinea" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].VentaPedidoLineaId" name='AlbaranLineas[@linea.Orden].VentaPedidoLineaId' value="@linea.VentaPedidoLineaId" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].UnidadesPendientes" name='AlbaranLineas[@linea.Orden].UnidadesPendientes' value="@linea.UnidadesPendientes" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].CodigoPedido" name='AlbaranLineas[@linea.Orden].CodigoPedido' value="@linea.CodigoPedidoDisplay" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].DescripcionAmpliada" name='AlbaranLineas[@linea.Orden].DescripcionAmpliada' value="@linea.DescripcionAmpliada.ToString()" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].TextoDescripcionAmpliada" name='AlbaranLineas[@linea.Orden].TextoDescripcionAmpliada' value="@linea.TextoDescripcionAmpliada" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].CodigoTipoIVA" name='AlbaranLineas[@linea.Orden].CodigoTipoIVA' value="@linea.CodigoTipoIVA" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].IVA_Porcentaje" name='AlbaranLineas[@linea.Orden].IVA_Porcentaje' value="@linea.IVA_Porcentaje" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].Tiempo" name='AlbaranLineas[@linea.Orden].Tiempo' value="@linea.Tiempo" />
+                                    <input type="hidden" id="AlbaranLineas[@linea.Orden].TieneTiempo" name='AlbaranLineas[@linea.Orden].TieneTiempo' value="@linea.TieneTiempo.ToString()" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-secondary">
+                        <i class="fas fa-info-circle"></i>&nbsp;No hay líneas en el albarán
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="NuevaLineaModal" tabindex="-1" aria-labelledby="NuevaLineaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content ui-front">
+                <div id="divAlbaranLinea">
+                    <div class="row">
+                        <div class="col text-center">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-blue-grey btn-sm text-nowrap" onclick="SaveLinea();">Añadir <i class="fas fa-plus ml-2"></i></a>
+                    <a class="btn btn-grey btn-sm text-nowrap" data-dismiss="modal">Cancelar <i class="fas fa-times ml-2"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="NuevaLineaDesdePedidoModal" tabindex="-1" aria-labelledby="NuevaLineaDesdePedidoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div id="divPedidos" class="p-2">
+                    <div class="row">
+                        <div class="col text-center">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-grey btn-sm text-nowrap" data-dismiss="modal">Cancelar <i class="fas fa-times ml-2"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>    
+
+</div>
+
+

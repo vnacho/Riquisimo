@@ -1,0 +1,108 @@
+﻿@model VentaAlbaran
+
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+
+    FormatoImpresion? FormatoImpresionForzado = null;
+    if (ViewBag.FormatoImpresionForzado != null)
+    {
+        FormatoImpresionForzado = (FormatoImpresion)ViewBag.FormatoImpresionForzado;
+    }
+}
+
+<form method="post" id="form">
+
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Detalle de albarán de venta
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                <button type="submit" class="btn btn-secondary btn-sm text-nowrap">Guardar <i class="fas fa-save ml-2"></i></button>
+                <a href="@Url.Action("Create", "VentasAlbaran", new { IdAlbaranDuplicado = Model.Id })" class="btn btn-secondary btn-sm text-nowrap">
+                    Duplicar <i class="fas fa-copy ml-2"></i>
+                </a>
+                <a href="@Url.Action("Create", "VentasFactura", new { idAlbaran = Model.Id })" class="btn btn-deep-orange btn-sm text-nowrap">
+                    Generar factura <i class="fas fa-file-alt ml-2"></i>
+                </a>                
+                @if (FormatoImpresionForzado.HasValue)
+                {
+                    if (FormatoImpresionForzado.Value == FormatoImpresion.B)
+                    {
+                        <a class="btn btn-grey btn-sm text-nowrap" asp-action="ImprimirAlbaran" asp-controller="VentasAlbaran" asp-route-id="@Model.Id" asp-route-formato="@FormatoImpresion.B">
+                            Imprimir (Formato B) <i class="fas fa-print ml-2"></i>
+                        </a>
+                    }
+                    else if (FormatoImpresionForzado.Value == FormatoImpresion.C)
+                    {
+                        <a class="btn btn-grey btn-sm text-nowrap" asp-action="ImprimirAlbaran" asp-controller="VentasAlbaran" asp-route-id="@Model.Id" asp-route-formato="@FormatoImpresion.C">
+                            Imprimir (Formato C) <i class="fas fa-print ml-2"></i>
+                        </a>
+                    }
+                }
+                else
+                {
+                    <div class="dropdown">
+                      <button class="btn btn-sm btn-grey dropdown-toggle" type="button" id="dropdownMenuImprimir" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Imprimir <i class="fas fa-print ml-2"></i>
+                      </button>
+                      <div class="dropdown-menu" aria-labelledby="dropdownMenuImprimir">
+                        <a class="dropdown-item" asp-action="ImprimirAlbaran" asp-controller="VentasAlbaran" asp-route-id="@Model.Id" asp-route-formato="@FormatoImpresion.A">Formato A</a>
+                        <a class="dropdown-item" asp-action="ImprimirAlbaran" asp-controller="VentasAlbaran" asp-route-id="@Model.Id" asp-route-formato="@FormatoImpresion.B">Formato B</a>
+                      </div>
+                    </div>
+                }                
+                <a asp-action="Index" class="btn btn-grey btn-sm text-nowrap">Volver <i class="fas fa-arrow-left ml-2"></i></a>
+            </div>
+        </div>
+    </div>
+
+    @Html.EditorForModel()
+
+</form>
+
+<partial name="_VentasAlbaranScript" />
+
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/lib/jqueryui/jqueryui/jquery-ui.min.css">
+}
+@section Scripts
+{
+    <script>
+         $('[data-toggle="tooltip"]').tooltip();
+
+         $(document).ready(function () {
+            $('#CodigoCliente').select2({
+                dropdownAutoWidth: 'true',                
+                minimumInputLength: 3,
+                allowClear: true,
+                language: 'es',            
+                ajax: {
+                    url: "@Url.Action("GetClientesJSON", "Clients")",
+                    dataType: "json",
+                    type: "POST",
+                    params: {
+                        contentType:'application/json; chasert=utf-8'
+                    },
+                    data: function (term, page){
+                        return "{ 'q':'" + term.term + "', 'page_limit': 10}";
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    }
+                },
+                escapeMarkup: function(m){ return m;}
+            });
+        });
+    </script>
+    <script src="~/lib/jqueryui/jqueryui/jquery-ui.min.js"></script>
+    <partial name="_VentasScriptsPartial" />
+}

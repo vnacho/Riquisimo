@@ -1,0 +1,263 @@
+﻿@model CompraFactura
+@{
+    var facturaLinea = new CompraFacturaLinea();
+    ViewData["FacturaLinea"] = facturaLinea;
+    string codigoAlbaran = string.Empty;
+    string codigoPedido = string.Empty;
+}
+
+<div id="divLineas" class="card mb-4 wow d-print-none">
+    <div class="card-body">
+        <div class="form-row mb-2">
+            <div class="col-4">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-8 text-right">
+                @if (Model.EstadoFactura != EstadoFactura.TaspasadoSAGE)
+                { 
+                    <a class="btn btn-blue-grey btn-sm text-nowrap" onclick="AddLineasDesdePedido();">Añadir desde pedido <i class="fas fa-plus ml-2"></i></a>
+                    <a class="btn btn-blue-grey btn-sm text-nowrap" onclick="AddLineasDesdeAlbaran();">Añadir desde albarán <i class="fas fa-plus ml-2"></i></a>
+                    <a class="btn btn-blue-grey btn-sm text-nowrap" data-toggle="modal" data-target="#NuevaLineaModal" onclick="AddFacturaLinea();">Añadir nueva línea <i class="fas fa-plus ml-2"></i></a>
+                }
+            </div>
+        </div>
+
+        @if (Model != null && Model.FacturaLineas != null && Model.FacturaLineas.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-striped">
+                    <thead class="font-weight-bolder">
+                        <tr>
+                            <th scope="col" class="text-right">@Html.DisplayNameFor(f => f.FacturaLineas.First().Unidades)</th>
+                            <th scope="col">@Html.DisplayNameFor(f => f.FacturaLineas.First().NombreArticulo)</th>
+                            <th scope="col">@Html.DisplayNameFor(f => f.FacturaLineas.First().NombreEvento)</th>
+                            <th scope="col">@Html.DisplayNameFor(f => f.FacturaLineas.First().ObservacionesFacturaLinea)</th>
+                            <th scope="col" class="text-right">@Html.DisplayNameFor(f => f.FacturaLineas.First().BaseImponiblePrecioUnitario)</th>
+                            <th scope="col" class="text-right">@Html.DisplayNameFor(f => f.FacturaLineas.First().BaseImponibleTotal)</th>
+                            <th scope="col" class="text-right">@Html.DisplayNameFor(f => f.FacturaLineas.First().IVA_Porcentaje)</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var linea in Model.FacturaLineas.Where(f => !f.CompraAlbaranLineaId.HasValue && !f.CompraPedidoLineaId.HasValue).OrderBy(f => f.Orden))
+                        {
+                            <tr>
+                                <td class="text-right font-weight-bold">
+                                    @linea.Unidades
+                                </td>
+                                <td>@linea.NombreArticulo</td>
+                                <td>@linea.NombreEvento</td>
+                                <td>@linea.ObservacionesFacturaLinea</td>
+                                <td class="text-right font-weight-bold text-nowrap">@linea.BaseImponiblePrecioUnitario.ToString("c")</td>
+                                <td class="text-right font-weight-bold text-nowrap">@linea.BaseImponibleTotal.ToString("c")</td>
+                                <td class="text-right text-nowrap">@Html.DisplayFor(f => linea.IVA_Porcentaje)</td>
+                                <td class="text-right text-nowrap">
+                                    @if (Model.EstadoFactura != EstadoFactura.TaspasadoSAGE)
+                                    {
+                                        <a href="#" class="text-info mr-2" data-toggle="modal" data-target="#NuevaLineaModal" onclick="EditFacturaLinea(@linea.Orden);">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </a>
+                                        <a class="text-danger mr-2" href="#" onclick="DeleteLinea(@linea.Orden)">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                    }
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].IdFacturaLinea" name='FacturaLineas[@linea.Orden].IdFacturaLinea' value="@linea.IdFacturaLinea" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].Orden" name='FacturaLineas[@linea.Orden].Orden' value="@linea.Orden" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CodigoEvento" name='FacturaLineas[@linea.Orden].CodigoEvento' value="@linea.CodigoEvento" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].NombreEvento" name='FacturaLineas[@linea.Orden].NombreEvento' value="@linea.NombreEvento" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CodigoArticulo" name='FacturaLineas[@linea.Orden].CodigoArticulo' value="@linea.CodigoArticulo" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].NombreArticulo" name='FacturaLineas[@linea.Orden].NombreArticulo' value="@linea.NombreArticulo" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].ObservacionesFacturaLinea" name='FacturaLineas[@linea.Orden].ObservacionesFacturaLinea' value="@linea.ObservacionesFacturaLinea" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].Unidades" name='FacturaLineas[@linea.Orden].Unidades' value="@linea.Unidades" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].BaseImponiblePrecioUnitario" name='FacturaLineas[@linea.Orden].BaseImponiblePrecioUnitario' value="@linea.BaseImponiblePrecioUnitario" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].BaseImponibleTotal" name='FacturaLineas[@linea.Orden].BaseImponibleTotal' value="@linea.BaseImponibleTotal" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CompraAlbaranLineaId" name='FacturaLineas[@linea.Orden].CompraAlbaranLineaId' value="@linea.CompraAlbaranLineaId" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CompraPedidoLineaId" name='FacturaLineas[@linea.Orden].CompraPedidoLineaId' value="@linea.CompraPedidoLineaId" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CodigoPedido" name='FacturaLineas[@linea.Orden].CodigoPedido' value="@linea.CodigoPedido" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].UnidadesPendientes" name='FacturaLineas[@linea.Orden].UnidadesPendientes' value="@linea.UnidadesPendientes" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CodigoTipoIVA" name='FacturaLineas[@linea.Orden].CodigoTipoIVA' value="@linea.CodigoTipoIVA" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].IVA_Porcentaje" name='FacturaLineas[@linea.Orden].IVA_Porcentaje' value="@linea.IVA_Porcentaje" />
+                                </td>
+                            </tr>
+                        }
+
+                        @*Líneas que vienen desde albarán*@
+                        @foreach (var linea in Model.FacturaLineas.Where(f => f.CompraAlbaranLineaId.HasValue).OrderBy(f => f.CodigoAlbaran))
+                        {
+                            @if (codigoAlbaran != linea.CodigoAlbaran)
+                            {
+                                <tr class="bg-light text-dark font-weight-bold">
+                                    <td colspan="8" class="text-right pr-3">
+                                        <i class="fas fa-file mr-2"></i>Albarán nº: @Html.DisplayFor(f => linea.CodigoAlbaran)
+                                        <a class="text-danger" title="Quitar albarán" href="#" onclick="DeleteAlbaran('@linea.CodigoAlbaran')">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                codigoAlbaran = linea.CodigoAlbaran;
+                            }
+                            <tr>
+                                <td class="text-right font-weight-bold">
+                                    @linea.Unidades
+                                </td>
+                                <td>@linea.NombreArticulo</td>
+                                <td>@linea.NombreEvento</td>
+                                <td>@linea.ObservacionesFacturaLinea</td>
+                                <td class="text-right font-weight-bold text-nowrap">@linea.BaseImponiblePrecioUnitario.ToString("c")</td>
+                                <td class="text-right font-weight-bold text-nowrap">@linea.BaseImponibleTotal.ToString("c")</td>
+                                <td class="text-right text-nowrap">@Html.DisplayFor(f => linea.IVA_Porcentaje)</td>
+                                <td class="text-right text-nowrap">
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].IdFacturaLinea" name='FacturaLineas[@linea.Orden].IdFacturaLinea' value="@linea.IdFacturaLinea" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].Orden" name='FacturaLineas[@linea.Orden].Orden' value="@linea.Orden" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CodigoEvento" name='FacturaLineas[@linea.Orden].CodigoEvento' value="@linea.CodigoEvento" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].NombreEvento" name='FacturaLineas[@linea.Orden].NombreEvento' value="@linea.NombreEvento" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CodigoArticulo" name='FacturaLineas[@linea.Orden].CodigoArticulo' value="@linea.CodigoArticulo" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].NombreArticulo" name='FacturaLineas[@linea.Orden].NombreArticulo' value="@linea.NombreArticulo" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].ObservacionesFacturaLinea" name='FacturaLineas[@linea.Orden].ObservacionesFacturaLinea' value="@linea.ObservacionesFacturaLinea" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].Unidades" name='FacturaLineas[@linea.Orden].Unidades' value="@linea.Unidades" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].BaseImponiblePrecioUnitario" name='FacturaLineas[@linea.Orden].BaseImponiblePrecioUnitario' value="@linea.BaseImponiblePrecioUnitario" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].BaseImponibleTotal" name='FacturaLineas[@linea.Orden].BaseImponibleTotal' value="@linea.BaseImponibleTotal" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CompraAlbaranLineaId" name='FacturaLineas[@linea.Orden].CompraAlbaranLineaId' value="@linea.CompraAlbaranLineaId" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CodigoAlbaran" name='FacturaLineas[@linea.Orden].CodigoAlbaran' value="@linea.CodigoAlbaran" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CompraPedidoLineaId" name='FacturaLineas[@linea.Orden].CompraPedidoLineaId' value="@linea.CompraPedidoLineaId" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CodigoPedido" name='FacturaLineas[@linea.Orden].CodigoPedido' value="@linea.CodigoPedido" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].UnidadesPendientes" name='FacturaLineas[@linea.Orden].UnidadesPendientes' value="@linea.UnidadesPendientes" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CodigoTipoIVA" name='FacturaLineas[@linea.Orden].CodigoTipoIVA' value="@linea.CodigoTipoIVA" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].IVA_Porcentaje" name='FacturaLineas[@linea.Orden].IVA_Porcentaje' value="@linea.IVA_Porcentaje" />
+                                </td>
+                            </tr>
+                        }
+
+                        @*Líneas que vienen desde pedido*@
+                        @foreach (var linea in Model.FacturaLineas.Where(f => f.CompraPedidoLineaId.HasValue).OrderBy(f => f.CodigoPedido))
+                        {
+                            @if (codigoPedido != linea.CodigoPedido)
+                            {
+                                <tr class="bg-light text-dark font-weight-bold">
+                                    <td colspan="8" class="text-right pr-3">
+                                        <i class="fas fa-file mr-2"></i>Pedido nº: @Html.DisplayFor(f => linea.CodigoPedido)                                        
+                                    </td>
+                                </tr>
+                                codigoPedido = linea.CodigoPedido;
+                            }
+                            <tr>
+                                <td class="text-right font-weight-bold">
+                                    @linea.Unidades
+                                </td>
+                                <td>@linea.NombreArticulo</td>
+                                <td>@linea.NombreEvento</td>
+                                <td>@linea.ObservacionesFacturaLinea</td>
+                                <td class="text-right font-weight-bold text-nowrap">@linea.BaseImponiblePrecioUnitario.ToString("c")</td>
+                                <td class="text-right font-weight-bold text-nowrap">@linea.BaseImponibleTotal.ToString("c")</td>
+                                <td class="text-right text-nowrap">@Html.DisplayFor(f => linea.IVA_Porcentaje)</td>
+                                <td class="text-right text-nowrap">
+                                    @if (Model.EstadoFactura != EstadoFactura.TaspasadoSAGE)
+                                    {
+                                        <a href="#" class="text-info mr-2" data-toggle="modal" data-target="#NuevaLineaModal" onclick="EditFacturaLinea(@linea.Orden);">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </a>
+                                        <a class="text-danger mr-2" href="#" onclick="DeleteLinea(@linea.Orden)">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                    }
+
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].IdFacturaLinea" name='FacturaLineas[@linea.Orden].IdFacturaLinea' value="@linea.IdFacturaLinea" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].Orden" name='FacturaLineas[@linea.Orden].Orden' value="@linea.Orden" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CodigoEvento" name='FacturaLineas[@linea.Orden].CodigoEvento' value="@linea.CodigoEvento" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].NombreEvento" name='FacturaLineas[@linea.Orden].NombreEvento' value="@linea.NombreEvento" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CodigoArticulo" name='FacturaLineas[@linea.Orden].CodigoArticulo' value="@linea.CodigoArticulo" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].NombreArticulo" name='FacturaLineas[@linea.Orden].NombreArticulo' value="@linea.NombreArticulo" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].ObservacionesFacturaLinea" name='FacturaLineas[@linea.Orden].ObservacionesFacturaLinea' value="@linea.ObservacionesFacturaLinea" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].Unidades" name='FacturaLineas[@linea.Orden].Unidades' value="@linea.Unidades" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].BaseImponiblePrecioUnitario" name='FacturaLineas[@linea.Orden].BaseImponiblePrecioUnitario' value="@linea.BaseImponiblePrecioUnitario" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].BaseImponibleTotal" name='FacturaLineas[@linea.Orden].BaseImponibleTotal' value="@linea.BaseImponibleTotal" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CompraAlbaranLineaId" name='FacturaLineas[@linea.Orden].CompraAlbaranLineaId' value="@linea.CompraAlbaranLineaId" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CodigoAlbaran" name='FacturaLineas[@linea.Orden].CodigoAlbaran' value="@linea.CodigoAlbaran" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CompraPedidoLineaId" name='FacturaLineas[@linea.Orden].CompraPedidoLineaId' value="@linea.CompraPedidoLineaId" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CodigoPedido" name='FacturaLineas[@linea.Orden].CodigoPedido' value="@linea.CodigoPedido" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].UnidadesPendientes" name='FacturaLineas[@linea.Orden].UnidadesPendientes' value="@linea.UnidadesPendientes" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].CodigoTipoIVA" name='FacturaLineas[@linea.Orden].CodigoTipoIVA' value="@linea.CodigoTipoIVA" />
+                                    <input type="hidden" id="FacturaLineas[@linea.Orden].IVA_Porcentaje" name='FacturaLineas[@linea.Orden].IVA_Porcentaje' value="@linea.IVA_Porcentaje" />
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="divTotalFactura">
+                <partial name="_TotalFactura" />
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-secondary">
+                        <i class="fas fa-info-circle"></i>&nbsp;No hay líneas en la factura
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="NuevaLineaModal" tabindex="-1" aria-labelledby="NuevaLineaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content ui-front">
+                <div id="divFacturaLinea">
+                    <div class="row">
+                        <div class="col text-center">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-blue-grey btn-sm text-nowrap" onclick="SaveLinea();">Añadir <i class="fas fa-plus ml-2"></i></a>
+                    <a class="btn btn-grey btn-sm text-nowrap" data-dismiss="modal">Cancelar <i class="fas fa-times ml-2"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="NuevaLineaDesdeAlbaranModal" tabindex="-1" aria-labelledby="NuevaLineaDesdeAlbaranModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div id="divAlbaranes" class="p-2">
+                    <div class="row">
+                        <div class="col text-center">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-grey btn-sm text-nowrap" data-dismiss="modal">Cancelar <i class="fas fa-times ml-2"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="NuevaLineaDesdePedidoModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div id="divPedidos" class="p-2">
+                    <div class="row">
+                        <div class="col text-center">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-grey btn-sm text-nowrap" data-dismiss="modal">Cancelar <i class="fas fa-times ml-2"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+

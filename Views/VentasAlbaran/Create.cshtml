@@ -1,0 +1,73 @@
+﻿@model VentaAlbaran
+
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+}
+
+<form method="post" id="form">
+
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Nuevo albarán de venta
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                <button type="submit" class="btn btn-secondary btn-sm text-nowrap">Guardar <i class="fas fa-save ml-2"></i></button>
+                @if (Model == null || !Model.TienePedidoRelacionado)
+                {
+                    <a asp-action="Index" class="btn btn-grey btn-sm text-nowrap">Volver <i class="fas fa-arrow-left ml-2"></i></a>
+                }
+                else
+                {
+                    <a asp-action="Edit" asp-controller="VentasPedido" asp-route-id="@ViewBag.IdPedido" class="btn btn-grey btn-sm text-nowrap">Volver <i class="fas fa-arrow-left ml-2"></i></a>
+                }
+            </div>
+        </div>
+    </div>
+
+    @Html.EditorForModel()
+
+</form>
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/lib/jqueryui/jqueryui/jquery-ui.min.css">
+}
+@section Scripts {    
+    <script src="~/lib/jqueryui/jqueryui/jquery-ui.min.js"></script>    
+    <partial name="_VentasScriptsPartial" />
+    <script>
+        $('[data-toggle="tooltip"]').tooltip();
+
+        $(document).ready(function () {
+            $('#CodigoCliente').select2({
+                dropdownAutoWidth: 'true',                
+                minimumInputLength: 3,
+                allowClear: true,
+                language: 'es',            
+                ajax: {
+                    url: "@Url.Action("GetClientesJSON", "Clients")",
+                    dataType: "json",
+                    type: "POST",
+                    params: {
+                        contentType:'application/json; chasert=utf-8'
+                    },
+                    data: function (term, page){
+                        return "{ 'q':'" + term.term + "', 'page_limit': 10}";
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    }
+                },
+                escapeMarkup: function(m){ return m;}
+            });
+        });
+    </script>
+    <partial name="_VentasAlbaranScript" />
+}

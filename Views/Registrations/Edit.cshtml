@@ -1,0 +1,628 @@
+﻿@model Ferpuser.Models.Registration
+
+@{
+    ViewData["Title"] = "Editar inscripción";
+    ViewData["SearchClient"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Validation"] = true;
+    ViewData["Select2"] = true;
+    ViewData["Swal"] = true;
+    ViewData["Summernote"] = true;
+    ViewData["Inline"] = false;
+    ViewData["DatePicker"] = true;
+    var hasSageCode = Model.Client?.SageCode != null;
+
+    bool existeSage = Convert.ToBoolean(ViewData["ExisteSAGE"]);
+}
+
+@section ExtraButtons {
+    @if (Model.AccommodationId == null)
+    {
+        <a asp-controller="Accommodations" asp-action="FromRegistration" asp-route-id="@Model.Id" class="btn btn-blue-grey text-nowrap">Crear alojamiento <i class="fas fa-hotel ml-2"></i></a>
+    }
+    else
+    {
+        <a asp-controller="Accommodations" asp-action="Edit" asp-route-id="@Model.AccommodationId" class="btn btn-primary text-nowrap">Ver alojamiento <i class="fas fa-hotel ml-2"></i></a>
+    }
+}
+<form asp-action="Edit" asp-route-returnUrl="@ViewData["returnUrl"]" class="row">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <input asp-for="Modified" class="form-control" />
+                <input asp-for="Deleted" class="form-control" />
+                <input asp-for="Created" class="form-control" />
+                <input hidden asp-for="Id" class="form-control" />
+
+                <div class="d-flex justify-content-between">
+                    <h5><i class="fas fa-sign-in-alt mr-3"></i>Datos de la inscripción</h5>
+                </div>
+                <div asp-validation-summary="All" class="text-danger"></div>
+
+                <div class="row">
+                    <div class="col-md-1 form-group">
+                        <label asp-for="Number" class="control-label"># Inscripción</label>
+                        <input asp-for="Number" value="@ViewHelpers.PadCongress(Model.Number)" class="form-control readonly" type="text" readonly />
+                        <span asp-validation-for="Number" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 form-group">
+                        <label asp-for="CongressId" class="control-label"></label>
+                        <select asp-for="CongressId" class="browser-default custom-select select2" asp-items="ViewBag.CongressId"></select>
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label asp-for="RegistrationTypeId" class="control-label"></label>
+                        <select asp-for="RegistrationTypeId" class="browser-default custom-select select2" asp-items="ViewBag.RegistrationTypeId"></select>
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label asp-for="VATId" class="control-label"></label>
+                        <select asp-for="VATId" class="browser-default custom-select select2" asp-items="ViewBag.VATId"></select>
+                    </div>
+
+                    <div class="col-md-2 form-group">
+                        <label asp-for="AccountId" class="control-label"></label>
+                        @if (User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_ADMINISTRACION)))
+                        {
+                            <select asp-for="AccountId" class="browser-default custom-select select2" asp-items="ViewBag.AccountId"></select>
+
+                        }
+                        else
+                        {
+                            <input asp-for="AccountId" hidden />
+                            <input value="@Model.Account.Name" class="form-control" type="text" readonly />
+                        }
+                    </div>
+                    <div class="col-md-1 form-group">
+                        <label asp-for="Fee" class="control-label"></label>
+                        <input asp-for="Fee" class="form-control" />
+                        <span asp-validation-for="Fee" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12 mb-5">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h5><i class="fas fa-user mr-3"></i>Persona inscrita</h5>
+                    @if (ViewBag.IdAsistente != null)
+            {
+                <a href="@Url.Action("Edit","Asistente", new { Id = ViewBag.IdAsistente })"><i class="fas fa-pencil-alt mr-2"></i>Editar asistente</a>
+            }
+                </div>
+                <div class="row">
+                    <partial name="/Views/Shared/EditorTemplates/Registrant.cshtml" for="Registrant" />
+                </div>
+                <div class="row">
+                    <partial name="/Views/Shared/EditorTemplates/RegistrantLocation.cshtml" for="Registrant.Location" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="billing-container" class="col-md-12">
+        <div class="card mb-5">
+            <div class="card-body">
+                <div class="d-flex flex-column flex-md-row justify-content-between">
+                    <h5><i class="fas fa-file-invoice-dollar mr-3"></i>Datos de facturación facilitados</h5>
+                    <div class="btn-group btn-group-sm">
+                        <a href="#" id="search-client" class="btn btn-sm btn-primary">Buscar</a>
+                        <a href="#" id="use-registrant" class="btn btn-sm btn-primary">Copiar</a>
+                        @*@if (Model.Client != null && string.IsNullOrWhiteSpace(Model.Client.SageCode))
+        {
+            <a href="#" id="btnTraspasar" class="btn btn-sm btn-primary">Traspasar</a>
+        }*@
+                        @if (!existeSage)
+                        {
+                            <a href="#" id="btnTraspasar" class="btn btn-sm btn-primary">Traspasar</a>
+                        }
+                    </div>
+                </div>
+                <div id="client-container" class="row">
+                    <partial name="/Views/Shared/EditorTemplates/Client.cshtml" for="Client" />
+                </div>
+                <div id="billing-location-container" class="row">
+                    @if (Model.BillingLocation == null || ViewData.ContainsKey("ShowBillingLocation"))
+                    {
+                        <partial name="/Views/Shared/EditorTemplates/ClientLocation.cshtml" for="BillingLocation" />
+                    }
+                </div>
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label asp-for="BillingLocationId" class="control-label"></label>
+                        <select asp-for="BillingLocationId" class="browser-default custom-select select2" asp-items="ViewBag.BillingLocationId">
+                            <option value="@Model.BillingLocation?.Id">
+                                Usar la dirección facilitada
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*
+
+        <partial name="/Views/Shared/EditorTemplates/Location.cshtml" for="BillingLocation" />
+        <partial name="/Views/Shared/EditorTemplates/Location.cshtml" for="AlternateLocation" />*@
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5>Estado</h5>
+                <div class="row">
+                    <div class="col-md-6">
+
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" asp-for="Notified">
+                            <label class="custom-control-label" asp-for="Notified">@Html.DisplayNameFor(model => model.Notified)</label>
+                        </div>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" asp-for="Authorization">
+                            <label class="custom-control-label" asp-for="Authorization">@Html.DisplayNameFor(model => model.Authorization)</label>
+                        </div>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" asp-for="OnlyBilling">
+                            <label class="custom-control-label" asp-for="OnlyBilling">@Html.DisplayNameFor(model => model.OnlyBilling)</label>
+                        </div>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" asp-for="Exported">
+                            <label class="custom-control-label" asp-for="Exported">@Html.DisplayNameFor(model => model.Exported)</label>
+                        </div>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" asp-for="Imported">
+                            <label class="custom-control-label" asp-for="Imported">@Html.DisplayNameFor(model => model.Imported)</label>
+                        </div>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" asp-for="Paid" disabled>
+                            <label class="custom-control-label" asp-for="Paid">@Html.DisplayNameFor(model => model.Paid)</label>
+                        </div>
+
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" asp-for="Reviewed">
+                            <label class="custom-control-label" asp-for="Reviewed">@Html.DisplayNameFor(model => model.Reviewed)</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        @if (Model.Exported)
+                        {
+                            <label asp-for="InvoiceNumber" class="control-label"></label>
+                            <input asp-for="InvoiceNumber" class="form-control readonly" type="text" readonly />
+                            @Html.HiddenFor(f => f.InvoiceDate)
+                            @*<input id="FakeInvoiceDate" class="form-control" value="@DateTime.Today.ToShortDateString()" type="date" />*@
+                            @*<div class="input-group date" data-target-input="nearest">
+                <input type="text" asp-for="InvoiceDate" value="@DateTime.Now.ToString("dd/MM/yyyy")" class="form-control datetimepicker" data-target="#InvoiceDate" />
+                <div class="input-group-append" data-target="#InvoiceDate" data-toggle="datetimepicker">
+                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                </div>
+            </div>*@
+
+                            @if (Model.InvoiceDate != null)
+                            {
+                                <label asp-for="InvoiceDate" class="control-label"></label>
+                                <span>@Model.InvoiceDate.Value.ToShortDateString()</span>
+                                <a href="/Registrations/InvoicePreview/@Model.Id" target="_blank">Ver factura <i class="fas fa-external-link-alt ml-2"></i></a>
+                            }
+                        }
+                        @if (Model.Paid && Model.PaidDate.HasValue)
+                        {
+                            <div>
+                                Cobrado el @Model.PaidDate.Value.ToShortDateString()
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="form-group">
+                    <label asp-for="Notes" class="control-label"></label>
+                    <textarea asp-for="Notes" class="form-control">@Html.Raw(Model.Notes)</textarea>
+                    <span asp-validation-for="Notes" class="text-danger"></span>
+                </div>
+                <div class="form-group">       
+                    <div class="form-check">
+                        @Html.EditorFor(f => f.HaAsistido, new { @class = "form-check-input" } )
+                        @Html.LabelFor(f => f.HaAsistido, new { @class = "form-check-label" })
+                    </div>
+                    @Html.ValidationMessageFor(f => f.HaAsistido, "", new { @class = "text-danger small" })            
+
+                    <div class="form-check">
+                        @Html.EditorFor(f => f.Creditos, new { @class = "form-check-input" } )
+                        @Html.LabelFor(f => f.Creditos, new { @class = "form-check-label" })
+                    </div>
+                    @Html.ValidationMessageFor(f => f.Creditos, "", new { @class = "text-danger small" })  
+                </div>
+                
+                <div class="form-group text-right">
+                    <button id="delete-btn" type="button" class="btn btn-outline-danger">Borrar <i class="fas fa-trash-alt ml-2"></i></button>
+                    @*@if (Model.Reviewed && !Model.Exported && hasSageCode && !Model.IsInvited)
+                    {
+                        <button id="invoice-btn" type="button" class="btn btn-outline-success">Facturar</button>
+                    }*@
+                    @if (hasSageCode) //10/11/2022 JV:deja solo la la condición hasSageCode
+                    {
+                        <button id="invoice-btn" type="button" class="btn btn-outline-success">Facturar</button>
+                    }
+                    @if (Model.Exported && !Model.Paid)
+                    {
+                        <button id="collect-btn" type="button" class="btn btn-outline-success">Cobrar</button>
+                    }
+                    @if (Model.Client != null && !(string.IsNullOrWhiteSpace(Model.Client.Email) && string.IsNullOrWhiteSpace(Model.Client.Email2)) && (Model.Reviewed && !Model.Notified || (Model.InvoiceDate != null)))
+                    {
+                        <div class="btn-group">
+                            <button data-type="0" type="button" class="btn btn-success notify-btn">Enviar todo</button>
+                            <button type="button" class="btn btn-success dropdown-toggle dropdown-toggle-split pl-1 pr-2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <div class="dropdown-menu">
+                                @if (Model.Reviewed && !Model.Notified)
+                                {
+                                    <button data-type="1" type="button" class="dropdown-item notify-btn">Enviar confirmación</button>
+                                    <a href="/Registrations/Notification/@Model.Id" target="_blank" class="dropdown-item"> Previsualizar confirmación  <i class="fas fa-external-link-alt ml-2"></i></a>
+                                }
+                                <div class="dropdown-divider"></div>
+                                @if (Model.InvoiceDate != null && !Model.IsInvited)
+                                {
+                                    <div data-type="2" type="button" class="dropdown-item notify-btn">Enviar factura</div>
+                                    <a href="/Registrations/InvoicePreview/@Model.Id" target="_blank" class="dropdown-item"> Previsualizar factura  <i class="fas fa-external-link-alt ml-2"></i></a>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else if (Model.Client == null || (string.IsNullOrWhiteSpace(Model.Client.Email) && string.IsNullOrWhiteSpace(Model.Client.Email2)))
+                    {
+                        <a class="btn btn-warning" href="#billing-container">
+                            El cliente no tiene correo electrónico
+                        </a>
+                    }
+                    <button id="not-available" role="button" class="btn btn-outline-blue-grey d-none">
+                        Marcar no disponibles
+                    </button>
+                    <input type="submit" value="Guardar" class="btn btn-primary" />
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        var changed = false;
+
+        var lastNif = "";
+        $(function () {
+            $("#not-available").click(e => {
+                e.preventDefault();
+                var nd = "N/D";
+                var ndMail = "no.disponible@ferpuser.com"
+                if (!$("#Registrant_Name").val()) {
+                    $("#Registrant_Name").val(nd);
+                }
+                if (!$("#Registrant_Surnames").val()) {
+                    $("#Registrant_Surnames").val(nd);
+                }
+                if (!$("#Registrant_NIF").val()) {
+                    $("#Registrant_NIF").val(nd);
+                }
+                if (!$("#Registrant_Email").val()) {
+                    $("#Registrant_Email").val(ndMail);
+                }
+                if (!$("#Registrant_Location_Address").val()) {
+                    $("#Registrant_Location_Address").val(nd);
+                }
+                if (!$("#Registrant_Location_City").val()) {
+                    $("#Registrant_Location_City").val(nd);
+                }
+                if (!$("#Registrant_Location_ZipCode").val()) {
+                    $("#Registrant_Location_ZipCode").val(nd);
+                }
+                if (!$("#Registrant_Location_Province").val()) {
+                    $("#Registrant_Location_Province").val(nd);
+                }
+                if (!$("#Registrant_Location_Country").val()) {
+                    $("#Registrant_Location_Country").val(nd);
+                }
+                if (!$("#Registrant_Location_Phone").val()) {
+                    $("#Registrant_Location_Phone").val(nd);
+                }
+            });
+            $("#FakeInvoiceDate").change(e => {
+                $("#InvoiceDate").val($("#FakeInvoiceDate").val().split('/').reverse().join('-'));
+            });
+            $("#delete-btn").click(e => {
+                Swal.fire({
+                    title: "No podrás deshacer esta acción",
+                    text: "¿Desea borrar esta inscripción?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Borrar",
+                    cancelButtonText: "Cancelar"
+                }).then((result) => {
+                    if (result.value) {
+
+                        const myHeaders = new Headers();
+                        var token = $('form').find("input[name='af_token']").val();
+                        myHeaders.append('RequestVerificationToken', token);
+                        myHeaders.append('Content-Type', 'application/json');
+                        ga('send', 'pageview', '/Registrations/Delete/@Model.Id');
+                        fetch("/Registrations/Delete/@Model.Id", {
+                            method: "POST",
+                            headers: myHeaders
+                        }).then(pr => {
+                            console.log(pr);
+                            if (pr.ok) {
+                                Swal.fire(
+                                    'Borrado',
+                                    'La inscripción ha sido borrada.',
+                                    'success'
+                                ).then(e => {
+                                    window.location = "/Registrations";
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+
+            $("#BillingLocationId").change(e => {
+                if ($("#BillingLocationId")[0].selectedIndex > 0) {
+                    $("#billing-location-container").empty();
+                } else {
+                    ga('send', 'pageview', '/Clients/Location');
+                    fetch("/Clients/Location/")
+                        .then(e => {
+                            return e.text()
+                        }).then(html => {
+                            $("#billing-location-container").empty();
+                            $("#billing-location-container").append($(html));
+                            $("#BillingLocation_Id").val(generateUUID());
+                        });
+                }
+            });
+            $("#use-registrant").click(function (e) {
+                e.preventDefault();
+                $("#Client_BusinessName").val($("#Registrant_Surnames").val() + ", " + $("#Registrant_Name").val());
+                $("#Client_NIF").val($("#Registrant_NIF").val());
+                $("#Client_Email").val($("#Registrant_Email").val());
+                $("#Client_Email2").val($("#Registrant_Email2").val());
+                $("#Client_Modified").val(new Date().toISOString());
+                $("#Client_Created").val(new Date().toISOString());
+                $("#Client_Id").val(generateUUID());
+                $("#BillingLocation_Address").val($("#Registrant_Location_Address").val());
+                $("#BillingLocation_City").val($("#Registrant_Location_City").val());
+                $("#BillingLocation_ZipCode").val($("#Registrant_Location_ZipCode").val());
+                $("#BillingLocation_Province").val($("#Registrant_Location_Province").val());
+                $("#BillingLocation_Country").val($("#Registrant_Location_Country").val());
+                $("#BillingLocation_Phone").val($("#Registrant_Location_Phone").val());
+                $("#BillingLocation_Phone2").val($("#Registrant_Location_Phone2").val());
+                $("#BillingLocation_Phone2").val($("#Registrant_Location_Phone2").val());
+                $("#BillingLocation_Modified").val(new Date().toISOString());
+                $("#BillingLocation_Created").val(new Date().toISOString());
+                $("#BillingLocation_Id").val(generateUUID());
+
+            });
+
+
+            var leaveClientEmpty = function () {
+
+                $("#Client_Id").val("");
+                $("#BillingLocationId").val(-1);
+                $("#BillingLocation_Id").val("");
+                $("#billing-container").remove();
+                $("#not-available").removeClass("d-none");
+            }
+            @if (Model.RegistrationTypeId.Equals(Guid.Parse("0a2ac937-5ddd-458c-8155-b7cc648eb1e0")))
+            {
+                @:leaveClientEmpty();
+            }
+
+            $("#RegistrationTypeId").on('change', e => {
+                 var val = $("#RegistrationTypeId").val();
+                 if (val == '0a2ac937-5ddd-458c-8155-b7cc648eb1e0') {
+                     leaveClientEmpty();
+                 }
+             });
+
+
+            $("#leave-client-empty").click(function (e) {
+                e.preventDefault();
+                leaveClientEmpty();
+            });
+
+            $("#search-client").click(e => {
+                e.preventDefault();
+                $("#ClientSearchName").val($("#Client_NIF").val());
+                $("#ClientSearchName").trigger("keyup");
+                clientSearchModal();
+            });
+
+            $("body").on("change", "input", e => {
+                changed = true;
+                $("#invoice-btn").remove();
+            });
+
+            $("#invoice-btn").click(evt => {
+                evt.preventDefault();
+                if (changed) {
+                    Swal.fire({ title: "Los datos han cambiado", text: "Es necesario guardar", icon: "warning" });
+                    return;
+                }
+
+                var hasSageCode = @(hasSageCode ? "true" : "false");
+                if (!hasSageCode) {
+                    Swal.fire({ title: "El cliente no está en sage", text: "Es necesario añadirlo", icon: "warning" });
+                    return;
+                }
+                Swal.fire({
+                    title: "Exportación a SAGE",
+                    html: "<label class='control-label'>Fecha</label><input id='export-date' class='form-control' type='date' value='@DateTime.Today.ToString("yyyy-MM-dd")' />",
+                    showCancelButton: true,
+                    confirmButtonText: "Facturar",
+                    cancelButtonText: "Cancelar"
+                }).then(e => {
+                    if (e.value) {
+                        ga('send', 'pageview', '/Transfer/CostCenterProductToSage/@Model.Id');
+                        $(evt.currentTarget).empty();
+                        $(evt.currentTarget).append('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="sr-only">Exportando...</span></div>');
+                        fetch("/Transfer/CostCenterProductToSage/@Model.Id?date=" + $("#export-date").val()).then(res => {
+                            isImportingClients = false;
+                            if (!res.ok) {
+                                $(evt.currentTarget).empty();
+                                $(evt.currentTarget).append('Error al facturar <i class="fas fa-times"></i>')
+                                $(evt.currentTarget).removeClass("text-info");
+                                $(evt.currentTarget).addClass("text-danger");
+                                return res.text();
+                            }
+                            Swal.fire({ title: "Se ha facturado correctamente", icon: "success" }).then(e => {
+                                window.location = window.location.href.split("#")[0];
+                            });
+                        }).then(e => {
+                            if (e.includes("No se puede insertar una clave duplicada en el objeto 'dbo.c_albven'")) {
+                                Swal.fire({ title: "Error al facturar", icon: "error", text: "El contador no está actualizado y provocaría una duplicidad." });
+                            }
+                        });
+                    }
+                });
+            });
+
+            $(".notify-btn").click(evt => {
+                evt.preventDefault();
+                var preview = "";
+                var dataType = $(evt.target).attr("data-type");
+                ga('send', 'pageview', '/Registrations/NotificationMail/@Model.Id/?emailType=' + dataType);
+                fetch("/Registrations/NotificationMail/@Model.Id/?emailType=" + dataType).then(e => {
+                    return e.text()
+                }).then(e => {
+                    preview = e;
+                    @{
+                        var mail = "El cliente no tiene correo electrónico establecido.";
+                        if (Model.Client != null) {
+                            if (!string.IsNullOrWhiteSpace(Model.Client.Email))
+                            {
+                                mail = Model.Client.Email;
+                            } else if (!string.IsNullOrWhiteSpace(Model.Client.Email2))
+                            {
+                                mail = Model.Client.Email2;
+                            }
+                        }
+                    }
+                    var email = "@mail";
+
+                    Swal.fire({
+                        title: "¿Desea enviar un correo de confirmación al cliente?",
+                        //input: 'text',
+                        html: "<div><label for='#send-mails'>Correos separados por ;</label><input id='send-emails' value='" + email + "' class='swal2-input' /></div><div id='mailBody' ><div style='text-align: left'>" + preview + "</div></div>",
+                        width: "80%",
+                        showCancelButton: true,
+                        confirmButtonText: "Enviar",
+                        cancelButtonText: "Cancelar",
+                        //inputPlaceholder: 'Enviar también a... (correos separados por ;)'
+                    }).then(e => {
+                        if (e.value != undefined) {
+                            ga('send', 'pageview', '/Registrations/Notify/@Model.Id/?emailType=' + dataType);
+                            $(evt.currentTarget).empty();
+                            $(evt.currentTarget).append('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="sr-only">Enviando...</span></div>');
+                            fetch("/Registrations/Notify/@Model.Id/?emailType=" + dataType, {
+                                method: 'POST',
+                                headers: {
+                                  'Accept': 'application/json',
+                                  'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    body: $('#mailBody').summernote('code'),
+                                    mails: $("#send-emails").val()
+                                })
+                            }).then(res => {
+                                isImportingClients = false;
+                                if (!res.ok) {
+                                    console.log(res);
+
+                                    $(evt.currentTarget).empty();
+                                    $(evt.currentTarget).append('Error al enviar el correo <i class="fas fa-times"></i>')
+                                    $(evt.currentTarget).removeClass("text-info");
+                                    $(evt.currentTarget).addClass("text-danger");
+                                    return res.text();
+                                }
+                                Swal.fire({ title: "Se ha enviado correctamente correctamente", icon: "success" }).then(e => {
+                                    window.location = window.location.href.split("#")[0];
+                                });
+                            });
+                        }
+                    });
+                    $('#mailBody').summernote(SummernoteConfig);
+                });
+            });
+
+        $("#collect-btn").click(evt => {
+                evt.preventDefault();
+                Swal.fire({
+                    title: "¿Cobrar factura en SAGE?",
+                    html: "<label class='control-label'>Fecha</label><input id='collect-date' class='form-control' type='date' value='@DateTime.Today.ToString("yyyy-MM-dd")' />",
+                    showCancelButton: true,
+                    confirmButtonText: "Cobrar",
+                    cancelButtonText: "Cancelar"
+                }).then(e => {
+                    if (e.value) {
+                        ga('send', 'pageview', '/Transfer/CollectBillToSage/@Model.Id');
+                        $(evt.currentTarget).empty();
+                        $(evt.currentTarget).append('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="sr-only">Exportando...</span></div>');
+                        fetch("/Transfer/CollectBillToSage/@Model.Id?date=" + $("#collect-date").val()).then(res => {
+                            isImportingClients = false;
+                            if (!res.ok) {
+                                $(evt.currentTarget).empty();
+                                $(evt.currentTarget).append('Error al cobrar <i class="fas fa-times"></i>')
+                                $(evt.currentTarget).removeClass("text-info");
+                                $(evt.currentTarget).addClass("text-danger");
+                                return res.text();
+                            }
+                            Swal.fire({ title: "Se ha cobrado correctamente", icon: "success" }).then(e => {
+                                window.location = window.location.href.split("#")[0];
+                            });
+                        });
+                    }
+                });
+            });
+            $("body").on("keyup", "#Client_NIF", e => {
+                console.log($("#Client_NIF").val());
+                if ($("#Client_NIF").val().length == 0) {
+                    return;
+                }
+                if (lastNif == $("#Client_NIF").val().trim()) {
+                    return;
+                }
+                lastNif = $("#Client_NIF").val().trim();
+
+                ga('send', 'pageview', '/Clients/ClientNIFExists/' + $("#Client_NIF").val());
+                fetch("/Clients/ClientNIFExists/?NIF=" + $("#Client_NIF").val())
+                    .then(e => {
+                        return e.text()
+                    }).then(id => {
+                        if (id != "false") {
+                            console.log(id);
+                            Swal.fire({
+                                title: "Ya existe un cliente con ese NIF",
+                                text: "¿Importar los datos desde SAGE?",
+                                showCancelButton: true,
+                                confirmButtonText: "Importar",
+                                cancelButtonText: "Cancelar"
+                            }).then(e => {
+                                if (e.value) {
+                                    importClient(id);
+                                }
+                            });
+                        }
+                    });
+            });
+
+
+            $(".readonly").dblclick(e => {
+                e.target.readOnly = '';
+            })
+        });
+    </script>
+}

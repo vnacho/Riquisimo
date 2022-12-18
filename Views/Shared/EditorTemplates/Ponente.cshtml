@@ -1,0 +1,152 @@
+﻿@model Ponente
+
+<div class="card mb-4 wow d-print-none">
+    <div class="form-row card-body">
+
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.Login, new { @class = "small" })
+            @Html.EditorFor(f => f.Login, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.Login, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.Password, new { @class = "small" })
+            @Html.EditorFor(f => f.Password, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.Password, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.Nombre, new { @class = "small" })
+            @Html.EditorFor(f => f.Nombre, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.Nombre, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.Apellidos, new { @class = "small" })
+            @Html.EditorFor(f => f.Apellidos, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.Apellidos, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.NIF, new { @class = "small" })
+            @Html.EditorFor(f => f.NIF, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.NIF, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.Localidad, new { @class = "small" })
+            @Html.EditorFor(f => f.Localidad, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.Localidad, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.Provincia, new { @class = "small" })
+            @Html.EditorFor(f => f.Provincia, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.Provincia, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.Cargo, new { @class = "small" })
+            @Html.EditorFor(f => f.Cargo, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.Cargo, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.CentroTrabajo, new { @class = "small" })
+            @Html.EditorFor(f => f.CentroTrabajo, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.CentroTrabajo, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.Telefono, new { @class = "small" })
+            @Html.EditorFor(f => f.Telefono, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.Telefono, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.Movil, new { @class = "small" })
+            @Html.EditorFor(f => f.Movil, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.Movil, "", new { @class = "text-danger small" })
+        </div>
+        <div class="w-100"></div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.Mail, new { @class = "small" })
+            @Html.EditorFor(f => f.Mail, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.Mail, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.Mail2, new { @class = "small" })
+            @Html.EditorFor(f => f.Mail2, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.Mail2, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.Tratamiento, new { @class = "small" })
+            @Html.DropDownListFor(f => f.Tratamiento, new SelectList(Html.GetEnumSelectList<Tratamiento>(), "Value", "Text"), "-Seleccionar-", new { @class = "form-control form-control-sm" })
+            @Html.ValidationMessageFor(f => f.Tratamiento, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.AmbitoComite, new { @class = "small" })
+            @Html.DropDownListFor(f => f.AmbitoComite, new SelectList(Html.GetEnumSelectList<AmbitoComite>(), "Value", "Text"), "-Seleccionar-", new { @class = "form-control form-control-sm" })
+            @Html.ValidationMessageFor(f => f.AmbitoComite, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.UltimoAcceso, new { @class = "small" })
+            @Html.EditorFor(f => f.UltimoAcceso, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.UltimoAcceso, "", new { @class = "text-danger small" })
+        </div>        
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.FechaRegistro, new { @class = "small" })
+            @Html.EditorFor(f => f.FechaRegistro, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.FechaRegistro, "", new { @class = "text-danger small" })
+        </div>
+
+        <div class="w-100"></div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.CongressId, new { @class = "small" })
+            @Html.DropDownListFor(f => f.CongressId, new SelectList(ViewBag.Eventos, "Id", "DisplayName"), "-Seleccionar-", new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(f => f.CongressId, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.TipoComiteId, new { @class = "small" })
+            @Html.DropDownListFor(f => f.TipoComiteId, new SelectList(ViewBag.TiposComite, "Id", "Nombre"), "-Seleccionar-", new { @class = "form-control select2"  })
+            @Html.ValidationMessageFor(f => f.TipoComiteId, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => f.PuestoComiteId, new { @class = "small" })
+            @Html.DropDownListFor(f => f.PuestoComiteId, new SelectList(ViewBag.PuestosComite, "Id", "Nombre"), "-Seleccionar-", new { @class = "form-control select2"  })
+            @Html.ValidationMessageFor(f => f.PuestoComiteId, "", new { @class = "text-danger small" })
+        </div>
+
+        <div class="w-100"></div>
+        <div class="form-group col-md-2">
+            <div class="form-check">
+                @Html.EditorFor(f => f.Activo, new { htmlAttributes = new { type = "checkbox", @class = "form-check-input" } })
+                @Html.LabelFor(f => f.Activo, new { @class = "small form-check-label" })
+            </div>
+            @Html.ValidationMessageFor(f => f.Activo, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            <div class="form-check">
+                @Html.EditorFor(f => f.Visible, new { htmlAttributes = new { type = "checkbox", @class = "form-check-input" } })
+                @Html.LabelFor(f => f.Visible, new { @class = "small form-check-label" })
+            </div>
+            @Html.ValidationMessageFor(f => f.Visible, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            <div class="form-check">
+                @Html.EditorFor(f => f.Superevaluador, new { htmlAttributes = new { type = "checkbox", @class = "form-check-input" } })
+                @Html.LabelFor(f => f.Superevaluador, new { @class = "small form-check-label" })
+            </div>
+            @Html.ValidationMessageFor(f => f.Superevaluador, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            <div class="form-check">
+                @Html.EditorFor(f => f.Visualizador, new { htmlAttributes = new { type = "checkbox", @class = "form-check-input" } })
+                @Html.LabelFor(f => f.Visualizador, new { @class = "small form-check-label" })
+            </div>
+            @Html.ValidationMessageFor(f => f.Visualizador, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            <div class="form-check">
+                @Html.EditorFor(f => f.JuntaDirectiva, new { htmlAttributes = new { type = "checkbox", @class = "form-check-input" } })
+                @Html.LabelFor(f => f.JuntaDirectiva, new { @class = "small form-check-label" })
+            </div>
+            @Html.ValidationMessageFor(f => f.JuntaDirectiva, "", new { @class = "text-danger small" })
+        </div>        
+        <div class="form-group col-md-12">
+            @Html.LabelFor(f => f.Comentarios, new { @class = "small" })
+            @Html.EditorFor(f => f.Comentarios, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.Comentarios, "", new { @class = "text-danger small" })
+        </div>
+    </div>
+</div>

@@ -1,0 +1,5 @@
+﻿A veces al sincronizar da un error. Si es así:
+1. Ir a Git/Administrar ramas
+2. En remotes/origin dar click derecho en master
+3. Fusionar "origin/master" con merge en "master
+4. Seleccionar rama "master" y en la ventana principal de administrar ramas (historial local) y enviar cambios desde salientes y recuperar desde entrantes.

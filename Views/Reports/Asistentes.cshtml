@@ -1,0 +1,189 @@
+﻿@using Ferpuser.ViewModels
+@model ReportAsistentesViewModel
+
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+}
+
+@section Styles
+{
+    <link href="/css/site.css" rel="stylesheet" />
+    <style type="text/css" media="print">
+        @@page {
+            size: landscape;
+        }
+
+        #divResultados th, td {
+            font-size: 0.5rem !important;
+            padding: 0px !important;
+        }
+    </style>
+}
+
+
+<form method="post">
+
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Informe de asistentes
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                @if (Model != null && Model.Items != null && Model.Items.Any())
+                {
+                    <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                        <button class="btn btn-grey btn-sm text-nowrap" onclick="window.print();">
+                            Imprimir informe <i class="fas fa-print ml-2"></i>
+                        </button>
+                    </div>
+                    @*<button type="submit" class="btn btn-grey btn-sm text-nowrap" asp-action="ExportPdf" asp-controller="InformeTotalHorasPersonal">
+                                Imprimir <i class="fas fa-print ml-2"></i>
+                            </button>
+                            <button type="submit" class="btn btn-grey btn-sm text-nowrap" asp-action="ExportCsv" asp-controller="InformeResumenEmpresa">
+                            Exportar <i class="fas fa-file-csv ml-2"></i>
+                        </button>*@
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row d-print-none">
+        <div class="form-group col-md-4">
+            @Html.LabelFor(f => f.NIF, new { @class = "small" })
+            @Html.DropDownListFor(model => model.NIF, new SelectList(ViewBag.Asistentes, "NIF", "Display"), "-Seleccionar-", new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(f => f.NIF, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(f => f.IdCongress, new { @class = "small" })
+            @Html.DropDownListFor(model => model.IdCongress, new SelectList(ViewBag.Congresses, "Id", "DisplayName"), "-Seleccionar-", new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(f => f.IdCongress, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-4 text-right">
+            <br />
+            <button type="submit" id="btnFiltrar" class="btn btn-sm btn-blue-grey">Filtrar <i class="fas fa-search ml-2"></i></button>
+            <a href="@Url.Action("Asistentes","Reports")" class="btn btn-sm btn-grey">Limpiar <i class="fas fa-eraser ml-2"></i></a>
+        </div>
+    </div>
+
+    <div id="divResultados">
+        @if (Model != null && Model.Items != null && Model.Items.Any())
+        {
+            <hr />
+            <div class="d-none d-print-block">
+                @*<img src="~/img/logo_informes.png" /><br />*@
+                <b>INFORME DE ASISTENTES</b>
+            </div>
+
+            <div class="small">
+                @if (Model.Asistente != null)
+                {
+                    <div class="row">
+                        <div class="col-md-12">
+                            @Model.Asistente.Treatment?.Name @Model.Asistente.Nombre @Model.Asistente.Apellidos
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            @Model.Asistente.CentroTrabajo
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            @Model.Asistente.CategoriaProfesional @Model.Asistente.Cargo @Model.Asistente.FechaActualizacionCargo?.ToShortDateString()
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            @Model.Asistente.Telefono1 @Model.Asistente.Telefono2 @Model.Asistente.Email1 @Model.Asistente.Email2
+                        </div>
+                    </div>
+                }
+            </div>
+            <hr class="d-print-none" />
+
+            <div class="table-responsive mt-2">
+                <table class="table table-sm table-hover table-striped bg-white table-bordered">
+                    <thead class="font-weight-bolder">
+                        <tr>
+                            <th scope="col" class="text-left pl-2 font-weight-bold">
+                                CÓDIGO DE EVENTO
+                            </th>
+                            <th scope="col" class="text-left pr-2 font-weight-bold">
+                                NOMBRE DEL EVENTO
+                            </th>
+                            <th scope="col" class="text-left pr-2 font-weight-bold">
+                                LUGAR
+                            </th>
+                            <th scope="col" class="text-center pr-2 font-weight-bold">
+                                FECHA DE INICIO
+                            </th>
+                            <th scope="col" class="text-center pr-2 font-weight-bold">
+                                FECHA DE FINALIZACIÓN
+                            </th>
+                            <th scope="col" class="text-left pr-2 font-weight-bold">
+                                TIPO DE LA INSCRIPCIÓN
+                            </th>
+                            <th scope="col" class="text-right pr-2 font-weight-bold">
+                                IMPORTE DE LA INSCRIPCIÓN
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td class="text-left pl-2">
+                                        @item.CodigoEvento
+                                    </td>
+                                    <td class="text-left pr-2 ">
+                                        @item.NombreEvento
+                                    </td>
+                                    <td class="text-left pr-2 ">
+                                        @item.Lugar
+                                    </td>
+                                    <td class="text-center pr-2 ">
+                                        @item.FechaInicio.ToShortDateString()
+                                    </td>
+                                    <td class="text-center pr-2 ">
+                                        @item.FechaFin.ToShortDateString()
+                                    </td>
+                                    <td class="text-left pr-2 ">
+                                        @item.TipoInscripcion
+                                    </td>
+                                    <td class="text-right pr-2 ">
+                                        @item.ImporteInscripcion?.ToString("C")
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                    @*<tfoot class="font-weight-bolder">
+                            <tr>
+                                <th scope="col">
+                                    &nbsp;
+                                </th>
+                                <th scope="col" class="text-right pr-2 font-weight-bold">
+                                    @Model.Items.Sum(f => f.Unidades).ToString("N1")
+                                </th>
+                                <th scope="col">
+                                    &nbsp;
+                                </th>
+                                <th scope="col" class="text-right pr-2 font-weight-bold">
+                                    @total.ToString("N1")
+                                </th>
+                            </tr>
+                        </tfoot>*@
+                </table>
+            </div>
+        }
+        else
+        {
+            <partial name="_Empty" model="string.Empty" />
+        }
+    </div>
+</form>

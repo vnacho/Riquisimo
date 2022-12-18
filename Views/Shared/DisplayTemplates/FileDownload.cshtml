@@ -1,0 +1,11 @@
+﻿@using Ferpuser.Models.Core
+@model Fichero
+@if (!string.IsNullOrWhiteSpace(Model.Url))
+{
+    <div id="divDisplayFile">
+        <p class="small">
+            Nombre del fichero: <b>@Model.Nombre</b>
+            <a download="@Model.Nombre" href="@Url.Content(Model.Url)" class="mx-5 text-dark"> <i class="fas fa-download mr-2 text-info"></i>Descargar</a>
+        </p>
+    </div>
+}

@@ -1,0 +1,23 @@
+﻿@font-face {
+    font-family: 'Museo';
+    font-weight: 300;
+    font-display: swap;
+    src: local(Museo 300), url("../mdb/font/museo/hinted-Museo-300.eot");
+    src: url("../mdb/font/museo/hinted-Museo-300.eot?#iefix") format("embedded-opentype"), url("../mdb/font/museo/hinted-Museo-300.woff2") format("woff2"), url("../mdb/font/museo/hinted-Museo-300.woff") format("woff"), url("../mdb/font/museo/hinted-Museo-300.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: 'Museo';
+    font-weight: 500;
+    font-display: swap;
+    src: url("../mdb/font/museo/hinted-Museo-500.eot");
+    src: url("../mdb/font/museo/hinted-Museo-500.eot?#iefix") format("embedded-opentype"), url("../mdb/font/museo/hinted-Museo-500.woff2") format("woff2"), url("../mdb/font/museo/hinted-Museo-500.woff") format("woff"), url("../mdb/font/museo/hinted-Museo-500.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: 'Museo';
+    font-weight: 700;
+    font-display: swap;
+    src: local(Museo 700), url("../mdb/font/museo/hinted-Museo-700.eot");
+    src: url("../mdb/font/museo/hinted-Museo-700.eot?#iefix") format("embedded-opentype"), url("../mdb/font/museo/hinted-Museo-700.woff2") format("woff2"), url("../mdb/font/museo/hinted-Museo-700.woff") format("woff"), url("../mdb/font/museo/hinted-Museo-700.ttf") format("truetype");
+}

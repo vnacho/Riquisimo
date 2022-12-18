@@ -1,0 +1,84 @@
+﻿<script>
+
+    function ChangeCliente()
+    {
+        var codigocliente = $("#CodigoCliente").val();
+        fetch('@Url.Action("GetByIdCliente", "EnvCli")' + '?CodigoCliente=' + codigocliente, {
+            method: 'GET',
+            })
+            .then((response) => { return response.text(); })
+            .then((result) => {
+                $('#divDireccionesEnvio').html(result);
+            });
+    }
+
+    function SeleccionarDireccion(linea)
+    {
+        $('#modalCambiarDireccion').modal('hide');
+        var codigocliente = $("#CodigoCliente").val();
+        fetch('@Url.Action("GetByIdCliente", "EnvCli")' + '?CodigoCliente=' + codigocliente + '&Linea=' + linea, {
+            method: 'GET',
+            })
+            .then((response) => { return response.text(); })
+            .then((result) => {
+                $('#divDireccionesEnvio').html(result);
+            });
+    }
+
+    function ArticuloChanged(CodigoArticuloSelect2)
+    {
+        var codigo = $(CodigoArticuloSelect2).val().trim();
+        var text = $("#linea_CodigoArticulo option:selected").text();
+        let nombre_producto = text.replace(codigo, "");
+        $("#linea_NombreArticulo").val(nombre_producto);
+
+        CargarPrecio(codigo);
+        CargarIVA(codigo);
+    }
+
+    function CargarIVA(codigoArticulo)
+    {
+        if (codigoArticulo != '') {
+            //Obtener el IVA por defecto del artículo
+            $.ajax({
+                url: "@Url.Action("GetFirstOrDefault", "TipoIVA")" + "?codigoArticulo=" + codigoArticulo,
+                success: function (response) {
+                    if (response != null) {
+                        $("#linea_CodigoTipoIVA").val(response.codigotipoiva);
+                    }
+                    else {
+                        $("#linea_CodigoTipoIVA").val('');
+                    }
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        }
+    }
+
+    function OrigenChanged(cbx)
+    {
+        if (cbx.checked)
+        {
+            $(".data-origen").removeClass('d-none');
+        }
+        else
+        {
+            $(".data-origen").addClass('d-none');
+        }
+    }
+
+    function OrigenArticuloChanged(CodigoArticuloSelect2)
+    {
+        var codigo = $(CodigoArticuloSelect2).val().trim();
+        var text = $("#OrigenCodigoArticulo option:selected").text();
+        let nombre_producto = text.replace(codigo, "");
+        $("#OrigenNombreArticulo").val(nombre_producto);
+    }
+
+
+</script>

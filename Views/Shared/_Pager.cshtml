@@ -1,0 +1,94 @@
+﻿@using Ferpuser.Models.Core
+@model Pager
+
+@if(Model!=null && Model.Total == 0)
+{
+    return;
+}
+
+<div class="row align-items-md-center">
+    <div class="col-md-7">
+        @if (Model.Total > Model.PageSize)
+        {
+            <nav aria-label="Paginación">
+                <ul class="pagination pagination-sm mb-0">
+
+                    @if (Model.Page == 1)
+                    {
+                        <li class="page-item disabled" data-toggle="tooltip" data-placement="top" title="Primero">
+                            <a href='#' class="page-link">
+                                Primero
+                            </a>
+                        </li>
+                        <li class="page-item disabled" data-toggle="tooltip" data-placement="top" title="Anterior">
+                            <a href='#' class="page-link">
+                                Anterior
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item" data-toggle="tooltip" data-placement="top" title="Primero">
+                            @{
+                                <button id="pag" name="pag" value="1" type="submit" class="page-link">Primero</button>
+                            }
+                        </li>
+                        <li class="page-item" data-toggle="tooltip" data-placement="top" title="Anterior">
+                            @{
+                                <button id="pag" name="pag" value="@(Model.Page - 1)" type="submit" class="page-link">Anterior</button>
+                            }
+                        </li>
+                    }
+
+                    @for (int i = Model.FirstPageDisplay; i <= Model.LastPageDisplay; i++)
+                    {
+                        if (Model.Page == i)
+                        {
+                            <li class="page-item active d-none d-md-block"><a class="page-link bg-info" href="#">@i</a></li>
+                        }
+                        else
+                        {
+                            <li class="page-item d-none d-md-block">
+                                @{
+                                    <input type="submit" id="pag" name="pag" value="@i" class="page-link" />
+                                }
+                            </li>
+                        }
+                    }
+
+                    @if (Model.Page * Model.PageSize >= Model.Total)
+                    {
+                        <li class="page-item disabled" data-toggle="tooltip" data-placement="top" title="Siguiente">
+                            <a class="page-link" href="#">
+                                Siguiente
+                            </a>
+                        </li>
+                        <li class="page-item disabled" data-toggle="tooltip" data-placement="top" title="Último">
+                            <a class="page-link" href="#">
+                                Último
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item" data-toggle="tooltip" data-placement="top" title="Siguiente">
+                            @{
+                                <button id="pag" name="pag" value="@(Model.Page + 1)" type="submit" class="page-link">Siguiente</button>
+                            }
+                        </li>
+                        <li class="page-item" data-toggle="tooltip" data-placement="top" title="Último">
+                            @{
+                                <button id="pag" name="pag" value="@(Model.LastPage)" type="submit" class="page-link">Último</button>
+                            }
+                        </li>
+                    }
+
+                </ul>
+            </nav>
+        }
+    </div>
+    <div class="col-md-5 text-md-right small">
+        <span><b>@Model.Total</b></span> elementos encontrados. Mostrando del <b>@Model.ResultadoDesde</b> al <b>@Model.ResultadoHasta</b>.
+    </div>
+</div>
+

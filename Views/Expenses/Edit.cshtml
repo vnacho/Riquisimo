@@ -1,0 +1,945 @@
+﻿@model Ferpuser.Models.Expense
+@using Ferpuser.Models.Sage
+
+@{
+    ViewData["Title"] = "Editar factura";
+    ViewData["SearchClient"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Validation"] = true;
+    ViewData["ValidationUnobtrusive"] = false;
+    ViewData["Select2"] = true;
+    ViewData["Swal"] = true;
+    ViewData["Summernote"] = true;
+    ViewData["Inline"] = true;
+    ViewData["DatePicker"] = true;
+    var hasSageCode = Model.Client?.SageCode != null;
+}
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form asp-action="Edit" class="row">
+    <div class="col-md-5 mb-2">
+        <div class="card">
+            <div class="card-body">
+                <input asp-for="Modified" class="form-control" />
+                <input asp-for="Deleted" class="form-control" />
+                <input asp-for="Created" class="form-control" />
+                <input hidden asp-for="Number" class="form-control" />
+                <input hidden asp-for="Id" class="form-control" />
+                <div class="d-flex flex-column">
+                    <div class="row">
+                        <label asp-for="CongressId" class="control-label col-xl-2">Evento</label>
+                        <div class="col-xl-10">
+                            <select asp-for="CongressId" class="browser-default custom-select select2" asp-items="ViewBag.CongressId"></select>
+                        </div>
+                        <span asp-validation-for="CongressId" class="text-danger col-12"></span>
+                    </div>
+
+                    <div class="row">
+                        <label asp-for="Serie" class="control-label col-xl-2"></label>
+                        <div class="col-xl-4">
+                            <select asp-for="Serie" class="browser-default custom-select select2" asp-items="ViewBag.Serie"></select>
+                        </div>
+
+                        <label asp-for="DocumentTypeId" class="control-label col-xl-2">T doc.</label>
+                        <div class="col-xl-4">
+                            <select asp-for="DocumentTypeId" class="browser-default custom-select select2" asp-items="ViewBag.DocumentTypes"></select>
+                        </div>
+                        <span asp-validation-for="DocumentTypeId" class="text-danger col-12"></span>
+                        <span asp-validation-for="Serie" class="text-danger col-12"></span>
+                    </div>
+
+                    <div class="row">
+                        <label asp-for="FPag" class="control-label col-xl-2">F. Pago</label>
+                        <div class="col-xl-4">
+                            <select asp-for="FPag" class="browser-default custom-select select2" asp-items="ViewBag.FPag"></select>
+                        </div>
+
+                        <label asp-for="AccountId" class="control-label col-xl-2">Vend.</label>
+                        <div class="col-xl-4">
+                            @if (User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_ADMINISTRACION)))
+                            {
+                                <select asp-for="AccountId" class="browser-default custom-select select2" asp-items="ViewBag.AccountId"></select>
+
+                            }
+                            else
+                            {
+                                <input value="@Model.Account.Name" class="form-control" type="text" readonly />
+                                <input asp-for="AccountId" hidden />
+                            }
+                        </div>
+                        <span asp-validation-for="AccountId" class="text-danger"></span>
+                        <span asp-validation-for="FPag" class="text-danger col-12"></span>
+                    </div>
+                    <div class="row">
+                        @if (Model != null && Model.DocumentType != null)
+                        {
+                            @if (Model.DocumentType.IsInvoice() && !string.IsNullOrWhiteSpace(Model.InvoiceNumber))
+                            {
+                                <label asp-for="InvoiceNumber" class="control-label col-xl-2">N Fac</label>
+                                <div class="col-xl-4">
+                                    <input asp-for="InvoiceNumber" class="form-control readonly" type="text" readonly />
+                                </div>
+                                <span asp-validation-for="InvoiceNumber" class="text-danger"></span>
+                            }
+                        }
+                        @if (Model.Exported)
+                        {
+                            <label asp-for="InvoiceDate" class="control-label col-xl-2">Fecha fac</label>
+                            <div class="col-xl-4">
+                                @if (User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_ADMINISTRACION)))
+                                {
+                                    <div class="input-group date" data-target-input="nearest">
+                                        @if (Model.InvoiceDate.HasValue)
+                                        {
+                                            <input type="text" asp-for="InvoiceDate" value="@Model.InvoiceDate.Value.ToString("dd/MM/yyyy")" class="form-control datetimepicker" data-target="#InvoiceDate" />
+                                        }
+                                        else
+                                        {
+                                            <input type="text" asp-for="InvoiceDate" value="@DateTime.Today.ToString("dd/MM/yyyy")" class="form-control datetimepicker" data-target="#InvoiceDate" />
+                                        }
+                                        <div class="input-group-append" data-target="#InvoiceDate" data-toggle="datetimepicker">
+                                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <input type="text" asp-for="InvoiceDate" hidden />
+                                    if (Model.InvoiceDate.HasValue)
+                                    {
+                                        @Model.InvoiceDate.Value.ToString("dd/MM/yyyy")
+                                    }
+                                }
+                            </div>
+                        }
+                        @if (Model.Paid)
+                        {
+                            <label asp-for="PaidDate" class="control-label col-xl-2">Fecha pago</label>
+                            <div class="col-xl-4">
+                                @if (User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_ADMINISTRACION)))
+                                {
+                                    <div class="input-group date" data-target-input="nearest">
+                                        @if (Model.PaidDate.HasValue)
+                                        {
+                                            <input type="text" asp-for="PaidDate" value="@Model.PaidDate.Value.ToString("dd/MM/yyyy")" class="form-control datetimepicker" data-target="#PaidDate" />
+                                        }
+                                        else
+                                        {
+                                            <input type="text" asp-for="PaidDate" value="@DateTime.Today" class="form-control datetimepicker" data-target="#PaidDate" />
+                                        }
+                                        <div class="input-group-append" data-target="#PaidDate" data-toggle="datetimepicker">
+                                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <input type="text" asp-for="PaidDate" hidden />
+                                    if (Model.PaidDate.HasValue)
+                                    {
+                                        @Model.PaidDate.Value.ToString("dd/MM/yyyy")
+                                    }
+                                }
+                            </div>
+                            @*<span asp-validation-for="PaidDate" class="text-danger"></span>*@
+
+                        }
+                        @if (!Model.Exported && !Model.Paid)
+                        {
+                            <label class="control-label col-xl-2">Fecha doc</label>
+                            <div class="col-xl-4">
+                                @Model.Modified.ToString("dd/MM/yyyy")
+                            </div>
+                        }
+                        <div class="col-xl-6">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" asp-for="ShowCostCenterInfoOnInvoice">
+                                <label class="custom-control-label" asp-for="ShowCostCenterInfoOnInvoice">@Html.DisplayNameFor(model => model.ShowCostCenterInfoOnInvoice)</label>
+                            </div>
+                        </div>
+                        <div class="col-xl-6">
+                            <div class="text-right">
+                                <a href="/Expenses/InvoicePreview/@Model.Id" target="_blank">Ver factura <i class="fas fa-external-link-alt ml-2"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="billing-container" class="col-md-3 mb-2">
+        <div class="card">
+            <div class="card-body">
+                <div id="client-container" class="d-flex flex-column">
+                    <partial name="/Views/Shared/EditorTemplates/Client.cshtml" for="Client" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="billing-container" class="col-md-4 mb-2">
+        <div class="card">
+            <div class="card-body">
+                <div id="billing-location-container" class="row">
+                    @*@if (Model.BillingLocationId == null)
+                        {*@
+                    <partial name="/Views/Shared/EditorTemplates/ClientLocation.cshtml" for="BillingLocation" />
+                    @*}*@
+                </div>
+                <div id="search-address-selector" class="row">
+                    <label asp-for="BillingLocationId" class="control-label col-xl-2">D. Factur.</label>
+                    <div class="col-xl-9">
+                        <select asp-for="BillingLocationId" class="browser-default custom-select select2" asp-items="ViewBag.BillingLocationId">
+                            @*<option value="@Model.BillingLocation?.Id">
+                                    Indicar dirección
+                                </option>*@
+                        </select>
+                    </div>
+                    <span asp-validation-for="BillingLocationId" class="text-danger"></span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div id="products-container" class="col-md-12">
+        <div class="card mb-2">
+            <div class="card-body">
+                <table class="table table-sm table-borderless">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%">Artículo</th>
+                            <th>Descripción</th>
+                            <th class="text-right" style="width: 12%">IVA</th>
+                            <th class="text-right" style="width: 6%">Unidades</th>
+                            <th class="text-right" style="width: 6%">Precio</th>
+                            <th class="text-right" style="width: 6%">Total</th>
+                            <th class="text-right" style="width: 5%">
+                                <a id="add-product" href="#" class="btn btn-sm btn-primary">Añadir</a>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="products-list">
+                        <tr>
+                            <td>
+                                <select asp-for="Product" class="browser-default custom-select select2-product">
+                                    @foreach (Articulo a in ViewBag.Products)
+                                    {
+                                        @if (a.Codigo.Equals(Model.Product))
+                                        {
+
+                                            <option data-productname="@a.Nombre" value="@a.Codigo" selected>
+                                                @a.Codigo
+                                            </option>
+                                        }
+                                        else
+                                        {
+                                            <option data-productname="@a.Nombre" value="@a.Codigo">
+                                                @a.Codigo
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="Product" class="text-danger"></span>
+                            </td>
+                            <td>
+                                <input asp-for="ProductDescription" maxlength="100" class="form-control" value="@Model.ProductDescription.Trim()" />
+                                <span asp-validation-for="ProductDescription" class="text-danger"></span>
+                            </td>
+                            <td>
+                                <input asp-for="VAT" hidden />
+                                <select asp-for="VATId" class="browser-default custom-select select2" asp-items="ViewBag.VATId"></select>
+                            </td>
+                            <td>
+                                <input asp-for="Units" class="form-control text-right" value="@Model.Units.ToString("N")" />
+                                <span asp-validation-for="Units" class="text-danger"></span>
+                            </td>
+                            <td>
+                                <input asp-for="BasePrice" class="form-control text-right" value="@Model.BasePrice.ToString("N")" />
+                                <span asp-validation-for="BasePrice" class="text-danger"></span>
+                            </td>
+                            <td>
+                                <input asp-for="TotalPrice" class="text-right form-control-plaintext text-right" value="@Model.TotalPrice.ToString("N")" readonly />
+                            </td>
+                            <td class="text-right">
+                                <a href="#" id="mandatory" class="toggle-comments btn btn-info btn-rounded btn-sm px-2"><i id="mandatory" class="fas fa-comment-dots"></i></a>
+                            </td>
+                        </tr>
+                        <tr class="d-none comments-mandatory">
+                            <td class="text-right">
+                                <b>
+                                    Comentarios
+                                </b>
+                            </td>
+                            <td colspan="6">
+                                <input asp-for="ProductNotes" maxlength="90" class="form-control" />
+                            </td>
+                        </tr>
+                        @if (Model.Products != null)
+                        {
+                            @for (var i = 0; i < Model.Products.Count(); i++)
+                            {
+                                @Html.EditorFor(p => p.Products[i], "/Views/Shared/EditorTemplates/ProductTemplate.cshtml")
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-2">
+        <div class="card">
+            <div class="card-body">
+                <h5>Estado</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" asp-for="Notified">
+                            <label class="custom-control-label" asp-for="Notified">@Html.DisplayNameFor(model => model.Notified)</label>
+                        </div>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" asp-for="Exported">
+                            <label class="custom-control-label" asp-for="Exported">@Html.DisplayNameFor(model => model.Exported)</label>
+                        </div>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" asp-for="Paid">
+                            <label class="custom-control-label" asp-for="Paid">@Html.DisplayNameFor(model => model.Paid)</label>
+                        </div>
+
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" asp-for="Reviewed">
+                            <label class="custom-control-label" asp-for="Reviewed">@Html.DisplayNameFor(model => model.Reviewed)</label>
+                        </div>
+
+                        @*<div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" asp-for="Authorization">
+                                    <label class="custom-control-label" asp-for="Authorization">@Html.DisplayNameFor(model => model.Authorization)</label>
+                                </div>
+                            <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" asp-for="OnlyBilling">
+                                    <label class="custom-control-label" asp-for="OnlyBilling">@Html.DisplayNameFor(model => model.OnlyBilling)</label>
+                                </div>
+                            <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" asp-for="Imported">
+                                    <label class="custom-control-label" asp-for="Imported">@Html.DisplayNameFor(model => model.Imported)</label>
+                                </div>*@
+                    </div>
+                    @*<div class="col-md-6">
+                            @if (Model.Exported)
+                            {
+                                <label asp-for="InvoiceNumber" class="control-label"></label>
+                                <input asp-for="InvoiceNumber" class="form-control readonly" type="text" readonly />
+
+                                <label asp-for="InvoiceDate" class="control-label"></label>
+                                @if (Model.InvoiceDate == null)
+                                {
+                                    <input asp-for="InvoiceDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" type="date" />
+                                }
+                                else
+                                {
+                                    <span>@Model.InvoiceDate.Value.ToShortDateString()</span>
+                                }
+                            }
+                            @if (Model.Paid && Model.PaidDate.HasValue)
+                            {
+                                <div>
+                                    Cobrado el @Model.PaidDate.Value.ToShortDateString()
+                                </div>
+                            }
+                        </div>*@
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-2">
+        <div class="card">
+            <div class="card-body row justify-content-between">
+
+                @if (string.IsNullOrWhiteSpace(Model.InvoiceNumber) || User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_ADMINISTRACION)))
+                {
+                    <div class="col-auto">
+                        <button id="delete-btn" type="button" class="btn btn-outline-danger">Borrar <i class="fas fa-trash-alt ml-2"></i></button>
+                    </div>
+                }
+
+                @if (Model.Reviewed && !Model.Exported && hasSageCode)
+                {
+                    <div class="col-auto">
+                        <button id="invoice-btn" type="button" class="btn btn-outline-success">Facturar</button>
+                    </div>
+                }
+                @if (Model.Exported && !Model.Paid)
+                {
+                    <div class="col-auto">
+                        <button id="collect-btn" type="button" class="btn btn-outline-success">Cobrar</button>
+                    </div>
+                }
+                @if (Model.ClientId != null && !(string.IsNullOrWhiteSpace(Model.Client.Email) && string.IsNullOrWhiteSpace(Model.Client.Email2)) && (Model.Reviewed && !Model.Notified))
+                {
+                    <div class="col-auto">
+                        <div data-type="2" type="button" class="btn btn-success notify-btn">Enviar factura</div>
+                    </div>
+                }
+                else if (Model.Client == null || (string.IsNullOrWhiteSpace(Model.Client.Email) && string.IsNullOrWhiteSpace(Model.Client.Email2)))
+                {
+                    <div class="col-auto">
+                        <a class="btn btn-warning" href="#billing-container">
+                            El cliente no tiene correo electrónico
+                        </a>
+                    </div>
+                }
+                @if (string.IsNullOrWhiteSpace(Model.InvoiceNumber) || User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_ADMINISTRACION)))
+                {
+                    <div class="col-auto">
+                        <input type="submit" value="Guardar" class="btn btn-primary" />
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-2">
+        <div class="card">
+            <div class="card-body text-right">
+                <table class="table table-borderless table-sm text-right">
+                    <thead>
+                        <tr>
+                            <th>
+                                Base IVA
+                            </th>
+                            <th>
+                                IVA %
+                            </th>
+                            <th>
+                                Importe IVA
+                            </th>
+                            <th>
+                                TOTAL
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="vat-detail">
+                        @{
+                            var first = true;
+                            var vats = Model.GetDistinctVATs();
+                        }
+                        @foreach (var vat in vats)
+                        {
+                            <tr>
+                                <td>@Model.TotalOfVAT(vat).ToString("N")</td>
+                                <td>@vat.ToString("N")</td>
+                                <td>@Model.TotalVATOfVAT(vat).ToString("N")</td>
+                                @if (first)
+                                {
+                                    first = false;
+                                    <td rowspan="@vats.Count">
+                                        <h3>
+                                            @Model.TotalVAT.ToString("N")
+                                        </h3>
+                                    </td>
+                                    <td rowspan="@vats.Count">
+                                        @if (string.IsNullOrWhiteSpace(Model.InvoiceNumber))
+                                        {
+                                            <button id="refresh-button" type="submit" class="btn btn-primary btn-rounded btn-sm px-3">
+                                                <i class="fas fa-sync"></i>
+                                            </button>
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <input id="refresh" type="hidden" name="refresh" value="false" />
+
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="form-group">
+                    <label asp-for="Notes" class="control-label"></label>
+                    <textarea asp-for="Notes" class="form-control">@Html.Raw(Model.Notes)</textarea>
+                    <span asp-validation-for="Notes" class="text-danger"></span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        var lastNif = "";
+        var changed = false;
+        $(function () {
+            function addCommas(nStr) {
+
+                nStr = parseFloat(nStr).toFixed(2);
+                var x = nStr.split('.');
+                var x1 = x[0];
+                var x2 = x.length > 1 ? ',' + x[1] : ',00';
+                var rgx = /(\d+)(\d{3})/;
+                while (rgx.test(x1)) {
+                        x1 = x1.replace(rgx, '$1' + '.' + '$2');
+                }
+                return x1 + x2;
+            }
+            function parseLocaleFloat(f) {
+                return parseFloat(f.split(".").join("").split(",").join("."));
+            }
+            function recalculate() {
+                $("#vat-detail").empty();
+                var vatTotals = {}
+                var vat = parseLocaleFloat($('input[name="VAT"]').val());
+                var units = parseLocaleFloat($('input[name="Units"]').val());
+                var basePrice = parseLocaleFloat($('input[name="BasePrice"]').val());
+                var totalPrice = units * basePrice;
+                vatTotals[vat] = totalPrice;
+                $('input[name="TotalPrice"]').val(addCommas(totalPrice));
+
+                var idx = 0;
+                while ($('input[name="Products[' + idx + '].VAT"]').length) {
+                    if ($('input[name="Products[' + idx + '].Deleted"]').val().length > 0) {
+                        idx++;
+                        continue;
+                    }
+                    var vat = parseLocaleFloat($('input[name="Products[' + idx + '].VAT"]').val());
+                    var units = parseLocaleFloat($('input[name="Products[' + idx + '].Units"]').val());
+                    var basePrice = parseLocaleFloat($('input[name="Products[' + idx + '].BasePrice"]').val());
+                    var totalPrice = units * basePrice;
+                    $('input[name="Products[' + idx + '].TotalPrice"]').val(addCommas(totalPrice));
+
+                    if (vatTotals[vat] == undefined) {
+                        vatTotals[vat] = totalPrice;
+                    } else {
+
+                        vatTotals[vat] += totalPrice;
+                    }
+
+                    idx++;
+                }
+
+                var first = true;
+                var s = "";
+                var sum = 0;
+                for (var i in vatTotals) {
+                    sum += vatTotals[i] + ((i / 100) * vatTotals[i]);
+                }
+                for (var i in vatTotals) {
+                    s += "<tr>";
+                    s += "<td>" + addCommas(vatTotals[i]) + "</td>";
+                    s += "<td>" + addCommas(i) + "</td>";
+                    s += "<td>" + addCommas((i / 100) * vatTotals[i]) + "</td>";
+                    if (first) {
+                        first = false;
+                        s += '<td rowspan="' + vatTotals.length + '"><h3>' + addCommas(sum) + '</h3></td>';
+                    }
+                }
+                $("#vat-detail").append(s);
+            }
+
+
+            $("#refresh-button").click(e => {
+                $("#refresh").val(true);
+            });
+
+            $("body").on("click", ".delete-product", e => {
+                e.preventDefault();
+                Swal.fire({
+                    title: "No podrás deshacer esta acción",
+                    text: "¿Desea borrar este producto?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Borrar",
+                    cancelButtonText: "Cancelar"
+                }).then((result) => {
+                    if (result.value) {
+                        var id = ".Product-" + e.target.id;
+                        var deleted = "#Product-Deleted-" + e.target.id;
+                        $(id).hide();
+                        $(deleted).val("27/04/2020 11:29:07");
+                        recalculate();
+                    }
+                })
+            });
+
+            $("body").on("click", ".toggle-comments", e => {
+                e.preventDefault();
+                var id = ".comments-" + e.target.id;
+                $(id).toggleClass("d-none");
+            });
+
+            $(".select2-product").select2({
+                matcher: matchCustom,
+                templateResult: formatCustom
+            });
+
+
+            function stringMatch(term, candidate) {
+                return candidate && candidate.toLowerCase().indexOf(term.toLowerCase()) >= 0;
+            }
+
+            function matchCustom(params, data) {
+                // If there are no search terms, return all of the data
+                if ($.trim(params.term) === '') {
+                    return data;
+                }
+                // Do not display the item if there is no 'text' property
+                if (typeof data.text === 'undefined') {
+                    return null;
+                }
+                // Match text of option
+                if (stringMatch(params.term, data.text)) {
+                    return data;
+                }
+                // Match attribute "data-foo" of option
+                if (stringMatch(params.term, $(data.element).attr('data-productname'))) {
+                    return data;
+                }
+                // Return `null` if the term should not be displayed
+                return null;
+            }
+
+            function formatCustom(state) {
+                return $(
+                    '<div class="product-select-list">' + state.text + '<span class="product-name">'
+                        + $(state.element).attr('data-productname')
+                        + '</span></div>'
+                );
+            }
+
+            $('body').on('select2:select', 'select[name="VATId"]', ev => {
+                var data = ev.params.data;
+                $('input[name="VAT"]').val(data.text.split('%')[0].split('IVA ')[1]);
+                $('input[name="VAT"]').trigger("change");
+            });
+            $('body').on('select2:select', 'select[name="Product"]', ev => {
+                $('input[name="ProductDescription"]').val(ev.params.data.element.dataset["productname"]);
+            });
+
+            @for (int i = 0; i < Model.Products.Count(); i++) {
+                @:$('select[name="Products[@i].VATId"]').select2();
+                @:$('body').on('select2:select', 'select[name="Products[@i].VATId"]', ev => {
+                @:        var data = ev.params.data;
+                @:        $('input[name="Products[@i].VAT"]').val(data.text.split('%')[0].split('IVA ')[1]);
+                @:        $('input[name="Products[@i].VAT"]').trigger("change");
+                @:    });
+
+                @:    $('body').on('select2:select', 'select[name="Products[@i].ProductCode"]', ev => {
+                @:        $('input[name="Products[@i].ProductDescription"]').val(ev.params.data.element.dataset["productname"]);
+                @:    });
+            }
+
+            $('select[name="Product"]').val("@Model.Product").trigger('change.select2');
+            $('input[name="VAT"]').val(@Model.VAT);
+
+            $("#add-product").click(e => {
+                e.preventDefault();
+                $.get('/Expenses/ProductTemplate/@Model.Id', function (template) {
+                    var count = ($("#products-list")[0].childElementCount / 2) - 1;
+                    console.log(count);
+                    template = template.split(' name="').join('name="Products[' + count + '].')
+
+                    $("#products-list").append(template);
+                    $('select[name="Products[' + count + '].VATId"]').select2();
+                    $('select[name="Products[' + count + '].ProductCode"]').select2({
+                        matcher: matchCustom,
+                        templateResult: formatCustom
+                    });
+
+                    $('body').on('select2:select', 'select[name="Products[' + count + '].VATId"]', ev => {
+                        var data = ev.params.data;
+                        $('input[name="Products[' + count + '].VAT"]').val(data.text.split('%')[0].split('IVA ')[1]);
+                        $('input[name="Products[' + count + '].VAT"]').trigger("change");
+                    });
+
+                    $('body').on('select2:select', 'select[name="Products[' + count + '].ProductCode"]', ev => {
+                        $('input[name="Products[' + count + '].ProductDescription"]').val(ev.params.data.element.dataset["productname"]);
+                    });
+
+                    $('select[name="Products[' + count + '].ProductCode"]').val(null).trigger('change.select2');
+                });
+            });
+            $("#FakeInvoiceDate").change(e => {
+                $("#InvoiceDate").val($("#FakeInvoiceDate").val().split('-').reverse().join('/'));
+            });
+            $("#delete-btn").click(e => {
+                Swal.fire({
+                    title: "No podrás deshacer esta acción",
+                    text: "¿Desea borrar esta factura?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Borrar",
+                    cancelButtonText: "Cancelar"
+                }).then((result) => {
+                    if (result.value) {
+
+                        const myHeaders = new Headers();
+                        var token = $('form').find("input[name='af_token']").val();
+                        myHeaders.append('RequestVerificationToken', token);
+                        myHeaders.append('Content-Type', 'application/json');
+
+                        ga('send', 'pageview', '/Expenses/Delete/@Model.Id');
+                        fetch("/Expenses/Delete/@Model.Id", {
+                            method: "POST",
+                            headers: myHeaders
+                        }).then(pr => {
+                            if (pr.ok) {
+                                Swal.fire(
+                                    'Borrado',
+                                    'La inscripción ha sido borrada.',
+                                    'success'
+                                ).then(e => {
+                                    window.location = "/Expenses";
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+
+            $("#BillingLocationId").change(e => {
+                //if ($("#BillingLocationId")[0].selectedIndex > 0) {
+                    //$("#billing-location-container").empty();
+
+                    fetch("/Clients/Location/" + $("#BillingLocationId").val() + "?inline=true")
+                        .then(e => {
+                            return e.text()
+                        }).then(html => {
+                            $("#billing-location-container").empty();
+                            $("#billing-location-container").append($(html));
+                            //$("#BillingLocation_Id").val(generateUUID());
+                            //$("#search-address-selector").addClass("d-none");
+                            //$("#billing-location-container").removeClass("d-none");
+                        });
+                //}
+                //else {
+                //    fetch("/Clients/Location/?inline=true")
+                //        .then(e => {
+                //            return e.text()
+                //        }).then(html => {
+                //            $("#billing-location-container").empty();
+                //            $("#billing-location-container").append($(html));
+                //            //$("#BillingLocation_Id").val(generateUUID());
+                //            //$("#search-address-selector").addClass("d-none");
+                //            //$("#billing-location-container").removeClass("d-none");
+                //        });
+                //}
+            });
+            $("body").on("click", "#search-address", e => {
+                e.preventDefault();
+                $("#search-address-selector").removeClass("d-none");
+                $("#billing-location-container").addClass("d-none");
+            });
+
+            $("#leave-client-empty").click(function (e) {
+                e.preventDefault();
+                $("#Client_Id").val("");
+                $("#BillingLocationId").val(-1);
+                $("#BillingLocation_Id").val("");
+                $("#billing-container").remove();
+            });
+
+            $("body").on("click", "#search-client", e => {
+                e.preventDefault();
+                $("#ClientSearchName").val($("#Client_NIF").val());
+                $("#ClientSearchName").trigger("keyup");
+                clientSearchModal();
+            });
+
+            $("body").on("change", "input", e => {
+                changed = true;
+                $("#invoice-btn").remove();
+                recalculate();
+            });
+
+            $("#invoice-btn").click(evt => {
+                evt.preventDefault();
+                if (changed) {
+                    Swal.fire({ title: "Los datos han cambiado", text: "Es necesario guardar", icon: "warning" });
+                    return;
+                }
+                var hasSageCode = @(hasSageCode ? "true" : "false");
+                if (!hasSageCode) {
+                    Swal.fire({ title: "El cliente no está en sage", text: "Es necesario añadirlo", icon: "warning" });
+                    return;
+                }
+                Swal.fire({
+                    title: "Exportación a SAGE",
+                    html: "<label class='control-label'>Fecha</label><input id='export-date' class='form-control' type='date' value='@DateTime.Today.ToString("yyyy-MM-dd")' />",
+                    showCancelButton: true,
+                    confirmButtonText: "Facturar",
+                    cancelButtonText: "Cancelar"
+                }).then(e => {
+                    if (e.value) {
+                        ga('send', 'pageview', '/Transfer/CostCenterProductToSage/@Model.Id');
+                        $(evt.currentTarget).empty();
+                        $(evt.currentTarget).append('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="sr-only">Exportando...</span></div>');
+                        fetch("/Transfer/CostCenterProductToSage/@Model.Id?date=" + $("#export-date").val()).then(res => {
+                            isImportingClients = false;
+                            if (!res.ok) {
+                                $(evt.currentTarget).empty();
+                                $(evt.currentTarget).append('Error al facturar <i class="fas fa-times"></i>')
+                                $(evt.currentTarget).removeClass("text-info");
+                                $(evt.currentTarget).addClass("text-danger");
+                                return res.text();
+                            }
+                            Swal.fire({ title: "Se ha facturado correctamente", icon: "success" }).then(e => {
+                                window.location = window.location.href.split("#")[0];
+                            });
+                        }).then(e => {
+                            if (e.includes("No se puede insertar una clave duplicada en el objeto 'dbo.c_albven'")) {
+                                Swal.fire({ title: "Error al facturar", icon: "error", text: "El contador no está actualizado y provocaría una duplicidad." });
+                            }
+                        });
+                    }
+                });
+            });
+
+            $(".notify-btn").click(evt => {
+                evt.preventDefault();
+
+                var dataType = $(evt.target).attr("data-type");
+                ga('send', 'pageview', '/Expenses/NotificationMail/@Model.Id/?emailType=' + dataType);
+                var preview = "";
+
+                fetch("/Expenses/NotificationMail/@Model.Id/?emailType=" + dataType).then(e => {
+                    return e.text()
+                }).then(e => {
+                    preview = e;
+
+                    @{
+                        var mail = "El cliente no tiene correo electrónico establecido.";
+                        if (Model.Client != null) {
+                            if (!string.IsNullOrWhiteSpace(Model.Client.Email))
+                            {
+                                mail = Model.Client.Email;
+                            } else if (!string.IsNullOrWhiteSpace(Model.Client.Email2))
+                            {
+                                mail = Model.Client.Email2;
+                            }
+                        }
+                    }
+                    var email = "@mail";
+
+                    Swal.fire({
+                        title: "¿Desea enviar un correo de confirmación al cliente? ",
+                        //input: 'text',
+                        html: "<div><label for='#send-mails'>Correos separados por ;</label><input id='send-emails' value='" + email + "' class='swal2-input' /></div><div id='mailBody' ><div style='text-align: left'>" + preview + "</div></div>",
+                        width: "80%",
+                        showCancelButton: true,
+                        confirmButtonText: "Enviar",
+                        cancelButtonText: "Cancelar",
+                        //inputPlaceholder: 'Enviar también a... (correos separados por ;)'
+                    }).then(e => {
+                        if (e.value != undefined) {
+                            ga('send', 'pageview', '/Expenses/Notify/@Model.Id/?emailType=' + dataType);
+                            $(evt.currentTarget).empty();
+                            $(evt.currentTarget).append('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="sr-only">Enviando...</span></div>');
+                            fetch("/Expenses/Notify/@Model.Id/?emailType=" + dataType, {
+                                method: 'POST',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    body: $('#mailBody').summernote('code'),
+                                    mails: $("#send-emails").val()
+                                })
+                            }).then(res => {
+                                isImportingClients = false;
+                                if (!res.ok) {
+                                    console.log(res.json());
+
+                                    $(evt.currentTarget).empty();
+                                    $(evt.currentTarget).append('Error al enviar el correo <i class="fas fa-times"></i>')
+                                    $(evt.currentTarget).removeClass("text-info");
+                                    $(evt.currentTarget).addClass("text-danger");
+
+                                    //alert(res.json().Promise());                                  
+
+                                    return res.text();
+                                }
+                                Swal.fire({ title: "Se ha enviado correctamente correctamente", icon: "success" }).then(e => {
+                                    window.location = window.location.href.split("#")[0];
+                                });
+                            });
+                        }
+                    });
+                    $('#mailBody').summernote(SummernoteConfig);
+                });
+            });
+
+            $("#collect-btn").click(evt => {
+                evt.preventDefault();
+                Swal.fire({
+                    title: "¿Cobrar factura en SAGE?",
+                    html: "<label class='control-label'>Fecha</label><input id='collect-date' class='form-control' type='date' value='@DateTime.Today.ToString("yyyy-MM-dd")' />",
+                    showCancelButton: true,
+                    confirmButtonText: "Cobrar",
+                    cancelButtonText: "Cancelar"
+                }).then(e => {
+                    if (e.value) {
+                        ga('send', 'pageview', '/Transfer/CollectBillToSage/@Model.Id');
+                        $(evt.currentTarget).empty();
+                        $(evt.currentTarget).append('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="sr-only">Exportando...</span></div>');
+                        fetch("/Transfer/CollectBillToSage/@Model.Id?date=" + $("#collect-date").val()).then(res => {
+                            isImportingClients = false;
+                            if (!res.ok) {
+                                $(evt.currentTarget).empty();
+                                $(evt.currentTarget).append('Error al cobrar <i class="fas fa-times"></i>')
+                                $(evt.currentTarget).removeClass("text-info");
+                                $(evt.currentTarget).addClass("text-danger");
+                                return res.text();
+                            }
+                            Swal.fire({ title: "Se ha cobrado correctamente", icon: "success" }).then(e => {
+                                window.location = window.location.href.split("#")[0];
+                            });
+                        });
+                    }
+                });
+            });
+
+            $("body").on("keyup", "#Client_NIF", e => {
+                console.log($("#Client_NIF").val());
+                if ($("#Client_NIF").val().length == 0) {
+                    return;
+                }
+                if (lastNif == $("#Client_NIF").val().trim()) {
+                    return;
+                }
+                lastNif = $("#Client_NIF").val().trim();
+                ga('send', 'pageview', '/Clients/ClientNIFExists/' + $("#Client_NIF").val());
+                fetch("/Clients/ClientNIFExists/?NIF=" + $("#Client_NIF").val())
+                    .then(e => {
+                        return e.text()
+                    }).then(id => {
+                        if (id != "false") {
+                            console.log(id);
+                            Swal.fire({
+                                title: "Ya existe un cliente con ese NIF",
+                                text: "¿Importar los datos desde SAGE?",
+                                showCancelButton: true,
+                                confirmButtonText: "Importar",
+                                cancelButtonText: "Cancelar"
+                            }).then(e => {
+                                if (e.value) {
+                                    importClient(id);
+                                }
+                            });
+                        }
+                    });
+            });
+
+            $(".readonly").dblclick(e => {
+                e.target.readOnly = '';
+            });
+        });
+    </script>
+}

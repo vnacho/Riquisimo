@@ -1,0 +1,35 @@
+﻿@using Ferpuser.Models.Core
+@model Fichero
+@{
+    string CampoUrl = Model.CampoUrl; //Obtenemos el identificador del elemento html
+    string CampoNombre = Model.CampoNombre; //Obtenemos el identificador del elemento html
+    string inputFileName = $"_{CampoUrl}";
+    string classDivInputFileName = string.IsNullOrWhiteSpace(Model.Url) ? "" : "d-none";
+}
+
+<input type="hidden" name="@CampoUrl" id="@CampoUrl" value="@Model.Url" />
+<input type="hidden" name="@CampoNombre" id="@CampoNombre" value="@Model.Nombre" />
+
+@if (!string.IsNullOrWhiteSpace(Model.Url))
+{
+    <div id="divDisplayFile">
+        <p class="small">
+            Nombre del fichero: <b>@Model.Nombre</b> 
+            <a download="@Model.Nombre" href="@Url.Content(Model.Url)" class="mx-5 text-dark"> <i class="fas fa-download mr-2 text-info"></i>Descargar</a>
+            <a href="#" class="text-dark" onclick='Quitar();'><i class="fas fa-times mr-2 text-danger"></i>Quitar</a>
+        </p>
+    </div>
+}
+
+<div id="divInputFileName" class="@classDivInputFileName">
+    <input name="@inputFileName" type="file" />
+</div>
+
+<script>
+    function Quitar() {
+        $("#@CampoUrl").val("");
+        $("#@CampoNombre").val("");
+        $("#divDisplayFile").addClass("d-none");
+        $("#divInputFileName").removeClass("d-none");
+    }
+</script>

@@ -1,0 +1,353 @@
+﻿@using Ferpuser.Models.Enums
+@using Ferpuser.Models.ViewModels
+@model Personal
+
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+}
+
+<form method="post" id="form">
+
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Detalle de registro de personal
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                <button type="submit" name="submit" value="guardar" class="btn btn-secondary btn-sm text-nowrap">Guardar <i class="fas fa-save ml-2"></i></button>
+                <button type="button" data-toggle="modal" data-target="#descargarDocModal" class="btn btn-grey btn-sm text-nowrap">Descargar documentación <i class="fas fa-download ml-2"></i></button>
+                <a asp-action="Index" class="btn btn-grey btn-sm text-nowrap">Volver <i class="fas fa-arrow-left ml-2"></i></a>
+            </div>
+        </div>
+    </div>
+    @Html.EditorForModel()
+</form>
+
+<form id="formDocumentos" method="post" enctype="multipart/form-data" action="@Url.Action("UploadDocumento","Personal")">
+    <input type="hidden" id="Id" name="Id" value="@Model.Id" />
+    <div class="card">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-md-12">
+                <h6 class="text-muted">Ficheros</h6>
+            </div>
+
+            <div class="col-md-3 border-right align-self-start">
+                <span class="badge badge-danger">Documentación</span>
+
+                <div class="input-group my-3">
+                  <input type="text" id="tbxDocumentosDocumentacion" class="form-control" placeholder="Buscar" aria-label="Recipient's username" aria-describedby="button-addon2">
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-info m-0 p-0 px-2 pr-3" type="button" onclick="BuscarDocumentacion('@TipoDocumento.Documentacion')"><i class="fas fa-search ml-2"></i></button>
+                    <button class="btn btn-outline-secondary m-0 p-0 px-2 pr-3" type="button" onclick="LimpiarDocumentacion('@TipoDocumento.Documentacion')"><i class="fas fa-times ml-2"></i></button>
+                  </div>
+                </div>
+
+                <div id="divDocumentosDocumentacion">
+                    @(await Html.PartialAsync("_Documentos", 
+                        Model,
+                        new ViewDataDictionary(ViewData)
+                        {
+                            { "Tipo", TipoDocumento.Documentacion }
+                        }))
+                </div>
+                <input name="fileDocumentacion" type="file" class="form-control form-control-sm" onchange="SubirFichero()" />
+            </div>
+
+            <div class="col-md-3 border-right align-self-start">
+                <span class="badge badge-danger">Formación</span>
+
+                <div class="input-group my-3">
+                  <input type="text" id="tbxDocumentosFormacion" class="form-control" placeholder="Buscar" aria-label="Recipient's username" aria-describedby="button-addon2">
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-info m-0 p-0 px-2 pr-3" type="button" onclick="BuscarDocumentacion('@TipoDocumento.Formacion')"><i class="fas fa-search ml-2"></i></button>
+                    <button class="btn btn-outline-secondary m-0 p-0 px-2 pr-3" type="button" onclick="LimpiarDocumentacion('@TipoDocumento.Formacion')"><i class="fas fa-times ml-2"></i></button>
+                  </div>
+                </div>
+
+                <div id="divDocumentosFormacion">
+                    @(await Html.PartialAsync("_Documentos", 
+                        Model,
+                        new ViewDataDictionary(ViewData)
+                        {
+                            { "Tipo", TipoDocumento.Formacion }
+                        }))
+                </div>
+                <input name="fileFormacion" type="file" class="form-control form-control-sm" onchange="SubirFichero()" />
+            </div>
+
+            <div class="col-md-3 border-right align-self-start">
+                <span class="badge badge-danger">Plantillas</span>
+
+                <div class="input-group my-3">
+                  <input type="text" id="tbxDocumentosPlantilla" class="form-control" placeholder="Buscar" aria-label="Recipient's username" aria-describedby="button-addon2">
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-info m-0 p-0 px-2 pr-3" type="button" onclick="BuscarDocumentacion('@TipoDocumento.Plantilla')"><i class="fas fa-search ml-2"></i></button>
+                    <button class="btn btn-outline-secondary m-0 p-0 px-2 pr-3" type="button" onclick="LimpiarDocumentacion('@TipoDocumento.Plantilla')"><i class="fas fa-times ml-2"></i></button>
+                  </div>
+                </div>
+
+                <div id="divDocumentosPlantilla">
+                    @(await Html.PartialAsync("_Documentos", 
+                        Model,
+                        new ViewDataDictionary(ViewData)
+                        {
+                            { "Tipo", TipoDocumento.Plantilla }
+                        }))
+                </div>
+                <input name="filePlantillas" type="file" class="form-control form-control-sm" onchange="SubirFichero()" />
+            </div>
+
+            <div class="col-md-3 border-right align-self-start">
+                <span class="badge badge-danger">Contratos</span>
+
+                <div class="input-group my-3">
+                  <input type="text" id="tbxDocumentosContratos" class="form-control" placeholder="Buscar" aria-label="Recipient's username" aria-describedby="button-addon2">
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-info m-0 p-0 px-2 pr-3" type="button" onclick="BuscarDocumentacion('@TipoDocumento.Contrato')"><i class="fas fa-search ml-2"></i></button>
+                    <button class="btn btn-outline-secondary m-0 p-0 px-2 pr-3" type="button" onclick="LimpiarDocumentacion('@TipoDocumento.Contrato')"><i class="fas fa-times ml-2"></i></button>
+                  </div>
+                </div>
+
+                <div id="divDocumentosContratos">
+                    @(await Html.PartialAsync("_Documentos", 
+                        Model,
+                        new ViewDataDictionary(ViewData)
+                        {
+                            { "Tipo", TipoDocumento.Contrato }
+                        }))
+                </div>
+                <input name="fileContratos" type="file" class="form-control form-control-sm" onchange="SubirFichero()" />
+            </div>
+                       
+        </div>
+    </div>
+</form>
+
+<!-- Modal -->
+<div class="modal fade" id="descargarDocModal" role="dialog" aria-labelledby="descargarDocModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="formDocumentacion" name="formDocumentacion" method="post" action="@Url.Action("DescargarDocumentacion","Personal")">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="descargarDocModalLabel">Descargar documentación</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Complete los siguientes campos:</p>
+                    <div id="divDocumentacion">
+                        @{
+                            DocumentosViewModel viewmodel = new DocumentosViewModel() { IdPersonal = Model.Id };
+                        }
+                        <partial name="_Documentacion" model="viewmodel" />
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <div class="row text-right">
+                        <div id="divBotonera" class="col-md-12">
+                            <button type="button" class="btn btn-grey btn-sm" data-dismiss="modal">Cerrar<i class="fas fa-times ml-2"></i></button>
+                            <button type="button" onclick="DescargarDocumentacion()" class="btn btn-primary btn-sm">Descargar<i class="fas fa-download ml-2"></i></button>
+                        </div>
+                        <div id="divSpinner" class="col-md-12 d-none">
+                            <div class="spinner-border spinner-border-sm" role="status"></div>
+                            <span class="small">Cargando...</span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/lib/jqueryui/jqueryui/jquery-ui.min.css">
+}
+@section Scripts
+{
+    <script>
+        $('[data-toggle="tooltip"]').tooltip();
+    </script>
+    <script src="~/lib/jqueryui/jqueryui/jquery-ui.min.js"></script>
+
+    <script>
+        function SubirFichero() {
+            $("#formDocumentos").submit();
+        }
+
+        function base64ToArrayBuffer(data) {
+            var binaryString = window.atob(data);
+            var binaryLen = binaryString.length;
+            var bytes = new Uint8Array(binaryLen);
+            for (var i = 0; i < binaryLen; i++) {
+                var ascii = binaryString.charCodeAt(i);
+                bytes[i] = ascii;
+            }
+            return bytes;
+        };
+
+        function DescargarDocumentacion() {            
+            $("#divBotonera").addClass('d-none');
+            $("#divSpinner").removeClass('d-none');
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("DescargarDocumentacion", "Personal")",
+                data: $('#formDocumentacion').serialize(),
+                success: function (data, textStatus, jqXHR) {
+                    // Get the raw header string
+                    var headers = jqXHR.getAllResponseHeaders();
+                    console.log(headers);
+
+                    // Convert the header string into an array
+                    // of individual headers
+                    var arr = headers.trim().split(/[\r\n]+/);
+
+                    // Create a map of header names to values
+                    var headerMap = {};
+                    arr.forEach(function (line) {
+                        var parts = line.split(': ');
+                        var header = parts.shift();
+                        var value = parts.join(': ');
+                        headerMap[header] = value;
+                    });
+
+                    var contentType = headerMap["content-type"];
+                    console.log(contentType);
+                    if (contentType == 'application/zip') {                        
+                        DescargarDocumentacion2();                        
+                    }
+                    else {
+                        $("#divDocumentacion").html(data);
+                        $("#divBotonera").removeClass('d-none');
+                        $("#divSpinner").addClass('d-none');
+                    }
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                },
+                complete: function (jqXHR, textStatus) {
+                    
+                }
+            });
+        }
+
+        function DescargarDocumentacion2() {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("DescargarDocumentacion", "Personal")",
+                data: $('#formDocumentacion').serialize(),
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function (data, textStatus, jqXHR) {                                        
+                    var link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(data);
+                    link.download = "Documentacion " + "@Model.Nombre" + ".zip";
+                    link.click();                    
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                },
+                complete: function (jqXHR, textStatus) {
+                    $("#divBotonera").removeClass('d-none');
+                    $("#divSpinner").addClass('d-none');
+                }
+            });
+        }
+
+        function BuscarDocumentacion(tipo)
+        {
+            var search = '';
+            var divReemplazar = '';
+            if (tipo == '@TipoDocumento.Documentacion')
+            {
+                search = $("#tbxDocumentosDocumentacion").val();
+                divReemplazar = 'divDocumentosDocumentacion';
+            }
+            if (tipo == '@TipoDocumento.Formacion')
+            {
+                search = $("#tbxDocumentosFormacion").val();
+                divReemplazar = 'divDocumentosFormacion';
+            }
+            if (tipo == '@TipoDocumento.Plantilla')
+            {
+                search = $("#tbxDocumentosPlantilla").val();
+                divReemplazar = 'divDocumentosPlantilla';
+            }
+            if (tipo == '@TipoDocumento.Contrato')
+            {
+                search = $("#tbxDocumentosContratos").val();
+                divReemplazar = 'divDocumentosContratos';
+            }
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("BuscarDocumentacion", "Personal")" + '?id=' + @Model.Id + '&tipo=' + tipo + '&search=' + search,                
+                success: function (data, textStatus, jqXHR) {                                        
+                    $("#" + divReemplazar).html(data);
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                },
+                complete: function (jqXHR, textStatus) {                    
+                }
+            });
+        }
+
+        function LimpiarDocumentacion(tipo)
+        {
+            var divReemplazar = '';
+            if (tipo == '@TipoDocumento.Documentacion')
+            {
+                $("#tbxDocumentosDocumentacion").val('');
+                divReemplazar = 'divDocumentosDocumentacion';
+            }
+            if (tipo == '@TipoDocumento.Formacion')
+            {
+                $("#tbxDocumentosFormacion").val('');
+                divReemplazar = 'divDocumentosFormacion';
+            }
+            if (tipo == '@TipoDocumento.Plantilla')
+            {
+                $("#tbxDocumentosPlantilla").val('');
+                divReemplazar = 'divDocumentosPlantilla';
+            }
+            if (tipo == '@TipoDocumento.Contrato')
+            {
+                $("#tbxDocumentosContratos").val('');
+                divReemplazar = 'divDocumentosContratos';
+            }
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("BuscarDocumentacion", "Personal")" + '?id=' + @Model.Id + '&tipo=' + tipo,                
+                success: function (data, textStatus, jqXHR) {                                        
+                    $("#" + divReemplazar).html(data);
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                },
+                complete: function (jqXHR, textStatus) {                    
+                }
+            });
+        }
+    </script>
+}
+

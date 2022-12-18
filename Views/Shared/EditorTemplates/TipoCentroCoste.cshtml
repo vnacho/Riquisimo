@@ -1,0 +1,31 @@
+﻿@using Ferpuser.Models.Consts 
+@model TipoCentroCoste
+
+@Html.HiddenFor(f => f.Id)
+<div class="card mb-4 wow d-print-none">
+    <div class="form-row card-body">
+        <div class="form-group col-md-6">
+            @Html.LabelFor(f => f.Descripcion, new { @class = "small" })
+            @Html.EditorFor(f => f.Descripcion, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.Descripcion, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(f => f.Tipo, new { @class = "small" })
+            @Html.DropDownListFor(f => f.Tipo,
+                new SelectList(new[]
+                {
+                    new { Value = "D", Text = "D - Directo" },
+                    new { Value = "I", Text = "I - Indirecto" },
+                    new { Value = "E", Text = "E - Estructura" },
+                    new { Value = Consts.CODIGO_TIPO_CENTRO_COSTE_E9, Text = $"{Consts.CODIGO_TIPO_CENTRO_COSTE_E9} - E9" }
+                },
+                "Value", "Text", Model == null ? null : Model.Tipo), "-Seleccionar-", new { @class = "form-control form-control-sm" })
+            @Html.ValidationMessageFor(f => f.Tipo, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.PorcentajeDistribucion, new { @class = "small" })
+            @Html.EditorFor(f => f.PorcentajeDistribucion, new { htmlAttributes = new { @class = "form-control form-control-sm", onkeyup = "ReplaceDotByComma(this);" } })
+            @Html.ValidationMessageFor(f => f.PorcentajeDistribucion, "", new { @class = "text-danger small" })
+        </div>
+    </div>
+</div>

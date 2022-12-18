@@ -1,0 +1,515 @@
+﻿@using Ferpuser.Models.Core
+@model Ferpuser.Models.Congress
+
+@{
+    var IsCongress = Model.IsCongress;
+
+    List<KeyValuePair<string, string>> tipos = new List<KeyValuePair<string, string>>();
+    tipos.Add(new KeyValuePair<string, string>("C", "Congreso"));
+    tipos.Add(new KeyValuePair<string, string>("O", "Obra"));
+    tipos.Add(new KeyValuePair<string, string>("Z", "Centro de coste"));
+
+    if (!IsCongress && Model.TipoCongress == "Z")
+    {
+        ViewData["Title"] = "Editar centro de coste";
+    }
+    else
+    {
+        ViewData["Title"] = "Editar congreso";
+        ViewData["Create"] = false;
+        ViewData["CreateCostCenter"] = false;
+    }
+
+    ViewData["Validation"] = true;
+    ViewData["ValidationUnobtrusive"] = false;
+    ViewData["FileUpload"] = true;
+    ViewData["Summernote"] = true;
+    ViewData["Select2"] = true;
+
+    ViewData["Swal"] = true;
+    ViewData["OneCard"] = false;
+}
+
+<form asp-action="Edit" method="post" id="form">
+    <partial name="_EditCongress.cshtml" model=Model />
+</form>
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/lib/jqueryui/jqueryui/jquery-ui.min.css">
+}
+
+@section Scripts {
+    <script>
+
+        $(document).ready(function () {
+
+            Combos();
+
+            $('body').on('select2:select', 'select[name="Number"]', ev => {
+                $('input[name="Name"] ').val(ev.params.data.element.dataset["almacen"]);
+            });
+
+            function stringMatch(term, candidate) {
+                return candidate && candidate.toLowerCase().indexOf(term.toLowerCase()) >= 0;
+            }
+
+            function matchCustom(params, data) {
+                // If there are no search terms, return all of the data
+                if ($.trim(params.term) === '') {
+                    return data;
+                }
+                // Do not display the item if there is no 'text' property
+                if (typeof data.text === 'undefined') {
+                    return null;
+                }
+                // Match text of option
+                if (stringMatch(params.term, data.text)) {
+                    return data;
+                }
+                // Match attribute "data-foo" of option
+                if (stringMatch(params.term, $(data.element).attr('data-almacen'))) {
+                    return data;
+                }
+                // Return `null` if the term should not be displayed
+                return null;
+            }
+
+            function formatCustom(state) {
+                return $(
+                    '<div class="product-select-list">' + state.text + '<span class="product-name">'
+                    + $(state.element).attr('data-almacen')
+                    + '</span></div>'
+                );
+            }
+
+            $("#delete-btn").click(e => {
+                Swal.fire({
+                    title: "No podrás deshacer esta acción",
+                    text: "¿Desea borrar este congreso?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Borrar",
+                    cancelButtonText: "Cancelar"
+                }).then((result) => {
+
+                    if (result.value) {
+                        const myHeaders = new Headers();
+                        var token = $('form').find("input[name='af_token']").val();
+                        myHeaders.append('RequestVerificationToken', token);
+                        myHeaders.append('Content-Type', 'application/json');
+
+                        ga('send', 'pageview', '/Congresses/Delete/@Model.Id');
+                        fetch("/Congresses/Delete/@Model.Id", {
+                            method: "POST",
+                            headers: myHeaders
+                        }).then(pr => {
+                            if (pr.ok) {
+                                Swal.fire(
+                                    'Borrado',
+                                    'El congreso ha sido borrado.',
+                                    'success'
+                                ).then(e => {
+                                    window.location = "/Congresses";
+                                });
+                            } else if (pr.status == 405){
+                                Swal.fire(
+                                    'No se ha podido borrar',
+                                    'Hay datos que dependen de este congreso.',
+                                    'warning'
+                                );
+                            } else {
+                                Swal.fire(
+                                    'No se ha podido borrar',
+                                    'Algo ha ido mal.',
+                                    'error'
+                                );
+                            }
+                        });
+                    }
+                });
+            });
+            
+            $("#FakeStartDate").change(function () {
+                $("#StartDate").val($("#FakeStartDate").val());
+            });
+            $("#FakeEndDate").change(function () {
+                $("#EndDate").val($("#FakeEndDate").val());
+            });
+            $(".readonly").dblclick(e => {
+                e.target.readOnly = '';
+            });
+            $('.toggler').click(e => {
+                $(e.target.children[0]).toggleClass("fa-rotate-180");
+            });
+
+        });
+
+        function EditLineaContrato(IDContrato) {
+            $("#divLineaContrato").load('@Url.Action("EditContrato", "Congresses")' + '?idContrato=' + IDContrato);
+        }
+        
+        function AddLineaContrato() {
+            var idCongress = $("#Id").val();
+            $("#divLineaContrato").load('@Url.Action("AddContrato", "Congresses")' + '?CodigoCongresses=' + idCongress);
+        }
+
+        function AddLineaContrato() {
+            var idCongress = $("#Id").val();
+            $("#divLineaContrato").load('@Url.Action("AddContrato", "Congresses")' + '?CodigoCongresses=' + idCongress);
+        }
+
+        function SaveContrato() {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("SaveContrato", "Congresses")",
+                data: $('#form').serialize(),
+                dataType: 'JSON',
+                success: function (response) {
+                    if (response.status == 1) {
+                        $('#ContratoObraModal').modal('toggle');
+                        $("#div_A_Reemplazar").html(response.data);
+                        $('body').removeClass('modal-open');
+                        $('.modal-backdrop').remove();
+                        $('[data-toggle="tooltip"]').tooltip();
+                    }
+                    else {
+                        $("#divLineaContrato").html(response.data);
+                    }
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        }
+
+        function SaveDocumentoObra() {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("SaveDocumentoObra", "Congresses")",
+                data: $('#form').serialize(),
+                dataType: 'JSON',
+                success: function (response) {
+                    if (response.status == 1) {
+                        $('#ContratoObraModal').modal('toggle');
+                        $("#div_A_Reemplazar").html(response.data);
+                        $('body').removeClass('modal-open');
+                        $('.modal-backdrop').remove();
+                        $('[data-toggle="tooltip"]').tooltip();
+                    }
+                    else {
+                        $("#divLineaContrato").html(response.data);
+                    }
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        }
+
+        function SubirFicheroContrato() {
+            const inputFichero = document.getElementById('fileDocumentacion');
+            const inputID = document.getElementById('IdcontratoObra');
+            var datosForm = new FormData();
+            datosForm.append('IdcontratoObra', inputID.value);
+            datosForm.append('fileDocumentacion', inputFichero.files[0]);
+            fetch("/Congresses/EnviarFichero", {
+                method: 'POST',                
+                body: datosForm
+            }).then(res => {
+                console.log(res);
+                var data = res.json();
+                console.log(data);
+                if (!res.ok) {
+                    data.then(function (result) {
+                        console.log(result);
+                        alert("Lo sentimos, el fichero no se ha podido subir. " + result);
+                    });
+                    return;
+                }
+                //Recuperamos la promesa
+                data.then(function (result) {
+                    console.log(result);
+                    //$("#hfFicheros").val($("#hfFicheros").val() + result.Path + ';' );
+                    $("#tablaDocumentos").append('<tr><td><a class="text-info" download="' + result.FileName + '" href="Url.Content("' + result.Path + '")">' + result.FileName + '</a></td></tr>');
+                });
+            });
+        }
+
+        function SubirFicheroObra() {
+            const inputFichero = document.getElementById('fileDocumentacionObra');
+            const inputID = document.getElementById('IdCongressObra');
+            var datosForm = new FormData();
+            datosForm.append('IdCongressObra', inputID.value);
+            datosForm.append('fileDocumentacionObra', inputFichero.files[0]);
+            fetch("/Congresses/EnviarFicheroObra", {
+                method: 'POST',                
+                body: datosForm
+            }).then(res => {
+                console.log(res);
+                var data = res.json();
+                console.log(data);
+                if (!res.ok) {
+                    data.then(function (result) {
+                        console.log(result);
+                        alert("Lo sentimos, el fichero no se ha podido subir. " + result);
+                    });
+                    return;
+                }
+                //Recuperamos la promesa
+                data.then(function (result) {
+                    console.log(result);
+                    //$("#hfFicheros").val($("#hfFicheros").val() + result.Path + ';' );
+                    $("#tablaDocumentosObra").append('<tr><td><a class="text-info" download="' + result.FileName + '" href="Url.Content("' + result.Path + '")">' + result.FileName + '</a></td></tr>');
+                });
+            });
+        }
+
+        function base64ToArrayBuffer(data) {
+            var binaryString = window.atob(data);
+            var binaryLen = binaryString.length;
+            var bytes = new Uint8Array(binaryLen);
+            for (var i = 0; i < binaryLen; i++) {
+                var ascii = binaryString.charCodeAt(i);
+                bytes[i] = ascii;
+            }
+            return bytes;
+        }
+
+        function DescargarDocumentacion() {            
+            $("#divBotonera").addClass('d-none');
+            $("#divSpinner").removeClass('d-none');
+           
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("DescargarDocumentacion", "Congresses")",
+                data: $('#formDocumentacion').serialize(),
+                success: function (data, textStatus, jqXHR) {
+                    // Get the raw header string
+                    var headers = jqXHR.getAllResponseHeaders();
+                    console.log(headers);
+
+                    // Convert the header string into an array
+                    // of individual headers
+                    var arr = headers.trim().split(/[\r\n]+/);
+
+                    // Create a map of header names to values
+                    var headerMap = {};
+                    arr.forEach(function (line) {
+                        var parts = line.split(': ');
+                        var header = parts.shift();
+                        var value = parts.join(': ');
+                        headerMap[header] = value;
+                    });
+
+                    var contentType = headerMap["content-type"];
+                    console.log(contentType);
+                    if (contentType == 'application/zip') {                        
+                        DescargarDocumentacion2();                        
+                    }
+                    else {
+                        $("#divDocumentacion").html(data);
+                        $("#divBotonera").removeClass('d-none');
+                        $("#divSpinner").addClass('d-none');
+                    }
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                },
+                complete: function (jqXHR, textStatus) {
+                    
+                }
+            });
+        }
+
+        function DeleteContrato(ContratoObraId) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("DeleteContrato", "Congresses")" + "?ContratoObraId=" + ContratoObraId,
+                data: $('#form').serialize(),
+                success: function (response) {
+                    $("#div_A_Reemplazar").html(response);
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        }
+
+        function DescargarDocumentacion2() {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("DescargarDocumentacion", "Congresses")",
+                data: $('#formDocumentacion').serialize(),
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function (data, textStatus, jqXHR) {                                        
+                    var link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(data);
+                    link.download = "Documentacion " + "@Model.Id" + ".zip";
+                    link.click();                    
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                },
+                complete: function (jqXHR, textStatus) {
+                    $("#divBotonera").removeClass('d-none');
+                    $("#divSpinner").addClass('d-none');
+                }
+            });
+        }
+
+        function refresh(campo) {            
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("Refrescar", "Congresses")",
+                data: $('#form').serialize(),
+                success: function (response) {
+                    $("#div_A_Reemplazar").html(response);
+                    Combos();
+                },
+                failure: function (response) {
+                    alert("Fallo?? " + response.responseText);
+                },
+                error: function (response) {
+                    alert("Error?? " + response.responseText);
+                }
+            });
+        }
+
+        function Combos(){
+            $('#SignatureSummernote').summernote(SummernoteConfig);
+
+            $(".select2-number").select2({
+                matcher: matchCustom,
+                templateResult: formatCustom
+            });
+
+            $(".select2-NombreCliente").select2({
+                matcher: matchCustom,
+                templateResult: formatCustom
+            });
+            
+            $(".select2-postal").select2({
+                id: function (e) {return e.id},
+                text: function (e) {return e.id},
+                dropdownAutoWidth: 'true',
+                templateSelection: function (e) 
+                                    {
+                                        if(e.id==''){
+                                            $('#CodPostalObra').val(@Model.CodigoPostalObra);
+                                            return '@Model.CodigoPostalObra';
+                                        }
+                                        else
+                                        {
+                                            //var cadenaCompleta = e.params.data.text;
+                                            var cadenaCompleta = e.text;
+                                            var indicePoblacion = cadenaCompleta.indexOf(' ');
+                                            var indiceProvincia = cadenaCompleta.indexOf('->');
+                                            var poblacion = cadenaCompleta.substring(indicePoblacion,indiceProvincia).trim();
+                                            var provincia = cadenaCompleta.substring(indiceProvincia+2);
+                                            var codigoPostal = cadenaCompleta.substring(0,indicePoblacion).trim();
+                                            $('#PoblacionObra').val(poblacion);
+                                            $('#ProvinciaObra').val(provincia);
+                                            $('#CodPostalObra').val(codigoPostal);
+
+                                            return e.id;
+                                        }
+                                    },
+                minimumInputLength: 3,
+                allowClear: true,
+                languaje: 'es',
+                ajax: {
+                    url: "@Url.Action("FiltrarCodigosPostales", "Congresses")",
+                    dataType: "json",
+                    type: "POST",
+                    params: {
+                        contentType:'application/json; chasert=utf-8'
+                    },
+                    data: function (term, page){
+                        return "{ 'q':'" + term.term + "', 'page_limit': 10}";
+                    },
+                    processResults: function (data) {
+                      return {
+                        results: data
+                      };
+                    }
+                },
+                templateResult: formatCustom,
+                formatSelection: formatCustom,
+                escapeMarkup: function(m){ return m;}
+            });
+        }
+
+        function matchCustom(params, data) {
+            // If there are no search terms, return all of the data
+            if ($.trim(params.term) === '') {
+                return data;
+            }
+            // Do not display the item if there is no 'text' property
+            if (typeof data.text === 'undefined') {
+                return null;
+            }
+            // Match text of option
+            if (stringMatch(params.term, data.text)) {
+                return data;
+            }
+            // Match attribute "data-foo" of option
+            if (stringMatch(params.term, $(data.element).attr('data-almacen'))) {
+                return data;
+            }
+            // Return `null` if the term should not be displayed
+            return null;
+        }
+
+        function formatCustom(state) {
+            return $(
+                '<div class="product-select-list">' + state.text + '<span class="product-name">'
+                + '</span></div>'
+                //+ $(state.element).attr('data-almacen')
+            );
+        }
+
+        function Guardar(){
+            var SignatureAfter = $('#SignatureSummernote').summernote('code');
+            $('#SignatureAfter').val(SignatureAfter);
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("Guardar", "Congresses")",
+                data: $('#form').serialize(),
+                success: function (response) {
+                    if(response.indexOf("ERROR") < 0)
+                        document.location = response;
+                    else
+                    {
+                        var div = "<div class=\"alert alert-dismissible alert-info wow fadeIn \"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><p class=\"mb-0 font-weight-bold small text-danger\"><i class=\"fas fa-exclamation-triangle mr-2\"></i>Ha ocurrido un error.</p><p class=\"small\">"+response+"</p></div>";
+                        $('#form').prepend(div);
+                    }
+                },
+                failure: function (response) {
+                    alert("Fallo?? " + response.responseText);
+                },
+                error: function (response) {
+                    alert("Error?? " + response.responseText);
+                }
+            });
+        }
+ </script>
+}

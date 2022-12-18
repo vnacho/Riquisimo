@@ -1,0 +1,18 @@
+﻿@using Ferpuser.Models.Enums
+@model EstadoAlbaran
+
+@{
+    switch (Model)
+    {
+        case EstadoAlbaran.NoFacturado:
+            <span class="badge badge-danger" style="width:100px;">No facturado</span>
+            break;        
+        case EstadoAlbaran.Facturado:
+            <span class="badge badge-success" style="width:100px;">Facturado</span>
+            break;
+    }
+}
+
+
+
+

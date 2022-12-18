@@ -1,0 +1,153 @@
+﻿@using Ferpuser.Models.Core
+@using Ferpuser.BLL.Filters
+@using Ferpuser.Models.ViewModels
+
+@model ComprasInformesFacturas
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+    ViewData["Report"] = true;
+
+    decimal total = Model.Items.Sum(f => f.Total);
+}
+
+<form method="post">
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Informe de facturas de compra
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                <button type="submit" id="btnFiltrar" class="btn btn-sm btn-blue-grey">Filtrar <i class="fas fa-search ml-2"></i></button>
+                <a href="@Url.Action("Facturas","ComprasInformes")" class="btn btn-sm btn-grey">Limpiar <i class="fas fa-eraser ml-2"></i></a>
+                @if (Model != null && Model.Items.Any())
+                {
+                    <button class="btn btn-grey btn-sm text-nowrap" type="button" onclick="window.print()">Imprimir <i class="fas fa-print ml-2"></i></button>
+                    <button type="submit" class="btn btn-grey btn-sm text-nowrap" asp-action="FacturasCsv" asp-controller="ComprasInformes">
+                        Exportar <i class="fas fa-file-csv ml-2"></i>
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row d-print-none">
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.Filter.CodigoProveedor, new { @class = "small" })            
+            @Html.DropDownListFor(f => f.Filter.CodigoProveedor, new SelectList(ViewBag.Proveedores, "CODIGO", "DisplayName"), "-Seleccionar-", new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(f => f.Filter.CodigoProveedor, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.Filter.CodigoOperario, new { @class = "small" })
+            @Html.DropDownListFor(f => f.Filter.CodigoOperario, new SelectList(ViewBag.Vendedores, "Codigo", "Display"), "-Seleccionar-", new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(f => f.Filter.CodigoOperario, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.Filter.FechaDesde, new { @class = "small" })
+            @Html.EditorFor(f => f.Filter.FechaDesde, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.Filter.FechaDesde, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.Filter.FechaHasta, new { @class = "small" })
+            @Html.EditorFor(f => f.Filter.FechaHasta, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.Filter.FechaHasta, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.Filter.CodigoEvento, new { @class = "small" })
+            @Html.DropDownListFor(f => f.Filter.CodigoEvento, new SelectList(ViewBag.Eventos, "Codigo", "DisplayName"), "-Seleccionar-", new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(f => f.Filter.CodigoEvento, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-1">
+            @Html.LabelFor(f => f.Filter.Pagada, new { @class = "small" })
+            @Html.DropDownListFor(f => f.Filter.Pagada, 
+                new SelectList(new[]
+                {
+                    new { Value = "true", Text = "Sí" },
+                    new { Value = "false", Text = "No" },
+                }, 
+                "Value", "Text"), "-Seleccionar-", new { @class = "form-control" })
+            @Html.ValidationMessageFor(f => f.Filter.Pagada, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-1">
+            @Html.LabelFor(f => f.Filter.TieneRetencion, new { @class = "small" })
+            @Html.DropDownListFor(f => f.Filter.TieneRetencion, 
+                new SelectList(new[]
+                {
+                    new { Value = "true", Text = "Sí" },
+                    new { Value = "false", Text = "No" },
+                }, 
+                "Value", "Text"), "-Seleccionar-", new { @class = "form-control" })
+            @Html.ValidationMessageFor(f => f.Filter.TieneRetencion, "", new { @class = "text-danger small" })
+        </div>
+    </div>
+    <hr class="d-print-none" />
+
+    @if (Model != null && Model.Items.Any())
+    {
+        <div class="table-responsive mt-2">
+            <table class="table table-sm table-hover table-striped bg-white">
+                <thead class="font-weight-bolder">
+                    <tr>
+                        <th scope="col" class="text-left">
+                            @Html.DisplayNameFor(f => f.Items.First().NumeroFactura)
+                        </th>
+                        <th scope="col" class="text-center">
+                            @Html.DisplayNameFor(f => f.Items.First().Fecha)
+                        </th>
+                        <th scope="col" class="text-left">
+                            @Html.DisplayNameFor(f => f.Items.First().CodigoProveedor)
+                        </th>
+                        <th scope="col" class="text-left">
+                            @Html.DisplayNameFor(f => f.Items.First().NombreProveedor)
+                        </th>
+                        <th scope="col" class="text-right">
+                            @Html.DisplayNameFor(f => f.Items.First().Total)
+                        </th>
+                        <th scope="col" class="text-left">
+                            @Html.DisplayNameFor(f => f.Items.First().CodigoEvento)
+                        </th>
+                        <th scope="col" class="text-center">
+                            @Html.DisplayNameFor(f => f.Items.First().TieneRetencion)
+                        </th>
+                        <th scope="col" class="text-left">
+                            @Html.DisplayNameFor(f => f.Items.First().NombreEvento)
+                        </th>
+                        <th scope="col" class="text-center">
+                            @Html.DisplayNameFor(f => f.Items.First().Pagada)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (CompraFactura item in Model.Items)
+                    {
+                    <tr>
+                        <td class="text-left">@item.NumeroFactura</td>
+                        <td class="text-center">@Html.DisplayFor(f => item.Fecha)</td>
+                        <td class="text-left">@item.CodigoProveedor</td>
+                        <td class="text-left">@item.NombreProveedor</td>
+                        <td class="text-right">@item.Total</td>                        
+                        <td class="text-left">@Html.DisplayFor(f => item.CodigoEvento)</td>
+                        <td class="text-center">@Html.DisplayFor(f => item.TieneRetencion)</td>
+                        <td class="text-left">@Html.DisplayFor(f => item.NombreEvento)</td>
+                        <td class="text-center">@Html.DisplayFor(f => item.Pagada)</td>
+                    </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="4"></th>
+                        <th class="text-right">@total.ToString("N")</th>
+                        <th colspan="3"></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    }
+    else
+    {
+        <partial name="_Empty" model="string.Empty" />
+    }
+</form>

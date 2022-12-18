@@ -1,0 +1,6 @@
+﻿@model int?
+
+@if (Model.HasValue)
+{
+    <span>@string.Format("{0}%", Model)</span>
+}

@@ -1,0 +1,16 @@
+﻿/*jqueryui autocomplete*/
+.ui-autocomplete {
+    max-height: 200px;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: hidden;
+    font-family: "Museo",sans-serif;
+}
+
+* html .ui-autocomplete {
+    height: 200px;
+}
+
+.bg-warning-light {
+    background-color: #FFEE9B !important;
+}

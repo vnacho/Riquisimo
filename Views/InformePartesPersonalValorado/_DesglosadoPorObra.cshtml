@@ -1,0 +1,86 @@
+﻿@using Ferpuser.Models.ViewModels
+@model InformePartesPersonalValoradoViewModel
+@{
+    var obras = Model.Items.OrderBy(f => f.CentroCoste.Nombre).Select(f => f.CentroCosteId).Distinct();
+    decimal total = 0;    
+}
+
+<div class="table-responsive mt-2">
+    <table class="table table-sm table-hover table-striped bg-white table-bordered">
+        <thead class="font-weight-bolder">
+            <tr>
+                <th scope="col" class="text-left pl-2 font-weight-bold">
+                    TRABAJADOR
+                </th>
+                <th scope="col" class="text-right pr-2 font-weight-bold">
+                    HORAS
+                </th>
+                <th scope="col" class="text-right pr-2 font-weight-bold">
+                    €/hora
+                </th>
+                <th scope="col" class="text-right pr-2 font-weight-bold">
+                    IMPORTE
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                foreach (var obra in obras)
+                {
+                    var personal = Model.Items.Where(f => f.CentroCosteId == obra).OrderBy(f => f.Personal.Nombre).Select(f => f.PersonalId).Distinct();
+                    decimal totalobra = 0;
+
+                    foreach (var p in personal)
+                    {
+                        decimal? totalpersona = null;
+                        if (Model.Items.First(f => f.PersonalId == p).Personal.PrecioHora.HasValue)
+                        {
+                            totalpersona = Model.Items.Where(f => f.PersonalId == p && f.CentroCosteId == obra).Sum(f => f.Unidades) * Model.Items.First(f => f.PersonalId == p).Personal.PrecioHora.Value;
+                            total += totalpersona.Value;
+                            totalobra += totalpersona.Value;
+                        }
+
+                        <tr>
+                            <td class="text-left pl-2">@Model.Items.First(f => f.PersonalId == p).Personal.Nombre</td>
+                            <td class="text-right pr-2 ">
+                                @Model.Items.Where(f => f.PersonalId == p && f.CentroCosteId == obra).Sum(f => f.Unidades).ToString("N1")
+                            </td>
+                            <td class="text-right pr-2 ">
+                                @Model.Items.First(f => f.PersonalId == p).Personal.PrecioHora
+                            </td>
+                            <td class="text-right pr-2 ">
+                                @totalpersona?.ToString("N2")
+                            </td>
+                        </tr>
+                    }
+                    <tr style="color:#7e0000 !important">
+                        <td class="text-left pl-2 font-weight-bold">@Model.Items.First(f => f.CentroCosteId == obra).CentroCoste.Nombre</td>            
+                        <td class="text-right pr-2 font-weight-bold">
+                            @Model.Items.Where(f => f.CentroCosteId == obra).Sum(f => f.Unidades).ToString("N1")
+                        </td>
+                        <td></td>
+                        <td class="text-right pr-2 font-weight-bold">
+                            @totalobra.ToString("N2")
+                        </td>
+                    </tr>
+                    }
+                }
+        </tbody>
+        <tfoot class="font-weight-bolder">
+            <tr>
+                <th scope="col">
+                    &nbsp;
+                </th>
+                <th scope="col" class="text-right pr-2 font-weight-bold">
+                    @Model.Items.Sum(f => f.Unidades).ToString("N1")
+                </th>
+                <th scope="col">
+                    &nbsp;
+                </th>
+                <th scope="col" class="text-right pr-2 font-weight-bold">
+                    @total.ToString("N2")
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>

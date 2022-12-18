@@ -1,0 +1,149 @@
+﻿@using Ferpuser.Models.Core
+@using Ferpuser.Models.ViewModels
+@model InformeTotalHorasPersonalViewModel
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+}
+
+@section Styles
+{
+    <style type="text/css" media="print">        
+        @@page {
+            size: landscape;
+        }
+    </style>
+
+    <style type="text/css">
+        @@media print { 
+            body {
+              -webkit-print-color-adjust: exact !important;
+            }
+
+            #divResultados th,td {
+                font-size: 0.5rem !important;
+            }
+        }
+    </style>
+}
+
+<form method="post">
+
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Informe de total horas personal
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                @if (Model != null && Model.Items != null && Model.Items.Any())
+                {
+                    <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                        <button class="btn btn-grey btn-sm text-nowrap" onclick="window.print();">
+                            Imprimir informe <i class="fas fa-print ml-2"></i>
+                        </button>
+                    </div>
+                    @*<button type="submit" class="btn btn-grey btn-sm text-nowrap" asp-action="ExportPdf" asp-controller="InformeTotalHorasPersonal">
+                            Imprimir <i class="fas fa-print ml-2"></i>
+                        </button>*@
+                    <button type="submit" class="btn btn-grey btn-sm text-nowrap" asp-action="ExportCsv" asp-controller="InformeTotalHorasPersonal">
+                        Exportar <i class="fas fa-file-csv ml-2"></i>
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row d-print-none">
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.nombre, new { @class = "small" })
+            @Html.EditorFor(f => f.nombre, new { htmlAttributes = new { @class = "form-control " } })
+            @Html.ValidationMessageFor(f => f.nombre, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(f => f.CentroCosteId, new { @class = "small" })
+            @Html.DropDownListFor(f => f.CentroCosteId, new SelectList(ViewBag.CentrosCoste, "Id", "Display"), "-Seleccionar-", new { @class = "form-control form-control-sm select2" })
+            @Html.ValidationMessageFor(f => f.CentroCosteId, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.FechaDesde, new { @class = "small" })
+            @Html.EditorFor(f => f.FechaDesde, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.FechaDesde, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.FechaHasta, new { @class = "small" })
+            @Html.EditorFor(f => f.FechaHasta, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.FechaHasta, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            <div class="form-check">
+                @Html.EditorFor(f => f.DesglosadoPorObra, new { htmlAttributes = new { type = "checkbox", @class = "form-check-input" } })
+                @Html.LabelFor(f => f.DesglosadoPorObra, new { @class = "small form-check-label" })
+            </div>
+            @Html.ValidationMessageFor(f => f.DesglosadoPorObra, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-12 text-right">
+            <button type="submit" id="btnFiltrar" class="btn btn-sm btn-blue-grey">Filtrar <i class="fas fa-search ml-2"></i></button>
+            <a href="@Url.Action("Index","InformeTotalHorasPersonal")" class="btn btn-sm btn-grey">Limpiar <i class="fas fa-eraser ml-2"></i></a>
+        </div>
+    </div>
+
+    <div class="d-none d-print-block">
+        <div class="row align-items-end">
+            <div class="col-1">
+                <img src="~/img/logo_informes.png" class="w-75" />        
+            </div>
+            <div class="col-11">
+                <h5>INFORME DE TOTAL HORAS PERSONAL</h5>
+            </div>
+        </div>
+        <br>
+    </div>
+
+    <div class="d-none d-print-block small" >
+        <div class="row">
+            <div class="col-md-12">
+                @if (Model != null && Model.CentroCosteId.HasValue)
+                {
+                    string centrocoste = (ViewBag.CentrosCoste as IEnumerable<CentroCoste>).First(f => f.Id == Model.CentroCosteId).Display;
+                    <span>Centro de coste: @centrocoste.</span>
+                }
+                @if (Model != null && Model.FechaDesde.HasValue)
+                {
+                    <span>Fecha desde: @Model.FechaDesde?.ToShortDateString().</span>
+                }
+                @if (Model != null && Model.FechaHasta.HasValue)
+                {
+                    <span>Fecha hasta: @Model.FechaHasta?.ToShortDateString().</span>
+                }
+                @if (Model != null && Model.DesglosadoPorObra)
+                {
+                    <span>Desglosado por obra.</span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <hr class="d-print-none"/>
+
+    <div id="divResultados">
+        @if (Model != null && Model.Items != null && Model.Items.Any())
+        {
+            @if (!Model.DesglosadoPorObra)
+            {
+                <partial name="_Default" />
+            }
+            else
+            {
+                <partial name="_DesglosadoPorObra" />
+            }
+        }
+        else
+        {
+            <partial name="_Empty" model="string.Empty" />
+        }
+    </div>
+
+</form>

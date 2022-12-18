@@ -1,0 +1,94 @@
+﻿@model IEnumerable<Ferpuser.Models.Congress>
+
+<div class="table-responsive mt-2">
+    <table class="table table-sm table-hover table-striped bg-white">
+        <thead class="font-weight-bolder">
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Number)
+                </th>
+                <th class="text-left">
+                    @Html.DisplayNameFor(model => model.Code)
+                </th>
+                <th class="text-left">
+                    @Html.DisplayNameFor(model => model.Name)
+                </th>
+                <th class="text-left">
+                    @Html.DisplayNameFor(model => model.Place)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.StartDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.EndDate)
+                </th>
+                @if (User.Claims.Any(c => c.Type.Equals("AccessCollaborations")))
+                {
+                }
+                <th>
+                    @Html.DisplayNameFor(model => model.TipoCongress)
+                </th>
+                <th data-orderable="false"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+            <tr>
+                <td>
+                    @ViewHelpers.PadCongress(item.Number)
+                </td>
+                <td class="text-left">
+                    @Html.DisplayFor(modelItem => item.Code)
+                </td>
+                <td class="text-left">
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td class="text-left">
+                    @Html.DisplayFor(modelItem => item.Place)
+                </td>
+                <td>
+                    @if (item.StartDate.Ticks > 0)
+                    {
+                        <span class="d-none">@item.StartDate.ToString("o")</span>@item.StartDate.ToShortDateString()
+                    }
+                </td>
+                <td>
+                    @if (item.EndDate.Ticks > 0)
+                    {
+                        <span class="d-none">@item.EndDate.ToString("o")</span>@item.EndDate.ToShortDateString()
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TipoCongress)
+                </td>
+                @*
+                @if (User.Claims.Any(c => c.Type.Equals("AccessCollaborations")))
+                {
+                        @if (item.IsCongress)
+                        {
+                            @:Congreso
+                        }
+                }
+                *@
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="text-info mx-2">
+                        <i class="fas fa-pencil-alt mt-0"></i>
+                    </a>
+                    <a class="mx-2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </a>
+
+                    <div class="dropdown-menu">
+                        <h6 class="dropdown-header">Credenciales</h6>
+                        <a class="dropdown-item" asp-action="RegistrantSelector" asp-route-id="@item.Id">Etiquetas</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Listados</h6>
+                        <a class="dropdown-item" asp-action="ClientsPending" asp-route-id="@item.Id" asp-route-useBarcode="true">Clientes sin facturar</a>
+                    </div>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

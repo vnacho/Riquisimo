@@ -1,0 +1,232 @@
+﻿@model IEnumerable<Ferpuser.Controllers.ByClientModel>
+
+@{
+    ViewData["Title"] = "Listado general de asistentes";
+    ViewData["Create"] = false;
+    ViewData["Back"] = false;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+    ViewData["Report"] = true;
+}
+<div class="row d-print-none mb-4">
+    <div class="col-12">
+        <div class="card">
+            <form class="card-body d-flex justify-content-around align-items-center flex-column flex-sm-row">
+                <div class="form-group flex-grow-1">
+                    <label for="CongressId" class="control-label">Congreso</label>
+                    <select id="CongressId" name="CongressId" class="browser-default custom-select select2" asp-items="ViewBag.CongressId">
+                        <option value="">
+                            Todos
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group mx-1">
+                    <label for="Filter" class="control-label">Filtro</label>
+                    <select id="Filter" name="Filter" class="select2">
+                        <option value="0">
+                            Mostrar todo
+                        </option>
+                        <option value="1">
+                            Mostrar "Sólo facturación"
+                        </option>
+                        <option value="2">
+                            Excluir "Sólo facturación"
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group btn-group btn-group-sm mb-0">
+                    <button class="btn btn-primary btn-sm mb-0"><i class="fas fa-sync fa-2x"></i></button>
+                    @if (Model.Any())
+                    {
+                        <button class="btn btn-primary btn-sm mb-0" type="button" onclick="window.print()"><i class="fas fa-print fa-2x"></i></button>
+                        <a class="btn btn-primary btn-sm mb-0" asp-action="AttendantsCsv" asp-route-congressId="@Model.FirstOrDefault().CongressId" asp-route-Filter="@ViewData["Filter"]">
+                            <i class="fas fa-file-csv fa-2x"></i>
+                        </a>
+                    }
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                @if (Model.GroupBy(r => r.CongressId).Count() == 1)
+                {
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <img src="@Model.FirstOrDefault().LogoBase64" class="w-50" />
+                        <img src="~/img/sanicongress.jpg" class="w-25" />
+                    </div>
+                }
+
+                <div class="col-12 text-center">
+                    <h1 class="mb-2 mb-sm-0 pt-1 h4">
+                        @ViewData["Title"]
+                    </h1>
+                </div>
+                <div class="card-body">
+                    @{
+                        var i = 0;
+                        var pageN = 0;
+                    }
+                    @while (i < Model.Count())
+                    {
+                        var p = 29;
+                        if (pageN == 0)
+                        {
+                            p = 21;
+                        }
+                        pageN++;
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Surnames)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Name)
+                                    </th>
+                                    <th>
+                                        Categoría
+                                    </th>
+                                    <th class="text-center">
+                                        Pagada
+                                    </th>
+                                    <th>
+                                        Pagada por
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.AccommodationHotel)
+                                    </th>
+                                    <th class="text-right">
+                                        @Html.DisplayNameFor(model => model.AccommodationStart)
+                                    </th>
+                                    <th class="text-right">
+                                        @Html.DisplayNameFor(model => model.AccommodationEnd)
+                                    </th>
+                                    <th class="text-center">
+                                        Pagado
+                                    </th>
+                                    <th>
+                                        Pagado por
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (var j = 0; j < p && i < Model.Count(); j++, i++)
+                                {
+                                    var item = Model.ToArray()[i];
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Surnames)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Name)
+                                        </td>
+                                        <td>
+                                            <div class="truncate">
+                                                @Html.DisplayFor(modelItem => item.Category)
+                                            </div>
+                                        </td>
+                                        <td class="text-right">
+                                            <div class="truncate">
+                                                @if (item.RegistrationPaid.HasValue)
+                                                {
+                                                    if (item.RegistrationPaid.Value)
+                                                    {
+                                                        <span>Sí</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>No</span>
+                                                    }
+                                                }
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="truncate">
+                                                @Html.DisplayFor(modelItem => item.RegistrationBusinessName)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrWhiteSpace(item.AccommodationHotel))
+                                            {
+                                                @Html.DisplayFor(modelItem => item.AccommodationHotel)
+                                            }
+                                            else
+                                            {
+                                                <span style="width: 400px; display: block;">
+                                                </span>
+                                            }
+                                        </td>
+
+                                        <td class="text-right">
+                                            @if (item.AccommodationStart.HasValue)
+                                            {
+                                                @item.AccommodationStart.Value.ToShortDateString()
+                                            }
+                                        </td>
+                                        <td class="text-right">
+                                            @if (item.AccommodationEnd.HasValue)
+                                            {
+                                                @item.AccommodationEnd.Value.ToShortDateString()
+                                            }
+                                        </td>
+                                        <td class="text-right">
+                                            @if (item.AccommodationPaid.HasValue)
+                                            {
+                                                if (item.AccommodationPaid.Value)
+                                                {
+                                                    <span>Sí</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>No</span>
+                                                }
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="truncate">
+                                                @Html.DisplayFor(modelItem => item.AccommodationBusinessName)
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="font-larger">
+                                    <th>
+                                        Página @pageN
+                                    </th>
+                                    <th colspan="9" class="text-right">
+                                        @ViewHelpers.PadCongress(Model.FirstOrDefault().Number)
+                                        @Model.FirstOrDefault().CongressName
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    }
+                </div>
+
+                <div class="card-footer text-right">
+                    <span class="mx-5">
+                        Total inscritos: @Model.Count()
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        $(e => {
+            $("#Filter").val(@(ViewData["Filter"])).trigger('change');
+        });
+    </script>
+}

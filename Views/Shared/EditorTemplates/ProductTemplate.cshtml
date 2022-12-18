@@ -1,0 +1,66 @@
+﻿@model Ferpuser.Models.Product
+@using Ferpuser.Models.Sage
+
+<tr class="Product-@Model.Id">
+    <td>
+        <input asp-for="ExpenseId" hidden />
+        <input asp-for="Created" hidden />
+        <input asp-for="Modified" hidden />
+        <input asp-for="Deleted" id="Product-Deleted-@Model.Id" hidden />
+        <input asp-for="Id" hidden value="@Model.Id" />
+
+        <select asp-for="ProductCode" class="browser-default custom-select select2-product">
+            @foreach (Articulo a in ViewBag.Products)
+            {
+                @if (a.Codigo.Equals(Model.ProductCode))
+                {
+
+                    <option data-productname="@a.Nombre" value="@a.Codigo" selected>
+                        @a.Codigo
+                    </option>
+                }
+                else
+                {
+                    <option data-productname="@a.Nombre" value="@a.Codigo">
+                        @a.Codigo
+                    </option>
+                }
+            }
+        </select>
+        <span asp-validation-for="ProductCode" class="text-danger"></span>
+    </td>
+    <td>
+        <input asp-for="ProductDescription" maxlength="90" class="form-control" value="@Model?.ProductDescription?.Trim()"/>
+        <span asp-validation-for="ProductDescription" class="text-danger"></span>
+    </td>
+    <td>
+        <select id="VATId-@Model.Id" asp-for="VATId" class="browser-default custom-select text-right" asp-items="ViewBag.VATId"></select>
+        <input asp-for="VAT" hidden />
+    </td>
+    <td>
+        <input asp-for="Units" class="form-control text-right" value="@Model.Units.ToString("N")" />
+        <span asp-validation-for="Units" class="text-danger"></span>
+    </td>
+    <td>
+        <input asp-for="BasePrice" class="form-control text-right" value="@Model.BasePrice.ToString("N")"/>
+        <span asp-validation-for="BasePrice" class="text-danger"></span>
+    </td>
+    <td>
+        <input asp-for="TotalPrice" class="text-right form-control-plaintext text-right" readonly value="@Model.TotalPrice.ToString("N")"/>
+    </td>
+    <td class="text-right">
+        <a href="#" id="@Model.Id" class="toggle-comments btn btn-info btn-rounded btn-sm px-2"><i id="@Model.Id" class="fas fa-comment-dots"></i></a>
+        <a href="#" id="@Model.Id" class="delete-product btn btn-danger btn-rounded btn-sm px-2"><i id="@Model.Id" class="fas fa-times"></i></a>
+    </td>
+</tr>
+<tr class="Product-@Model.Id comments-@Model.Id d-none">
+    <td class="text-right">
+        <b>
+            Comentarios
+        </b>
+    </td>
+    <td colspan="6">
+        <input asp-for="ProductNotes" maxlength="45" class="form-control" />
+        <span asp-validation-for="ProductNotes" class="text-danger"></span>
+    </td>
+</tr>

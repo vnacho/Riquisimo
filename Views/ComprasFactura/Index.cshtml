@@ -1,0 +1,316 @@
+﻿@using Ferpuser.Models.Core
+@using Ferpuser.BLL.Filters
+@model IEnumerable<CompraFactura>
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+    ViewData["Swal"] = true;
+    TableHeaderSortable th;
+    var pager = ViewData["Pager"];
+    CompraFacturaFilter filter = new CompraFacturaFilter();
+}
+
+<form id="formDocumentacion" name="formDocumentacion" method="post">
+
+    <input type="hidden" name="currentsort" id="currentsort" value="@ViewData["Sort"].ToString()" />
+
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Listado de facturas de compra
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                <a asp-action="Create" asp-controller="ComprasFactura" class="btn btn-secondary btn-sm text-nowrap">Nuevo <i class="fas fa-plus ml-2"></i></a>
+                <button type="submit" class="btn btn-grey btn-sm text-nowrap" asp-action="ExportPdf" asp-controller="ComprasFactura">
+                    Imprimir <i class="fas fa-print ml-2"></i>
+                </button>
+                <button type="submit" class="btn btn-grey btn-sm text-nowrap" asp-action="ExportCsv" asp-controller="ComprasFactura">
+                    Exportar <i class="fas fa-file-csv ml-2"></i>
+                </button>
+                @*<a asp-action="Export" class="btn btn-grey btn-sm text-nowrap">Enviar <i class="fas fa-envelope ml-2"></i></a>*@
+                 <button type="button"  onclick="DescargarDocumentacion2()" class="btn btn-grey btn-sm text-nowrap">Descarga Masiva <i class="fas fa-download ml-2"></i></button>
+@*                 <button type="submit" class="btn btn-grey btn-sm text-nowrap" asp-action="DescargarDocumentacion" asp-controller="ComprasFactura">
+                    Descarga Masiva <i class="fas fa-download ml-2"></i>
+                </button>*@
+
+            </div>
+        </div>
+    </div>
+    <div id="divMensaje"></div>
+
+    <div class="form-row">
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.numFactura, new { @class = "small" })
+            @Html.EditorFor(f => filter.numFactura, new { htmlAttributes = new { @class = "form-control " } })
+            @Html.ValidationMessageFor(f => filter.numFactura, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-5">
+            @Html.LabelFor(f => filter.CodigoProveedor, new { @class = "small" })            
+            @Html.DropDownListFor(f => filter.CodigoProveedor, new SelectList(ViewBag.Proveedores, "CODIGO", "DisplayName", Model == null ? null : filter.CodigoProveedor), "-Seleccionar-", new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(f => filter.CodigoProveedor, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-5">
+            @Html.LabelFor(f => filter.CodigoEvento, new { @class = "small" })
+            @Html.DropDownListFor(f => filter.CodigoEvento, new SelectList(ViewBag.Eventos, "Codigo", "DisplayName", Model == null ? null : filter.CodigoEvento), "-Seleccionar-", new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(f => filter.CodigoEvento, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.FechaDesde, new { @class = "small" })
+            @Html.EditorFor(f => filter.FechaDesde, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => filter.FechaDesde, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.FechaHasta, new { @class = "small" })
+            @Html.EditorFor(f => filter.FechaHasta, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => filter.FechaHasta, "", new { @class = "text-danger small" })
+        </div>        
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.EstadoFactura, new { @class = "small" })
+            @Html.DropDownListFor(f => filter.EstadoFactura, new SelectList(Html.GetEnumSelectList<EstadoFactura>(), "Value", "Text", Model == null ? null : filter.EstadoFactura), "-Seleccionar-", new { @class = "form-control form-control-sm" })
+            @Html.ValidationMessageFor(f => filter.EstadoFactura, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.Pagada, new { @class = "small" })
+            @Html.DropDownListFor(f => filter.Pagada, 
+                new SelectList(new[]
+                {
+                    new { Value = "true", Text = "Sí" },
+                    new { Value = "false", Text = "No" },
+                }, 
+                "Value", "Text", Model == null ? null : filter.Pagada), "-Seleccionar-", new { @class = "form-control form-control-sm" })
+            @Html.ValidationMessageFor(f => filter.Pagada, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.Registro, new { @class = "small" })
+            @Html.EditorFor(f => filter.Registro, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => filter.Registro, "", new { @class = "text-danger small" })
+        </div>
+
+        @Html.HiddenFor(f => filter.CodigoOperario)
+
+        @*<div class="form-group offset-8 col-md-2">
+            <label for="btnFiltrar" class="invisible d-block small">Filtrar</label>
+            <button type="submit" id="btnFiltrar" class="btn btn-sm btn-light-blue w-100">Filtrar <i class="fas fa-search ml-2"></i></button>
+        </div>
+        <div class="form-group col-md-2">
+            <label for="btnFiltrar" class="invisible d-block small">Limpiar</label>
+            <button type="submit" id="btnFiltrar" class="btn btn-sm btn-grey w-100">Limpiar <i class="fas fa-search ml-2"></i></button>
+        </div>*@
+    </div>
+
+    <div class="form-row">
+        <div class="col text-right">
+            <button type="submit" id="btnFiltrar" class="btn btn-sm btn-blue-grey">Filtrar <i class="fas fa-search ml-2"></i></button>
+            <a href="@Url.Action("Index","ComprasFactura")" class="btn btn-sm btn-grey">Limpiar <i class="fas fa-eraser ml-2"></i></a>
+        </div>
+    </div>
+
+    <hr />
+
+    <partial name="_Pager" model="pager" />
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive mt-2">
+            <table class="table table-sm table-hover table-striped bg-white">
+                <thead class="font-weight-bolder">
+                    <tr>
+                        <th scope="col" class="text-center">
+                            @{ th = new TableHeaderSortable() { Property = "NumeroFactura", Display = Html.DisplayNameFor(f => f.NumeroFactura).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col" class="text-center">
+                            @{ th = new TableHeaderSortable() { Property = "Registro", Display = Html.DisplayNameFor(f => f.Registro).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col" class="text-center">
+                            @{ th = new TableHeaderSortable() { Property = "Fecha", Display = Html.DisplayNameFor(f => f.Fecha).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col">
+                            @{ th = new TableHeaderSortable() { Property = "NombreProveedor", Display = Html.DisplayNameFor(f => f.NombreProveedor).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col">
+                            @{ th = new TableHeaderSortable() { Property = "NombreOperario", Display = Html.DisplayNameFor(f => f.NombreOperario).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        @*<th scope="col">
+                            @{ th = new TableHeaderSortable() { Property = "CodigoEvento", Display = Html.DisplayNameFor(f => f.CodigoEvento).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>*@
+                        <th scope="col">
+                            @{ th = new TableHeaderSortable() { Property = "NombreEvento", Display = Html.DisplayNameFor(f => f.NombreEvento).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col" class="text-right">
+                            @{ th = new TableHeaderSortable() { Property = "Total", Display = Html.DisplayNameFor(f => f.Total).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col" class="text-center">
+                            @{ th = new TableHeaderSortable() { Property = "EstadoFactura", Display = Html.DisplayNameFor(f => f.EstadoFactura).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col" class="text-center">
+                            @{ th = new TableHeaderSortable() { Property = "Pagada", Display = Html.DisplayNameFor(f => f.Pagada).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (CompraFactura item in Model)
+                    {
+                    <tr>
+                        <td class="text-center">@item.NumeroFactura</td>
+                        <td class="text-center">@item.Registro</td>
+                        <td class="text-center">@item.Fecha.ToShortDateString()</td>
+                        <td>@item.CodigoProveedor @item.NombreProveedor</td>
+                        <td>@item.NombreOperario</td>
+                        @*<td>@item.CodigoEvento</td>*@
+                        <td>@item.CodigoEvento @item.NombreEvento</td>
+                        <td class="text-right font-weight-bold text-nowrap">@item.Total.ToString("C")</td>
+                        <td class="text-center">@Html.DisplayFor(f => item.EstadoFactura)</td>
+                        <td class="text-center">@Html.DisplayFor(f => item.Pagada)</td>
+                        <td class="text-right text-nowrap">
+                            <a class="text-info mx-2" href="@Url.Action("Edit", "ComprasFactura", new { Id = item.Id })">
+                                <i class="fas fa-pencil-alt"></i>
+                            </a>
+                            <a class="text-danger mr-2" asp-controller="ComprasFactura" asp-action="Delete" asp-route-id="@item.Id" onclick="return confirm('¿Está seguro de que quiere eliminar este registro?');">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <partial name="_Empty" model="string.Empty" />
+    }
+
+    <partial name="_Pager" model="pager" />
+
+</form>
+@section Styles
+{
+    <link rel="stylesheet" href="~/lib/jqueryui/jqueryui/jquery-ui.min.css">
+}
+@section Scripts
+{
+    <script>
+        $(document).ready(function() {    
+            $()            
+        });
+
+        function DescargarDocumentacion() {            
+            $("#divBotonera").addClass('d-none');
+            $("#divSpinner").removeClass('d-none');
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("DescargarDocumentacion", "ComprasFactura")",
+                data: $('#formDocumentacion').serialize(),
+                success: function (data, textStatus, jqXHR) {
+
+                    // Get the raw header string
+                    var headers = jqXHR.getAllResponseHeaders();
+                    console.log(headers);
+
+                    // Convert the header string into an array
+                    // of individual headers
+                    var arr = headers.trim().split(/[\r\n]+/);
+
+                    // Create a map of header names to values
+                    var headerMap = {};
+                    arr.forEach(function (line) {
+                        var parts = line.split(': ');
+                        var header = parts.shift();
+                        var value = parts.join(': ');
+                        headerMap[header] = value;
+                    });
+
+                    var contentType = headerMap["content-type"];
+                    //console.log(contentType);
+                    Swal.fire({
+                      title: 'DESCARGA MASIVA',
+                      text: "Se han encontrado "+jqXHR+" facturas",
+                      icon: 'warning',
+                      showCancelButton: true,
+                      confirmButtonText: 'Continuar',
+                      cancelButtonText: 'Cancelar',
+                      reverseButtons: true
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        if (contentType == 'application/zip') {                        
+                            DescargarDocumentacion2();                        
+                        }
+                        else {
+                            $("#divDocumentacion").html(data);
+                            $("#divBotonera").removeClass('d-none');
+                            $("#divSpinner").addClass('d-none');
+                        }
+                      } 
+                      else {
+                            $("#divDocumentacion").html(data);
+                            $("#divBotonera").removeClass('d-none');
+                            $("#divSpinner").addClass('d-none');
+                      }
+                    });
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                },
+                complete: function (jqXHR, textStatus) {
+                    
+                }
+            });
+        }
+
+        function DescargarDocumentacion2() {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("DescargarDocumentacion", "ComprasFactura")",
+                data: $('#formDocumentacion').serialize(),
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function (data, textStatus, jqXHR) {                                        
+                    var link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(data);
+                    link.download = "Documentacion " + "Fecha" + ".zip";
+                    link.id="ficheroComprimido";
+                    link.click();
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                },
+                complete: function (jqXHR, textStatus) {
+                    var mensaje = jqXHR.getResponseHeader('content-disposition').split('filename=')[1].split(';')[0].replace('"', '');
+
+                    if (!mensaje .startsWith("ERROR"))
+                    {
+                        $("#divMensaje").html("<div class='alert alert-dismissible alert-info wow fadeIn '><button type='button' class='close' data-dismiss='alert'>&times;</button><p class='mb-0 font-weight-bold small'><i class='fas fa-info-circle mr-2'></i>"+mensaje+"</p></div>");
+                    } 
+                    else
+                    {
+                        $("#divMensaje").html("<div class=\'alert alert-dismissible alert-info wow fadeIn \'><button type='button' class='close' data-dismiss='alert'>&times;</button><p class='mb-0 font-weight-bold small text-danger'><i class='fas fa-exclamation-triangle mr-2'></i>Ha ocurrido un error.</p><p class='small'>"+mensaje+"</p></div>");
+                    }
+
+                    $("#divBotonera").removeClass('d-none');
+                    $("#divSpinner").addClass('d-none');
+                }
+            });
+        }
+    </script>
+}

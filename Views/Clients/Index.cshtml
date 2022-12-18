@@ -1,0 +1,62 @@
+﻿@model IEnumerable<Ferpuser.Models.Client>
+
+@{
+    ViewData["Title"] = "Clientes";
+
+    ViewData["DataTable"] = true;
+    ViewData["Back"] = false;
+    ViewData["Create"] = false;
+    ViewData["Swal"] = true;
+    ViewData["ImportClients"] = true;
+}
+
+<table class="table table-striped table-hover table-sm table-borderless">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.NIF)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BusinessName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SageCode)
+            </th>
+            <th data-orderable="false"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.NIF)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.BusinessName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SageCode)
+                </td>
+                <td class="text-right">
+
+                    @if (item.SageCode == null)
+                    {
+                        <a class="text-info mx-2 export" data-client-name="@item.BusinessName" data-client-id="@item.Id">
+                            <i class="fas fa-share"></i>
+                        </a>
+
+                    }
+
+                    <a class="text-danger mx-2" asp-action="Delete" asp-route-id="@item.Id">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="text-info mx-2">
+                        <i class="fas fa-pencil-alt"></i>
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

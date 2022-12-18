@@ -1,0 +1,103 @@
+﻿@model Ferpuser.Models.CongressEmailAccounts
+
+@{
+    ViewData["Title"] = "Editar correo electrónico";
+
+    ViewData["Validation"] = true;
+    ViewData["ValidationUnobtrusive"] = false;
+    ViewData["FileUpload"] = true;
+    ViewData["Summernote"] = true;
+    ViewData["Select2"] = true;
+}
+
+<form asp-action="Edit">
+
+    <input asp-for="Id" hidden class="form-control" />
+    <input asp-for="Modified" hidden class="form-control" />
+    <input asp-for="Created" hidden class="form-control" />
+    <input asp-for="Deleted" hidden class="form-control" />
+    <div class="row">
+        <div class="col-12">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        </div>
+        <div class="col-6 form-group">
+            <label asp-for="CongressId" class="control-label"></label>
+            <select asp-for="CongressId" class="form-control select2" asp-items="ViewBag.CongressId"></select>
+        </div>
+        <div class="col-6 form-group">
+            <label asp-for="AccountId" class="control-label"></label>
+            <select asp-for="AccountId" class="form-control select2" asp-items="ViewBag.AccountId"></select>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="form-group">
+                <label asp-for="IncomingMailServer" class="control-label"></label>
+                <input asp-for="IncomingMailServer" class="form-control " />
+                <span asp-validation-for="IncomingMailServer" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="IncomingMailPort" class="control-label"></label>
+                <input asp-for="IncomingMailPort" class="form-control " />
+                <span asp-validation-for="IncomingMailPort" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="form-group">
+                <label asp-for="OutgoingMailServer" class="control-label"></label>
+                <input asp-for="OutgoingMailServer" class="form-control " />
+                <span asp-validation-for="OutgoingMailServer" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="OutgoingMailPort" class="control-label"></label>
+                <input asp-for="OutgoingMailPort" class="form-control " />
+                <span asp-validation-for="OutgoingMailPort" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="MailUser" class="control-label"></label>
+                <input asp-for="MailUser" class="form-control " />
+                <span asp-validation-for="MailUser" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="MailPassword" class="control-label"></label>
+                <input asp-for="MailPassword" class="form-control " />
+                <span asp-validation-for="MailPassword" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="form-group">
+                <label for="SignatureSummernote" class="control-label"></label>
+                <div id="SignatureSummernote">
+                    @Html.Raw(Model.SignatureAfter)
+                </div>
+                <textarea asp-for="SignatureAfter" hidden>
+                </textarea>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <input id="save" type="submit" value="Guardar" class="btn btn-primary" />
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#save').click(e => {
+                $('#SignatureAfter').text($('#SignatureSummernote').summernote('code'));
+            })
+            $('#SignatureSummernote').summernote(SummernoteConfig);
+        });
+    </script>
+}

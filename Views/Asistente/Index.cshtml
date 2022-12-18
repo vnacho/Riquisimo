@@ -1,0 +1,110 @@
+﻿@using Ferpuser.Models.Core
+@using Ferpuser.BLL.Filters
+@model IEnumerable<Asistente>
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    TableHeaderSortable th;
+    var pager = ViewData["Pager"];
+    AsistenteFilter filter = new AsistenteFilter();
+}
+
+<form>
+
+    <input type="hidden" name="currentsort" id="currentsort" value="@ViewData["Sort"].ToString()" />
+
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Listado de asistentes
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                <a asp-action="Create" asp-controller="Asistente" class="btn btn-secondary btn-sm text-nowrap">Nuevo <i class="fas fa-plus ml-2"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => filter.NIF, new { @class = "small" })
+            @Html.EditorFor(f => filter.NIF, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => filter.NIF, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => filter.Nombre, new { @class = "small" })
+            @Html.EditorFor(f => filter.Nombre, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => filter.Nombre, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3">
+            @Html.LabelFor(f => filter.Apellidos, new { @class = "small" })
+            @Html.EditorFor(f => filter.Apellidos, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => filter.Apellidos, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-3 text-right">
+            <br />
+            <button type="submit" id="btnFiltrar" class="btn btn-sm btn-blue-grey">Filtrar <i class="fas fa-search ml-2"></i></button>
+            <a href="@Url.Action("Index","Asistente")" class="btn btn-sm btn-grey">Limpiar <i class="fas fa-eraser ml-2"></i></a>
+        </div>
+    </div>
+
+    @*<div class="form-row">
+        <div class="col text-right">
+            
+        </div>
+    </div>*@
+
+    <hr />
+
+    <partial name="_Pager" model="pager" />
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive mt-2">
+            <table class="table table-sm table-hover table-striped bg-white">
+                <thead class="font-weight-bolder">
+                    <tr>
+                        <th scope="col" class="text-left px-0">
+                            @{ th = new TableHeaderSortable() { Property = "NIF", Display = Html.DisplayNameFor(f => f.NIF).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col" class="text-left px-0">
+                            @{ th = new TableHeaderSortable() { Property = "Nombre", Display = Html.DisplayNameFor(f => f.Nombre).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col" class="text-left px-0">
+                            @{ th = new TableHeaderSortable() { Property = "Apellidos", Display = Html.DisplayNameFor(f => f.Apellidos).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (Asistente item in Model)
+                    {
+                    <tr>
+                        <td class="text-left">@item.NIF</td>
+                        <td class="text-left">@item.Nombre</td>
+                        <td class="text-left">@item.Apellidos</td>
+                        <td class="text-right text-nowrap">
+                            <a class="text-info mx-2" href="@Url.Action("Edit", "Asistente", new { Id = item.Id })">
+                                <i class="fas fa-pencil-alt"></i>
+                            </a>
+                            <a class="text-danger mr-2" asp-controller="Asistente" asp-action="Delete" asp-route-id="@item.Id" onclick="return confirm('¿Está seguro de que quiere eliminar este registro?');">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <partial name="_Empty" model="string.Empty" />
+    }
+
+    <partial name="_Pager" model="pager" />
+
+</form>

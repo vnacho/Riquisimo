@@ -1,0 +1,962 @@
+﻿@inject Microsoft.Extensions.Options.IOptions<AppSettings> AppSettings
+@using Ferpuser.BLL.Filters
+@using Ferpuser.Models.Enums
+@using Microsoft.AspNetCore.Http;
+@inject IHttpContextAccessor HttpContextAccessor
+
+@using System.Security.Claims;
+@{
+    MenuType menu = MenuType.MenuDefault;
+    string SessionMenu = HttpContextAccessor.HttpContext.Session.GetString("MENU");
+    if (!string.IsNullOrWhiteSpace(SessionMenu))
+    {
+        switch (SessionMenu)
+        {
+            case "MENU_COMPRAS":
+                menu = MenuType.MenuCompras;
+                break;
+            case "MENU_FACTURACION":
+                menu = MenuType.MenuFacturacion;
+                break;
+            case "MENU_VENTAS":
+                menu = MenuType.MenuVentas;
+                break;            
+            case "MENU_EVENTOS":
+                menu = MenuType.MenuEventos;
+                break;
+            case "MENU_CONTROL_PRESUPUESTARIO":
+                menu = MenuType.MenuControlPresupuestario;
+                break;
+            case "MENU_CONTROL_ALMACEN":
+                menu = MenuType.MenuControlAlmacen;
+                break;
+        }
+    }
+
+    string controllerCss = Context.Request.RouteValues["controller"].ToString().ToLower();
+    if (controllerCss == "expenses")
+    {
+        controllerCss = string.Empty;
+    }
+}
+
+<!DOCTYPE html>
+<html lang="es-es">
+<head>
+    <title>@ViewData["Title"] - @AppSettings.Value.Empresa</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <link async rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link async rel="stylesheet" href="~/mdb/css/mdb.lite.min.css" />
+    <link async rel="stylesheet" href="~/mdb/css/style.css" />
+    <link async rel="stylesheet" href="~/css/Museo.css" />
+    @*<link async rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daemonite-material@4.1.1/css/material.min.css" />*@
+    <link async rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" />
+    @if ((bool)(ViewData["FileUpload"] ?? false))
+    {
+        <link href="~/css/FileUpload.css" rel="stylesheet" defer />
+    }
+    @if ((bool)(ViewData["Select2"] ?? false))
+    {
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/css/select2.min.css" rel="stylesheet" defer />
+    }
+    @if ((bool)(ViewData["Swal"] ?? false))
+    {
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9" defer></script>
+    }
+
+    @if ((bool)(ViewData["Summernote"] ?? false))
+    {
+        <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.16/dist/summernote-lite.min.css" rel="stylesheet">
+    }
+
+    @if ((bool)(ViewData["Report"] ?? false))
+    {
+        <style>
+            @@page {
+                size: auto; /* auto is the initial value */
+                margin: 2mm 4mm 0mm 0mm; /* this affects the margin in the printer settings */
+            }
+
+            div {
+                margin: 0;
+            }
+
+            td {
+                font-size: 12px !important;
+                padding-top: 0.1rem !important;
+                padding-bottom: 0.1rem !important;
+                width: auto;
+                white-space: nowrap;
+            }
+
+            th {
+                font-size: 12px !important;
+                padding-top: 3rem !important;
+                padding-bottom: 0.1rem !important;
+            }
+
+            .datepicker th {
+                padding-top: 0rem !important;
+            }
+
+            tfoot > tr > th {
+                padding-bottom: 3rem !important;
+                padding-top: 0.1rem !important;
+                vertical-align: top;
+            }
+
+            table {
+                page-break-after: always;
+            }
+
+            th > .truncate, td > .truncate {
+                width: auto;
+                min-width: 0;
+                max-width: 200px;
+                display: inline-block;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            #expenses thead > tr > th:first-child, #expenses thead > tr > th:nth-child(2) {
+                width: 7vw !important;
+                max-width: 7vw !important;
+            }
+
+            .table-100 {
+                width: 100% !important;
+            }
+
+            .text-right {
+                padding-right: 30px;
+            }
+
+            @@media print {
+                .dataTables_length, .dataTables_filter, .dataTables_info, .dataTables_paginate {
+                    display: none;
+                }
+
+                .text-right {
+                    padding-right: 5px;
+                }
+
+                .table-100 {
+                    width: 100% !important;
+                }
+            }
+        </style>
+    }
+
+    @if ((bool)(ViewData["DatePicker"] ?? false))
+    {
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.0-alpha14/css/tempusdominus-bootstrap-4.min.css" />
+    }
+
+    @RenderSection("Styles", required: false)
+    <link rel="stylesheet" href="~/css/ferpuser.css">
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    @*<script async src="https://www.googletagmanager.com/gtag/js?id=UA-159843583-1"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() { dataLayer.push(arguments); }
+            gtag('js', new Date());
+
+            gtag('config', 'UA-159843583-1');
+        </script>*@
+    <script>
+        window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) }; ga.l = +new Date;
+        ga('create', 'UA-159843583-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+</head>
+<body class="grey lighten-2">
+    @if ((bool)(ViewData["DefaultView"] ?? true))
+    {
+        <header>
+            <!-- Navbar -->
+            <nav class="navbar fixed-top navbar-expand-lg navbar-light white scrolling-navbar">
+                <div class="container-fluid">
+
+                    <!-- Brand -->
+                    <a class="navbar-brand waves-effect" asp-controller="Home" asp-action="Index"><img src="~/img/logo.png" height="30" alt="Logo de Ferpuser" /></a>
+                    <!-- Collapse -->
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <!-- Links -->
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+                        <!-- Left -->
+                        <ul class="navbar-nav">
+                            @if (menu == MenuType.MenuEventos)
+                            {
+                                if (AppSettings.Value.HabilitarCongresos)
+                                {
+                                    <li class="nav-item @ViewHelpers.SetActive(ViewContext, "Congress")">
+                                        <a class="nav-link waves-effect" asp-area="" asp-controller="Congress" asp-action="Index">Inicio</a>
+                                    </li>
+                                }
+                                <li class="nav-item @ViewHelpers.SetActive(ViewContext, "Congresses")">
+                                    <a class="nav-link waves-effect" asp-area="" asp-controller="Congresses" asp-action="Index">
+                                        @if (User.Claims.Any(c => c.Type.Equals("AccessCollaborations")))
+                                        {
+                                            @:Eventos
+                                        }
+                                        else
+                                        {
+                                            @:Congresos
+                                        }
+                                    </a>
+                                </li>
+                            }
+                            @if (menu == MenuType.MenuFacturacion)
+                            {
+                                @if (User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_FACTURACION)))
+                                {
+                                    <li class="nav-item @ViewHelpers.SetActive(ViewContext, "Expenses")">
+                                        <a class="nav-link waves-effect" asp-area="" asp-controller="Expenses" asp-action="Index">Facturas</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link waves-effect" asp-area="" asp-controller="Reports" asp-action="UnpaidExpenses">Facturas pendientes de cobro</a>
+                                    </li>
+                                }
+                            }
+                            @if (menu == MenuType.MenuCompras)
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="navbarMaestrosCompras" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Maestros
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="navbarMaestrosCompras">
+                                        <a class="dropdown-item" asp-area="" asp-controller="Proveedor" asp-action="Index">Proveedores</a>
+                                    </div>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link waves-effect" asp-area="" asp-controller="ComprasPedido" asp-action="Index">
+                                        Pedidos
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link waves-effect" asp-area="" asp-controller="ComprasAlbaran" asp-action="Index">
+                                        Albaranes
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link waves-effect" asp-area="" asp-controller="ComprasFactura" asp-action="Index">
+                                        Facturas
+                                    </a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Informes
+                                    </a>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" asp-area="" asp-controller="ComprasInformes" asp-action="Facturas">Facturas pendientes de pago</a>
+                                    </div>
+                                </li>
+                            }
+                            @if (menu == MenuType.MenuVentas)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link disabled" href="#">
+                                        <span class="badge badge-pill badge-success">Ventas</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link waves-effect" asp-area="" asp-controller="TipoDocumentoVenta" asp-action="Index">
+                                        Tipos de documento
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link waves-effect" asp-area="" asp-controller="VentasPedido" asp-action="Index">
+                                        Pedidos
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link waves-effect" asp-area="" asp-controller="VentasAlbaran" asp-action="Index">
+                                        Albaranes
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link waves-effect" asp-area="" asp-controller="VentasFactura" asp-action="Index">
+                                        Facturas
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link waves-effect" asp-area="" asp-controller="VentasFacturacionAgrupada" asp-action="Index">
+                                        Facturación agrupada
+                                    </a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="navbarVentasInformes" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Informes
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="navbarMaestrosControlPresupuestario">
+                                        <a class="dropdown-item" asp-area="" asp-controller="VentasInformes" asp-action="UnpaidExpenses">Facturas pendientes de cobro</a>
+                                    </div>
+                                </li>
+                            }
+                            @if (menu == MenuType.MenuControlPresupuestario)
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="navbarMaestrosControlPresupuestario" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Maestros
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="navbarMaestrosControlPresupuestario">
+                                        <a class="dropdown-item" asp-area="" asp-controller="CentroCoste" asp-action="Index">Centros de coste</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Estructura" asp-action="Index">Estructuras</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Personal" asp-action="Index">Personal</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Evento" asp-action="Calendar">Personal</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="TipoCentroCoste" asp-action="Index">Tipos de centros de coste</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="TipoContrato" asp-action="Index">Tipos de contrato</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="TipoTarifa" asp-action="Index">Tipos de tarifa</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="VerOrigen" asp-action="Index">Ver origen</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="ArticulosAlmacen" asp-action="Index">Articulos Almacen</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Tiendas" asp-action="Index">Tiendas</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Tikects" asp-action="Index">Tikects</a>
+                                    </div>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link waves-effect" asp-area="" asp-controller="PartePersonal" asp-action="Index">
+                                        Partes de personal
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link waves-effect" asp-area="" asp-controller="Tikects" asp-action="Index">
+                                        Tikects
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link waves-effect" asp-area="" asp-controller="PartesInternosAlmacen" asp-action="Index">
+                                        Partes almacen
+                                    </a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="navbarInformes" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Informes
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="navbarInformes">
+                                        <a class="dropdown-item" asp-area="" asp-controller="ControlPresupuestario" asp-action="Index">Informe de control presupuestario</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="InformeTotalHorasPersonal" asp-action="Index">Informe de total horas personal</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="InformePartesPersonalValorado" asp-action="Index">Informe de partes de personal valorado</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="InformeResumenEmpresa" asp-action="Index">Informe de resumen de empresa</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="InformeCarteraObra" asp-action="Index">Informe cartera Obras</a>
+                                    </div>
+                                </li>
+                            }
+                            @if (menu == MenuType.MenuControlAlmacen)
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="navbarMaestrosControlPresupuestario" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Maestros Almacen
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="navbarMaestrosControlPresupuestario">
+                                        <a class="dropdown-item" asp-area="" asp-controller="CentroCoste" asp-action="Index">Centros de coste</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="ArticulosAlmacen" asp-action="Index">Articulos Almacen</a>
+                                    </div>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link waves-effect" asp-area="" asp-controller="InventarioArticulosAlmacen" asp-action="Index">
+                                        Inventario articulos almacen
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link waves-effect" asp-area="" asp-controller="MovimientosArticulosAlmacen" asp-action="Index">
+                                        Movimientos articulos
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link waves-effect" asp-area="" asp-controller="PartesInternosAlmacen" asp-action="Index">
+                                        Partes almacen
+                                    </a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="navbarInformes" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Informes
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="navbarInformes">
+@*                                        <a class="dropdown-item" asp-area="" asp-controller="ControlPresupuestario" asp-action="Index">Informe de control presupuestario</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="InformeTotalHorasPersonal" asp-action="Index">Informe de total horas personal</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="InformePartesPersonalValorado" asp-action="Index">Informe de partes de personal valorado</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="InformeResumenEmpresa" asp-action="Index">Informe de resumen de empresa</a>
+*@                                        <a class="dropdown-item" asp-area="" asp-controller="InformeInventario" asp-action="Index">Informe inventario</a>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+
+                        @if (menu == MenuType.MenuEventos && User.Claims.Any(c => c.Type.Equals("AccessCongress")) && AppSettings.Value.HabilitarCongresos)
+                        {
+                            <div class="navbar-nav ml-lg-5">
+
+                                <div class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle waves-effect" id="MaestrosMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Maestros</a>
+                                    <div class="dropdown-menu dropdown-primary" aria-labelledby="MaestrosMenuLink">
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="CargoJuntaDirectivaSociedadCientifica" asp-action="Index">Cargos de junta directiva de sociedad científica</a>                                        
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="CategoriaInscrito" asp-action="Index">Categorías inscritos</a>
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="PuestoComite" asp-action="Index">Puestos de comité</a>
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="Encuentro" asp-action="Index">Restauración</a>                                        
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="SociedadCientifica" asp-action="Index">Sociedades científicas</a>                                        
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="SocioSociedadCientifica" asp-action="Index">Socios de sociedades científicas</a>                                        
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="TipoComite" asp-action="Index">Tipos de comité</a>                                        
+                                    </div>
+                                </div>
+                              
+                                <div class="nav-item @ViewHelpers.SetActive(ViewContext, "Ponente")">
+                                    <a class="nav-link waves-effect" asp-area="" asp-controller="Ponente" asp-action="Index">Ponentes</a>
+                                </div>
+
+                                <div class="nav-item dropdown @ViewHelpers.SetActive(ViewContext, "Registrations")">
+                                    <a class="nav-link dropdown-toggle waves-effect" id="RegistrationsMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Inscripciones</a>
+                                    <div class="dropdown-menu dropdown-primary" aria-labelledby="RegistrationsMenuLink">
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="Registrations" asp-action="Index">Listado</a>
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="Registrations" asp-action="Unsent">Pendientes</a>
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="Asistente" asp-action="Index">Asistentes</a>
+                                    </div>
+                                </div>
+
+                                <div class="nav-item dropdown @ViewHelpers.SetActive(ViewContext, "Accommodations")">
+                                    <a class="nav-link dropdown-toggle waves-effect" id="AccommodationsMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Alojamientos</a>
+                                    <div class="dropdown-menu dropdown-primary" aria-labelledby="AccommodationsMenuLink">
+                                        <a class="nav-link waves-effect" asp-area="" asp-controller="Accommodations" asp-action="Index">Listado</a>
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="Accommodations" asp-action="Unsent">Pendientes</a>
+                                    </div>
+                                </div>
+
+                                <div class="nav-item @ViewHelpers.SetActive(ViewContext, "Registrants")">
+                                    <a class="nav-link waves-effect" asp-area="" asp-controller="Registrants" asp-action="Index">Inscritos</a>
+                                </div>
+
+                                <div class="nav-item dropdown @ViewHelpers.SetActive(ViewContext, "Reports")">
+                                    <a class="nav-link dropdown-toggle waves-effect" id="ReportsMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Informes</a>
+                                    <div class="dropdown-menu dropdown-primary" aria-labelledby="ReportsMenuLink">
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="Reports" asp-action="Attendants">Listado general</a>
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="Reports" asp-action="Registrants">Listado inscritos</a>
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="Reports" asp-action="Accommodations">Listado alojados</a>
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="Reports" asp-action="PaidPending">Inscripciones pagadas/pendientes</a>
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="Inscripciones" asp-action="Index">Inscripciones</a>
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="Reports" asp-action="ByWorkplace">Por centro de trabajo</a>
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="Reports" asp-action="ByInscriptionType">Por tipo de inscripción</a>
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="Reports" asp-action="ByHotel">Por hotel</a>
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="Reports" asp-action="AccommodationPaidPending">Alojamientos pagados/pendientes</a>
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="Reports" asp-action="ByClient">Relación de facturadores</a>
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="Reports" asp-action="Asistentes">Asistentes</a>
+                                    </div>
+                                </div>
+
+                                <div class="nav-item @ViewHelpers.SetActive(ViewContext, "Sync")">
+                                    <a class="nav-link waves-effect" asp-area="" asp-controller="Sync" asp-action="FromWeb">Importación</a>
+                                </div>
+                            </div>
+                        }
+
+                        <ul class="navbar-nav ml-auto">
+                            @if (User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_ADMINISTRACION)))
+                            {
+                                <li class="nav-item @ViewHelpers.SetActive(ViewContext, "CongressEmailAccounts")">
+                                    <a class="nav-link waves-effect" asp-area="" asp-controller="CongressEmailAccounts" asp-action="Index">Correos</a>
+                                </li>
+                                <li class="nav-item dropdown @ViewHelpers.SetActive(ViewContext, "RoomTypes")  @ViewHelpers.SetActive(ViewContext, "RegistrationTypes") @ViewHelpers.SetActive(ViewContext, "Treatments")">
+                                    <a class="nav-link dropdown-toggle waves-effect" id="OptionsMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Opciones</a>
+                                    <div class="dropdown-menu dropdown-primary" aria-labelledby="OptionsMenuLink">
+                                        <a class="dropdown-item waves-effect @ViewHelpers.SetActive(ViewContext, "DatosEmpresa")" asp-area="" asp-controller="DatosEmpresa" asp-action="Index">Datos de empresa</a>
+                                        <a class="dropdown-item waves-effect @ViewHelpers.SetActive(ViewContext, "Parametros")" asp-area="" asp-controller="Parametro" asp-action="Index">Parámetros</a>
+                                        <a class="dropdown-item waves-effect @ViewHelpers.SetActive(ViewContext, "RoomTypes")" asp-area="" asp-controller="RoomTypes" asp-action="Index">Tipos de habitación</a>
+                                        <a class="dropdown-item waves-effect @ViewHelpers.SetActive(ViewContext, "RegistrationTypes")" asp-area="" asp-controller="RegistrationTypes" asp-action="Index">Tipos de inscripción</a>
+                                        <a class="dropdown-item waves-effect @ViewHelpers.SetActive(ViewContext, "Treatments")" asp-area="" asp-controller="Treatments" asp-action="Index">Tratamientos</a>
+                                    </div>
+                                </li>
+                            }
+
+                            <li class="nav-item dropdown @ViewHelpers.SetActive(ViewContext, "Account")">
+                                <a class="nav-link dropdown-toggle waves-effect" id="ReportsMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-user"></i></a>
+                                <div class="dropdown-menu dropdown-primary dropdown-menu-right" aria-labelledby="ReportsMenuLink">
+                                    @if (User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_ADMINISTRACION)))
+                                    {
+                                        <a class="dropdown-item waves-effect" asp-area="" asp-controller="Account" asp-action="Index">Usuarios</a>
+                                    }
+                                    <a class="dropdown-item waves-effect" asp-area="" asp-controller="Account" asp-action="Edit">Mi usuario</a>
+                                    <a class="dropdown-item waves-effect" asp-area="" asp-controller="Account" asp-action="Logout">Cerrar sesión</a>
+                                </div>
+                            </li>
+                        </ul>
+
+                        @*Cargar con javascript y vista parcial*@
+                        <div id="divEjercicio">
+                            @*@await Html.PartialAsync("_EjercicioSelector")*@
+                        </div>
+
+                    </div>
+
+                </div>
+            </nav>
+            <!-- Navbar -->
+        </header>
+
+        <main class="pt-5 mx-lg-5 @controllerCss">
+            <div class="container-fluid mt-5">
+
+                @if (ViewData["OcultarBarraTareasLayout"] == null || !(bool)ViewData["OcultarBarraTareasLayout"])
+                {
+                    <div class="card mb-4 wow fadeIn d-print-none">
+                        <!--Card content-->
+                        <div class="card-body row justify-content-between align-items-center py-2">
+                            <div class="col-6 col-md-3">
+                                @if ((bool)(ViewData["Back"] ?? true))
+                                {
+                                    if (string.IsNullOrWhiteSpace((string)ViewData["returnUrl"] ?? ""))
+                                    {
+                                        <a asp-action="Index" class="btn btn-light"><i class="fas fa-arrow-left"></i></a>
+                                    }
+                                    else
+                                    {
+                                        <a href="@ViewData["returnUrl"]" class="btn btn-light"><i class="fas fa-arrow-left"></i></a>
+                                    }
+                                }
+                            </div>
+
+                            <div class="col-12 col-md-6 order-first order-md-0 text-center">
+                                <h1 class="mb-2 mb-sm-0 pt-1 h4">
+                                    @ViewData["Title"]
+                                </h1>
+                            </div>
+
+                            <div class="col-6 col-md-3 text-right d-flex justify-content-end">
+                                @if ((bool)(ViewData["Create"] ?? true))
+                                {
+                                    <a asp-action="Create" class="btn btn-secondary text-nowrap">Añadir Evento<i class="fas fa-plus ml-2"></i></a>
+                                }
+                                @if ((bool)(ViewData["CreateCostCenter"] ?? false))
+                                {
+                                    <a asp-action="CreateCostCenter" class="btn btn-secondary text-nowrap">Añadir centro de coste <i class="fas fa-plus ml-2"></i></a>
+                                }
+                                @RenderSection("ExtraButtons", false)
+                            </div>
+
+                        </div>
+                    </div>
+                }
+
+                @if (TempData["Message"] != null && !string.IsNullOrWhiteSpace(TempData["Message"].ToString()))
+                {
+                    <div class="alert alert-dismissible alert-info wow fadeIn ">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <p class="mb-0 font-weight-bold small"><i class="fas fa-info-circle mr-2"></i>@TempData["Message"].ToString()</p>
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null && !string.IsNullOrWhiteSpace(TempData["ErrorMessage"].ToString()))
+                {
+                    <div class="alert alert-dismissible alert-info wow fadeIn ">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <p class="mb-0 font-weight-bold small text-danger"><i class="fas fa-exclamation-triangle mr-2"></i>Ha ocurrido un error.</p>
+                        <p class="small">@TempData["ErrorMessage"].ToString()</p>
+                    </div>
+                }
+
+                @if ((bool)(ViewData["OneCard"] ?? true))
+                {
+                    <div class="row wow fadeIn">
+                        <div class="col-12 mb-4">
+                            <div class="card row-card">
+                                <div class="card-body">
+                                    @RenderBody()
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    @RenderBody()
+                }
+
+            </div>
+        </main>
+
+        <footer class="page-footer text-center font-small primary-color-dark darken-2 mt-4 wow fadeIn d-print-none">
+            <partial name="_CookieConsentPartial" />
+
+            <div class="footer-copyright py-3">
+                © @DateTime.Now.Year - NVM - <a asp-controller="Home" asp-action="Privacy">Política de privacidad</a>
+            </div>
+        </footer>
+    }
+    else
+    {
+        @RenderBody()
+    }
+
+    @if ((bool)(ViewData["SearchClient"] ?? false))
+    {
+        <div class="modal fade right vh-100 overflow-hidden" id="SelectClientModal" data-id-input="" data-name-input="" tabindex="-1" role="dialog" aria-labelledby="exampleModalPreviewLabel" aria-hidden="true">
+            <div class="modal-dialog modal-full-height modal-right modal-notify" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalPreviewLabel">Buscar cliente</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body row">
+                        <div class="col-12 mb-4">
+                            <label for="ClientSearchName" class="control-label">Nombre</label>
+                            <input id="ClientSearchName" class="form-control" />
+                        </div>
+                        <div class="col-12">
+                            Resultados
+                        </div>
+                        <div id="ClientSearchResults" class="col-12 client-list-search-container">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    @if ((bool)(ViewData["SearchRegistrant"] ?? false))
+    {
+        <div class="modal fade right vh-100 overflow-hidden" id="SelectRegistrantModal" data-id-input="" data-name-input="" tabindex="-1" role="dialog" aria-labelledby="exampleModalPreviewLabel" aria-hidden="true">
+            <div class="modal-dialog modal-full-height modal-right modal-notify" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalPreviewLabel">Buscar inscrito</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body row">
+                        <div class="col-12 mb-4">
+                            <label for="RegistrantSearchName" class="control-label">Nombre</label>
+                            <input id="RegistrantSearchName" class="form-control" />
+                        </div>
+                        <div class="col-12">
+                            Resultados
+                        </div>
+                        <div id="RegistrantSearchResults" class="col-12 registrant-list-search-container">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    <script type="text/javascript" src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="~/mdb/js/popper.min.js"></script>
+    <script type="text/javascript" src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="~/mdb/js/mdb.min.js"></script>
+    @*<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daemonite-material@4.1.1/js/material.min.js"></script>*@
+    <script type="text/javascript" src="~/js/site.js"></script>
+    <script type="text/javascript">
+        new WOW().init();
+
+        $("#divEjercicio").load('@Url.Action("SelectorEjercicio", "Ejercicio")');
+    </script>
+    @if ((bool)(ViewData["DatePicker"] ?? false))
+    {
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.0-alpha14/js/tempusdominus-bootstrap-4.min.js"></script>
+        <script type="text/javascript">
+            $(function () {
+                $('.datetimepicker').each(d => {
+                    var picker = $($('.datetimepicker')[d]);
+                    var value = picker.val();
+                    console.log(value);
+                    picker.datetimepicker({
+                        locale: 'es',
+                        format: 'DD/MM/YYYY',
+                        date: value
+                    });
+                    picker.val(value);
+                });
+            });
+        </script>
+    }
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @if ((bool)(ViewData["SearchClient"] ?? false))
+    {
+        <script>
+
+            var clientSearchModal = function () {
+                $("#SelectClientModal").modal("show");
+                setTimeout(e => {
+                    $("#ClientSearchName").focus()
+                }, 10);
+            }
+            var importClient = function (id) {
+                ga('send', 'pageview', '/Clients/Editor/' + id);
+                fetch("/Clients/Editor/" + id + "?inline=@Context.Request.RouteValues["controller"].ToString().ToLower().Equals("expenses")" )
+                    .then(e => {
+                        return e.text()
+                    }).then(html => {
+                        $("#client-container").empty();
+                        $("#client-container").append(html);
+                        fetch("/Clients/Locations/" + id + "?inline=@Context.Request.RouteValues["controller"].ToString().ToLower().Equals("expenses")" )
+                            .then(e => {
+                                return e.text()
+                            }).then(html => {
+                                $("#BillingLocationId").empty();
+                                $("#billing-location-container").empty();
+                                $("#BillingLocationId").append(html);
+                            });
+                    });
+            }
+            let timeout = null;
+
+            $("#ClientSearchName").keyup(function () {
+                var value = $("#ClientSearchName").val();
+                if (value.length <= 3) {
+                    return;
+                }
+                clearTimeout(timeout);
+                timeout = setTimeout(function () {
+                    $("#ClientSearchResults").empty();
+                    $("#ClientSearchResults").append('<div class="text-center m-5"><div class="spinner-border text-primary" role="status"><span class="sr-only">Cargando...</span></div></div>')
+
+                    ga('send', 'pageview', '/Clients/Search/' + value);
+                    fetch("/Clients/Search/" + value)
+                        .then(e => {
+                            return e.text()
+                        }).then(html => {
+                            $("#ClientSearchResults").empty();
+                            $("#ClientSearchResults").append(html);
+                        });
+                }, 1000);
+
+            });
+            $("body").on("click", ".client-search-item", function (e) {
+                e.preventDefault();
+                var id = $(this).attr("data-id").trim();
+                importClient(id);
+
+
+                $($("#SelectClientModal").attr("data-id-input")).val(id);
+                $($("#SelectClientModal").attr("data-name-input")).val($(this).text().trim());
+                $("#SelectClientModal").modal("hide");
+                $($("#SelectClientModal").attr("data-id-input")).trigger("change");
+            })
+        </script>
+    }
+    @if ((bool)(ViewData["SearchRegistrant"] ?? false))
+    {
+        <script>
+            var registrantSearchModal = function () {
+                $("#SelectRegistrantModal").modal("show");
+                setTimeout(e => {
+                    $("#RegistrantSearchName").focus()
+                }, 10);
+            }
+            var importRegistrant = function (id) {
+                ga('send', 'pageview', '/Registrants/Editor/' + id);
+                fetch("/Registrants/Editor/" + id)
+                    .then(e => {
+                        return e.text()
+                    }).then(html => {
+                        $("#registrant-container").empty();
+                        $("#registrant-container").append(html);
+                        var children = $("#registrant-container").find('*');
+                        children.each(e => {
+                            $(children[e]).prop("id", "Registrant_" + $(children[e]).prop("id"));
+                            $(children[e]).prop("for", "Registrant_" + $(children[e]).prop("for"));
+                            $(children[e]).prop("name", "Registrant." + $(children[e]).prop("name"));
+                            $(children[e]).prop("data-valmsg-for", "Registrant." + $(children[e]).prop("data-valmsg-for"));
+                        });
+                        //fetch("/Registrants/Locations/" + id)
+                        //    .then(e => {
+                        //        return e.text()
+                        //    }).then(html => {
+                        //        $("#BillingLocationId").empty();
+                        //        $("#BillingLocationId").append(html);
+                        //    });
+                    });
+            }
+            $("#RegistrantSearchName").keyup(function () {
+                var value = $("#RegistrantSearchName").val();
+                if (value.length <= 3) {
+                    return;
+                }
+                ga('send', 'pageview', '/Registrants/Search/' + value);
+                $("#RegistrantSearchResults").empty();
+                $("#RegistrantSearchResults").append('<div class="text-center m-5"><div class="spinner-border text-primary" role="status"><span class="sr-only">Cargando...</span></div></div>')
+                fetch("/Registrants/Search/" + value)
+                    .then(e => {
+                        return e.text()
+                    }).then(html => {
+                        $("#RegistrantSearchResults").empty();
+                        $("#RegistrantSearchResults").append(html);
+                    });
+            });
+            $("body").on("click", ".registrant-search-item", function (e) {
+                e.preventDefault();
+                var id = $(this).attr("data-id").trim();
+                importRegistrant(id);
+
+
+                $($("#SelectRegistrantModal").attr("data-id-input")).val(id);
+                $($("#SelectRegistrantModal").attr("data-name-input")).val($(this).text().trim());
+                $("#SelectRegistrantModal").modal("hide");
+                $($("#SelectRegistrantModal").attr("data-id-input")).trigger("change");
+            })
+        </script>
+    }
+    @if ((bool)(ViewData["Validation"] ?? false))
+    {
+        <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+        @*<script src="~/lib/jquery-validation/dist/additional-methods.min.js"></script>*@
+
+        @if ((bool)(ViewData["ValidationUnobtrusive"] ?? true))
+        {
+            <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+        }
+        <script src="~/lib/jquery-validation/dist/localization/messages_es.js"></script>
+
+        <localization-validation-scripts></localization-validation-scripts>
+    }
+    @if ((bool)(ViewData["DataTable"] ?? false))
+    {
+        <script type="text/javascript" src="~/mdb/js/addons/datatables.min.js"></script>
+        <script type="text/javascript" src="~/mdb/js/addons/datatables-select.min.js"></script>
+        <script type="text/javascript" src="~/js/diacritics-sort.js"></script>
+
+        <script type="text/javascript">
+            $(function () {
+                $('table').DataTable({
+                    "language": {
+                        "url": "/mdb/js/addons/Spanish.json"
+                    },
+                    dateFormat: "dd/mm/yyyy",
+                    lengthMenu: [[10, 20, 40, 60, 100, -1], [10, 20, 40, 60, 100, "Todos"]],
+                    pageLength: 20,
+                    @*@if ((int)(ViewData["DataTableCheckBox"] ?? -1) >= 0)
+                    {
+
+                        @:columnDefs: [{
+                            @:orderable: false,
+                            @:className: 'select-checkbox',
+                            @:targets: @ViewData["DataTableCheckBox"]
+                        @:}],
+                        @:select: {
+                            @:style: 'os',
+                            @:selector: 'td:first-child'
+                        @:}
+                    }*@
+
+                });
+                $('.dataTables_length').addClass('bs-select');
+                $("body").on("keyup", ".dataTables_wrapper input", e => {
+                    var t = $(e.target);
+                    t.val(removeDiacritics(t.val()));
+                });
+            });
+        </script>
+    }
+    @if ((bool)(ViewData["FileUpload"] ?? false))
+    {
+        <script src="~/js/FileUpload.js"></script>
+    }
+    @if ((bool)(ViewData["Summernote"] ?? false))
+    {
+        <script>
+            const SummernoteConfig =
+            {
+                lang: 'es-ES',
+                toolbar:
+                    [
+                        ['style', ['style']],
+                        ['font', ['bold', 'underline', 'clear']],
+                        ['fontname', ['fontname', 'fontsize']],
+                        ['color', ['color']],
+                        ['para', ['ul', 'ol', 'paragraph']],
+                        ['table', ['table']],
+                        ['insert', ['link', 'picture', 'video']],
+                        ['view', ['fullscreen', 'codeview', 'help']],
+                    ],
+            };
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.16/dist/summernote-lite.min.js"></script>
+        @*<script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.12/lang/summernote-es-ES.min.js'></script>*@
+    }
+    @if ((bool)(ViewData["Select2"] ?? false))
+    {
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/js/select2.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/i18n/es.js"></script> 
+        <script>
+            $(document).ready(function () {
+                $('.select2').select2();
+            });
+        </script>
+    }
+    @if ((bool)(ViewData["ImportClients"] ?? false))
+    {
+        <script>
+            var isImportingClients = false;
+            $(e => {
+                $(".export").click(evt => {
+                    evt.preventDefault();
+                    if (isImportingClients || $(evt.currentTarget).hasClass("exported")) {
+                        return;
+                    }
+                    isImportingClients = true;
+                    Swal.fire({
+                        title: "Exportación a SAGE",
+                        text: "¿Exportar el cliente '" + evt.currentTarget.dataset.clientName + "' a SAGE?",
+                        showCancelButton: true,
+                        confirmButtonText: "Exportar",
+                        cancelButtonText: "Cancelar"
+                    }).then(e => {
+                        if (e.value) {
+                            ga('send', 'pageview', '/Transfer/ClientToSage/' + id);
+                            var id = evt.currentTarget.dataset.clientId;
+                            $(evt.currentTarget).empty();
+                            $(evt.currentTarget).append('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="sr-only">Exportando...</span></div>');
+                            fetch("/Transfer/ClientToSage/" + id).then(res => {
+                                isImportingClients = false;
+                                if (!res.ok) {
+                                    $(evt.currentTarget).empty();
+                                    $(evt.currentTarget).append('<i class="fas fa-times"></i>')
+                                    $(evt.currentTarget).removeClass("text-info");
+                                    $(evt.currentTarget).addClass("text-danger");
+                                    return res.text();
+                                }
+                                Swal.fire({ title: "Se ha exportado '" + evt.currentTarget.dataset.clientName + "' correctamente", icon: "success" });
+                                //Exported ok
+                                $(evt.currentTarget).removeClass("text-info");
+                                $(evt.currentTarget).addClass("text-success");
+                                $(evt.currentTarget).addClass("exported");
+                                $(evt.currentTarget).empty();
+                                $(evt.currentTarget).append('<i class="fas fa-check"></i>');
+                            });
+                        }
+                    });
+                });
+            })
+
+
+
+
+        </script>
+    }
+
+    @RenderSection("Scripts", required: false)
+
+    <script>
+        function ReplaceDotByComma(ele) {
+            //esto se ha copiado
+            ele.value = ele.value.replace('.', ',');
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,57 @@
+﻿@using Ferpuser.Models.Sage
+@model Ferpuser.ViewModels.DireccionViewModel
+
+@{
+    var direcciones = ViewBag.Direcciones as List<Env_Cli>;
+}
+
+@Html.HiddenFor(f => f.LineaEnvCli)
+@Html.HiddenFor(f => f.Direccion)
+@Html.HiddenFor(f => f.CodigoPostal)
+@Html.HiddenFor(f => f.Poblacion)
+@Html.HiddenFor(f => f.Provincia)
+
+<div class="small">
+@if (!string.IsNullOrWhiteSpace(Model.Direccion))
+{
+        <b class="mr-2">Dirección:</b>@Model.ToString()
+    }
+@if (direcciones != null && direcciones.Count() > 1)
+{
+    <a href="#" data-toggle="modal" data-target="#modalCambiarDireccion">Cambiar dirección...</a>
+
+    <!-- Modal -->
+    <div class="modal" id="modalCambiarDireccion" tabindex="-1" role="dialog" aria-labelledby="modalCambiarDireccionLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalCambiarDireccionLabel">Seleccionar dirección</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+              <table class="table table-sm table-hover table-striped w-100">
+                @foreach(var direccion in direcciones)
+                {
+                    <tr>
+                        <td>@direccion.Direccion @direccion.CodPos @direccion.Poblacion @direccion.Provincia</td>
+                        <td class="text-right">
+                            <button type="button" class="btn btn-blue-grey btn-sm text-nowrap waves-effect waves-light" onclick="SeleccionarDireccion(@direccion.Linea)">Seleccionar</button>
+                        </td>
+                    </tr>
+                }
+            </table>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-sm btn-grey text-nowrap waves-effect waves-light" data-dismiss="modal">Cerrar <i class="fas fa-arrow-left ml-2"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+}
+</div>
+
+<div>
+
+</div>

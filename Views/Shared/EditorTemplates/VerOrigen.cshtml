@@ -1,0 +1,12 @@
+﻿@model VerOrigen
+
+@Html.HiddenFor(f => f.Id)
+<div class="card mb-4 wow d-print-none">
+    <div class="form-row card-body">
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.NivelAnalitico1, new { @class = "small" })
+            @Html.EditorFor(f => f.NivelAnalitico1, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.NivelAnalitico1, "", new { @class = "text-danger small" })
+        </div>
+    </div>
+</div>

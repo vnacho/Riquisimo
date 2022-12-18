@@ -1,0 +1,427 @@
+﻿@model IEnumerable<Ferpuser.ViewModels.UnpaidExpensesViewModel>
+
+@{
+    //ViewData["Title"] = "Facturas pendientes de cobro";
+    ViewData["Create"] = false;
+    ViewData["Back"] = false;
+    ViewData["OneCard"] = false;
+    ViewData["DatePicker"] = true;
+    ViewData["Select2"] = true;
+    ViewData["Report"] = true;
+
+    bool? bEstado = ViewBag.Estado == null ? (bool?)null : Convert.ToBoolean(ViewBag.Estado);
+}
+
+<h1 class="d-print-inline d-none h4 text-center">
+    @ViewBag.Title
+</h1>
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <form id="mainForm" asp-action="UnpaidExpenses">
+                <div class="card-body d-flex justify-content-start align-items-center flex-column flex-sm-row pb-0">
+                    <div class="form-group mx-1">
+                        <label for="Filter" class="control-label d-print-18">Clientes</label>
+                        <select id="Cliente" name="Cliente" class="browser-default custom-select select2" style="width: 100%" asp-items="ViewBag.Cliente">
+                            <option value="">
+                                Todos
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group mx-1">
+                        <label for="Filter" class="control-label d-print-18">Vendedor</label>
+                        <select id="Vendedor" name="Vendedor" class="browser-default custom-select select2 w-100" style="width: 100%" asp-items="ViewBag.Vendedor">
+                            <option value="">
+                                Todos
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group mx-1">
+                        <label for="start" class="d-print-18">Desde</label>
+                        <input id="start" name="start" class="form-control d-print-p-0" type="date" value="@ViewBag.Start.ToString("yyyy-MM-dd")" style="width: 100%" />
+                    </div>
+                    <div class="form-group mx-1">
+                        <label for="end" class="d-print-18">Hasta</label>
+                        <input id="end" name="end" class="form-control datetimepicker d-print-p-0" type="date" value="@ViewBag.End.ToString("yyyy-MM-dd")" style="width: 100%" />
+                    </div>
+
+                    <div id="EventSingleContainer" class="form-group mx-1 @(ViewBag.Range ? "d-none" : "")">
+                        <label for="Filter" class="control-label d-print-18">Evento</label>
+                        <select id="EventSingle" name="Almacen" class="browser-default custom-select select2  w-100" asp-items="ViewBag.Almacen">
+                            <option value="">
+                                Todos
+                            </option>
+                            <option value="Range">
+                                Rango
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group mx-1">
+                        <label for="FilterEstado" class="control-label d-print-18">Estado</label>
+                        @Html.DropDownList("FilterEstado", ViewBag.Estados, "Todas", new { @class = "browser-default custom-select select2 w-100" })
+                    </div>
+
+                    <div class="form-group mx-1">
+                        <label for="FilterRetencion" class="control-label d-print-18">Retención</label>
+                        @Html.DropDownList("FilterRetencion", 
+                            new SelectList(new[]
+                            {
+                                new { Value = "true", Text = "Sí" },
+                                new { Value = "false", Text = "No" },
+                            }, 
+                            "Value", "Text", Model == null ? null : ViewBag.FilterRetencion), "Todas", new { @class = "form-control" })
+                    </div>
+
+                    @*<div id="EventRangeContainer" class="@(ViewBag.Range ? "" : "d-none")">
+                            <div class="d-flex">
+                                <div class="form-group mx-1">
+                                    <label for="Filter" class="control-label">Evento desde</label>
+                                    <select id="EventRangeStart" name="AlmacenDesde" class="browser-default custom-select select2 w-100 eventRange" asp-items="ViewBag.AlmacenDesde">
+                                        <option value="Single">
+                                            Un solo evento
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group mx-1">
+                                    <label for="Filter" class="control-label">Evento hasta</label>
+                                    <select id="EventRangeEnd" name="AlmacenHasta" class="browser-default custom-select select2 w-100 eventRange" asp-items="ViewBag.AlmacenHasta">
+                                        <option value="Single">
+                                            Un solo evento
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>*@
+
+                    <div class="form-group btn-group btn-group-sm mb-0 flex-grow-1 justify-content-end d-print-none">
+                        <div>
+                            <button class="btn btn-primary btn-sm mb-0"><i class="fas fa-sync fa-2x"></i></button>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary btn-sm mb-0" type="button" onclick="window.print()"><i class="fas fa-print fa-2x"></i></button>
+                        </div>
+                        <div>
+                            <button id="exportCsv" class="btn btn-primary btn-sm mb-0" asp-action="UnpaidExpensesCsv">
+                                <i class="fas fa-file-csv fa-2x"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                @*<div class="card-header d-flex">
+                        <div>
+                            @if (ViewBag.Start != DateTime.MinValue)
+                            {
+                                <span>
+                                    @ViewBag.Start.ToString("dd/MM/yyyy")
+                                </span>
+                            }
+
+                            @if (ViewBag.End.Date < new DateTime(9999, 12, 31))
+                            {
+                                <span>
+                                    @ViewBag.End.ToString("dd/MM/yyyy")
+                                </span>
+                            }
+                        </div>
+                        <div>
+
+                        </div>
+                    </div>*@
+                <div class="card-body pb-0">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable(0)">
+                                    Factura
+                                </th>
+                                <th onclick="sortTable(1, 'date')">
+                                    Fecha
+                                </th>
+                                <th onclick="sortTable(2)">
+                                    Cliente
+                                </th>
+                                <th class="d-print-none" onclick="sortTable(3)">
+                                    Nombre
+                                </th>
+                                <th class="text-right" onclick="sortTable(4, 'decimal')">
+                                    Importe
+                                </th>
+                                <th onclick="sortTable(5)">
+                                    Cod.
+                                </th>
+                                <th class="text-center">
+                                    Ret.
+                                </th>
+                                <th onclick="sortTable(6)">
+                                    Descripción evento
+                                </th>
+                                @if (bEstado == null)
+                                {
+                                <th class="text-center">
+                                    Cobrada
+                                </th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody id="table">
+                            @foreach (var s in Model)
+                            {
+                            <tr ondblclick="@(s.ExpenseType != null ? "window.location = '/" + s.ExpenseType + "/Edit/" + s.Id + "'" : "")">
+                                <td>
+                                    @s.Factura
+                                </td>
+                                <td>
+                                    @s.Fecha?.ToString("dd/MM/yyyy")
+                                </td>
+                                <td class="d-print-none">
+                                    @s.Cliente
+                                </td>
+                                <td>
+                                    @s.Nombre
+                                </td>
+                                <td class="text-right">
+                                    @s.Pending.ToString("n2")
+                                </td>
+                                <td>
+                                    @s.Almacen
+                                </td>
+                                <td class="text-center">
+                                    @Html.DisplayFor(f => s.TieneRetencion, "Retencion")
+                                </td>
+                                <td>
+                                    @s.Descripcion
+                                </td>
+                                @if (bEstado == null)
+                                {
+                                    <td class="text-center">
+                                        @Html.DisplayFor(f => s.Cobrada)
+                                    </td>
+                                }
+                                </tr>
+                            }
+                            @{
+                                var random = new Random();
+
+
+                            }
+                            @*
+                                    const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz     ";
+                                    @for (int i = 0; i < 10; i++)
+                                {
+                                    <tr>
+                                        <td>
+                                            I @random.Next(200000, 210000)
+                                        </td>
+                                        <td>
+                                            0@(i)/01/2020
+                                        </td>
+                                        <td class="d-print-none">
+                                            @random.Next(10000000, 100000000)
+                                        </td>
+                                        <td>
+                                            @{
+                                                var s = new string(Enumerable.Repeat(chars, 20).Select(s => s[random.Next(s.Length)]).ToArray());
+                                            }
+                                            @s
+                                        </td>
+                                        <td class="text-right">
+                                            @((random.NextDouble() * 100).ToString("N"))
+                                        </td>
+                                        <td>
+                                            @random.Next(1000, 10000)
+                                        </td>
+                                        <td>
+                                            @{
+                                                s = new string(Enumerable.Repeat(chars, 6).Select(s => s[random.Next(s.Length)]).ToArray());
+                                            }
+                                            @s
+                                        </td>
+                                    </tr>
+                                }*@
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                <th class="d-print-none"></th>
+                                <th></th>
+                                <th class="text-right">@ViewBag.Total.ToString("N")</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+
+    <script>
+        $(e => {
+            $("#EventSingle").on("select2:select", e => {
+                if ($("#EventSingle").val() == 'Range') {
+                    $("#EventSingleContainer").addClass("d-none");
+                    $("#EventRangeContainer").removeClass("d-none");
+                }
+            });
+            $(".eventRange").on("select2:select", e => {
+                if ($(e.target).val() == 'Single') {
+                    $("#EventSingleContainer").removeClass("d-none");
+                    $("#EventRangeContainer").addClass("d-none");
+                }
+            });
+        });
+    </script>
+
+    <script>
+        var lastSortIsUp = true;
+
+        function sortTable(col, fieldType) {
+            var table, rows, switching, i, x, y, shouldSwitch;
+            table = document.getElementById("table");
+            switching = true;
+            /*Make a loop that will continue until
+            no switching has been done:*/
+            while (switching) {
+                //start by saying: no switching is done:
+                switching = false;
+                rows = table.rows;
+                /*Loop through all table rows (except the
+                first, which contains table headers):*/
+                for (i = 0; i < (rows.length - 1); i++) {
+                    //start by saying there should be no switching:
+                    shouldSwitch = false;
+                    /*Get the two elements you want to compare,
+                    one from current row and one from the next:*/
+                    x = rows[i].getElementsByTagName("TD")[col];
+                    y = rows[i + 1].getElementsByTagName("TD")[col];
+                    var valX = "";
+                    if (x !== undefined && x.innerHTML !== undefined) {
+                        valX = x.innerHTML.trim();
+                        if (fieldType === 'decimal') {
+                            valX = parseFloat(valX.replace(",", "."));
+                        } else if (fieldType === 'date') {
+                            valX = valX.split('/').reverse().join("/");
+                        } else if (!isNaN(parseInt(valX))) {
+                            valX = parseInt(valX);
+                        }
+                    }
+                    var valY = "";
+                    if (y !== undefined && y.innerHTML !== undefined) {
+                        valY = y.innerHTML.trim();
+                        if (fieldType === 'decimal') {
+                            valY = parseFloat(valY.replace(",", "."));
+                        } else if (fieldType === 'date') {
+                            valY = valY.split('/').reverse().join("/");
+                        } else if (!isNaN(parseInt(valY))) {
+                            valY = parseInt(valY);
+                        }
+                    }
+                    //check if the two rows should switch place:
+                    if (lastSortIsUp) {
+                        if (valX > valY) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else {
+                        if (valX < valY) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                }
+            }
+            lastSortIsUp = !lastSortIsUp;
+        }
+    </script>
+
+}
+
+@section Styles {
+
+    <style>
+        @@media print {
+            th, td, label, input, span {
+                /*font-size: 10px !important;*/
+            }
+
+            .select2-container--default .select2-selection--single .select2-selection__rendered {
+                /*line-height: 0;*/
+                /*font-size: 18px !important;*/
+                padding: 0px !important;
+                margin: 0px !important;
+                text-align: left !important;
+            }
+
+            .select2-container .select2-selection--single {
+                /*height: unset !important;*/
+                /*font-size: 18px !important;*/
+                padding: 0px !important;
+                margin: 0px !important;
+                margin-top: 8px !important;
+                text-align: left !important;
+            }
+
+            .select2 {
+                /* padding: initial !important;*/
+                padding: 0px !important;
+                margin: 0px !important;
+                /*height: auto !important;*/
+                background: none !important;
+                /*font-size: 18px !important;*/
+                text-align: left !important;
+            }
+
+            input, .select2, .form-control {
+                border: 0 !important;
+                /*font-size: 18px !important;*/
+                text-align: left !important;
+            }
+
+            ::-webkit-inner-spin-button,
+            ::-webkit-calendar-picker-indicator {
+                display: none;
+                -webkit-appearance: none;
+            }
+            /*.d-print-18 {
+                font-size: 18px !important;
+                padding: 0px !important;
+                margin: 0px !important;
+                text-align:left !important;
+            }    */
+            .d-print-p-0 {
+                padding: 0px !important;
+                margin: 0px !important;
+            }
+        }
+
+        th {
+            padding-top: 0 !important;
+        }
+    </style>
+}

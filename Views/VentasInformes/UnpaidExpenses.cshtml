@@ -1,0 +1,349 @@
+﻿@model IEnumerable<Ferpuser.ViewModels.UnpaidExpensesViewModel>
+
+@{
+    //¡¡¡Esta vista está copiada de la antigua de ventas aunque con algunas ligeras modificaciones!!!
+    ViewData["Create"] = false;
+    ViewData["Back"] = false;
+    ViewData["OneCard"] = false;
+    ViewData["DatePicker"] = true;
+    ViewData["Select2"] = true;
+    ViewData["Report"] = true;
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;    
+
+    bool? bEstado = ViewBag.Estado == null ? (bool?)null : Convert.ToBoolean(ViewBag.Estado);
+}
+
+<form id="mainForm" method="post" asp-action="UnpaidExpenses">
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    @ViewBag.Title
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                <button class="btn btn-secondary btn-sm text-nowrap">Filtrar <i class="fas fa-sync ml-2"></i></button>                
+
+                @if (Model != null)
+                {
+                    <a href="@Url.Action("UnpaidExpenses","VentasInformes")" class="btn btn-sm btn-grey">Limpiar <i class="fas fa-eraser ml-2"></i></a>
+                    <button class="btn btn-grey btn-sm text-nowrap" type="button" onclick="window.print()">Imprimir <i class="fas fa-print ml-2"></i></button>
+                    <button id="exportCsv" class="btn btn-grey btn-sm text-nowrap" asp-action="UnpaidExpensesCsv">
+                        Exportar <i class="fas fa-file-csv ml-2"></i>
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+
+<div class="row mb-4">
+    <div class="col-md-2 col-sm-2 pr-0">
+        <label for="Cliente">Clientes</label>
+        <select id="Cliente" name="Cliente" class="form-control select2" asp-items="ViewBag.Cliente">
+            <option value="">
+                Todos
+            </option>
+        </select>
+    </div>
+    <div class="col-md-2 col-sm-2 pr-0">
+        <label for="Vendedor">Vendedor</label>
+        <select id="Vendedor" name="Vendedor" class="browser-default custom-select select2 w-100" style="width: 100%" asp-items="ViewBag.Vendedor">
+            <option value="">
+                Todos
+            </option>
+        </select>
+    </div>
+    <div class="col-md-2 col-sm-2  pr-0">
+        <label for="start">Desde</label>
+        <input id="start" name="start" class="form-control d-print-p-0" type="date" value="@ViewBag.Start.ToString("yyyy-MM-dd")" style="width: 100%" />
+    </div>
+    <div class="col-md-2 col-sm-2  pr-0">
+        <label for="end">Hasta</label>
+        <input id="end" name="end" class="form-control datetimepicker d-print-p-0" type="date" value="@ViewBag.End.ToString("yyyy-MM-dd")" style="width: 100%" />
+    </div>
+    <div id="EventSingleContainer" class="col-md-2 col-sm-2 pr-0 @(ViewBag.Range ? "d-none" : "")">
+        <label for="EventSingle">Evento</label>
+        <select id="EventSingle" name="Almacen" class="browser-default custom-select select2  w-100" asp-items="ViewBag.Almacen">
+            <option value="">
+                Todos
+            </option>
+            <option value="Range">
+                Rango
+            </option>
+        </select>
+    </div>
+    <div class="col-md-1 col-sm-1 pr-0">
+        <label for="FilterEstado">Estado</label>
+        @Html.DropDownList("FilterEstado", ViewBag.Estados, "Todas", new { @class = "browser-default custom-select select2 w-100" })
+    </div>
+    <div class="col-md-1 col-sm-1">
+        <label for="FilterRetencion">Retención</label>
+        @Html.DropDownList("FilterRetencion", 
+            new SelectList(new[]
+            {
+                new { Value = "true", Text = "Sí" },
+                new { Value = "false", Text = "No" },
+            }, 
+            "Value", "Text", Model == null ? null : ViewBag.FilterRetencion), "Todas", new { @class = "form-control" })
+    </div>    
+</div>
+
+
+</form>
+
+@if (Model != null && Model.Any())
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="card">                
+                <div class="card-body pb-0">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable(0)">
+                                    Factura
+                                </th>
+                                <th onclick="sortTable(1, 'date')">
+                                    Fecha
+                                </th>
+                                <th onclick="sortTable(2)">
+                                    Cliente
+                                </th>
+                                <th class="d-print-none" onclick="sortTable(3)">
+                                    Nombre
+                                </th>
+                                <th class="text-right" onclick="sortTable(4, 'decimal')">
+                                    Importe
+                                </th>
+                                <th onclick="sortTable(5)">
+                                    Cod.
+                                </th>
+                                <th class="text-center">
+                                    Ret.
+                                </th>
+                                <th onclick="sortTable(6)">
+                                    Descripción evento
+                                </th>
+                                @if (bEstado == null)
+                                {
+                                <th class="text-center">
+                                    Cobrada
+                                </th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody id="table">
+                            @foreach (var s in Model)
+                            {
+                            <tr ondblclick="@(s.ExpenseType != null ? "window.location = '/" + s.ExpenseType + "/Edit/" + s.Id + "'" : "")">
+                                <td>
+                                    @s.Factura
+                                </td>
+                                <td>
+                                    @s.Fecha?.ToString("dd/MM/yyyy")
+                                </td>
+                                <td class="d-print-none">
+                                    @s.Cliente
+                                </td>
+                                <td>
+                                    @s.Nombre
+                                </td>
+                                <td class="text-right">
+                                    @s.Pending.ToString("n2")
+                                </td>
+                                <td>
+                                    @s.Almacen
+                                </td>
+                                <td class="text-center">
+                                    @Html.DisplayFor(f => s.TieneRetencion, "Retencion")
+                                </td>
+                                <td>
+                                    @s.Descripcion
+                                </td>
+                                @if (bEstado == null)
+                                {
+                                    <td class="text-center">
+                                        @Html.DisplayFor(f => s.Cobrada)
+                                    </td>
+                                }
+                                </tr>
+                            }
+                            @{
+                                var random = new Random();
+                            }                            
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                <th class="d-print-none"></th>
+                                <th></th>
+                                <th class="text-right">@ViewBag.Total.ToString("N")</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+
+    <script>
+        $(e => {
+            $("#EventSingle").on("select2:select", e => {
+                if ($("#EventSingle").val() == 'Range') {
+                    $("#EventSingleContainer").addClass("d-none");
+                    $("#EventRangeContainer").removeClass("d-none");
+                }
+            });
+            $(".eventRange").on("select2:select", e => {
+                if ($(e.target).val() == 'Single') {
+                    $("#EventSingleContainer").removeClass("d-none");
+                    $("#EventRangeContainer").addClass("d-none");
+                }
+            });
+        });
+    </script>
+
+    <script>
+        var lastSortIsUp = true;
+
+        function sortTable(col, fieldType) {
+            var table, rows, switching, i, x, y, shouldSwitch;
+            table = document.getElementById("table");
+            switching = true;
+            /*Make a loop that will continue until
+            no switching has been done:*/
+            while (switching) {
+                //start by saying: no switching is done:
+                switching = false;
+                rows = table.rows;
+                /*Loop through all table rows (except the
+                first, which contains table headers):*/
+                for (i = 0; i < (rows.length - 1); i++) {
+                    //start by saying there should be no switching:
+                    shouldSwitch = false;
+                    /*Get the two elements you want to compare,
+                    one from current row and one from the next:*/
+                    x = rows[i].getElementsByTagName("TD")[col];
+                    y = rows[i + 1].getElementsByTagName("TD")[col];
+                    var valX = "";
+                    if (x !== undefined && x.innerHTML !== undefined) {
+                        valX = x.innerHTML.trim();
+                        if (fieldType === 'decimal') {
+                            valX = parseFloat(valX.replace(",", "."));
+                        } else if (fieldType === 'date') {
+                            valX = valX.split('/').reverse().join("/");
+                        } else if (!isNaN(parseInt(valX))) {
+                            valX = parseInt(valX);
+                        }
+                    }
+                    var valY = "";
+                    if (y !== undefined && y.innerHTML !== undefined) {
+                        valY = y.innerHTML.trim();
+                        if (fieldType === 'decimal') {
+                            valY = parseFloat(valY.replace(",", "."));
+                        } else if (fieldType === 'date') {
+                            valY = valY.split('/').reverse().join("/");
+                        } else if (!isNaN(parseInt(valY))) {
+                            valY = parseInt(valY);
+                        }
+                    }
+                    //check if the two rows should switch place:
+                    if (lastSortIsUp) {
+                        if (valX > valY) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else {
+                        if (valX < valY) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                }
+            }
+            lastSortIsUp = !lastSortIsUp;
+        }
+    </script>
+
+}
+
+@section Styles {
+
+    <style>
+        @@media print {
+            th, td, label, input, span {
+                /*font-size: 10px !important;*/
+            }
+
+            .select2-container--default .select2-selection--single .select2-selection__rendered {
+                /*line-height: 0;*/
+                /*font-size: 18px !important;*/
+                padding: 0px !important;
+                margin: 0px !important;
+                text-align: left !important;
+            }
+
+            .select2-container .select2-selection--single {
+                /*height: unset !important;*/
+                /*font-size: 18px !important;*/
+                padding: 0px !important;
+                margin: 0px !important;
+                margin-top: 8px !important;
+                text-align: left !important;
+            }
+
+            .select2 {
+                /* padding: initial !important;*/
+                padding: 0px !important;
+                margin: 0px !important;
+                /*height: auto !important;*/
+                background: none !important;
+                /*font-size: 18px !important;*/
+                text-align: left !important;
+            }
+
+            input, .select2, .form-control {
+                border: 0 !important;
+                /*font-size: 18px !important;*/
+                text-align: left !important;
+            }
+
+            ::-webkit-inner-spin-button,
+            ::-webkit-calendar-picker-indicator {
+                display: none;
+                -webkit-appearance: none;
+            }
+            /*.d-print-18 {
+                font-size: 18px !important;
+                padding: 0px !important;
+                margin: 0px !important;
+                text-align:left !important;
+            }    */
+            .d-print-p-0 {
+                padding: 0px !important;
+                margin: 0px !important;
+            }
+        }
+
+        th {
+            padding-top: 0 !important;
+        }
+    </style>
+}

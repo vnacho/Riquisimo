@@ -1,0 +1,37 @@
+﻿@model IEnumerable<ClientLocation>
+@{
+    Layout = null;
+}
+@if (!ViewBag.Inline)
+{
+    <option value="">
+        Añadir dirección
+    </option>
+}
+else
+{
+
+    <option selected disabled value="">
+        Seleccionar dirección
+    </option>
+}
+
+@{
+    var first = !ViewBag.Inline;
+}
+@foreach (var l in Model)
+{
+    if (first)
+    {
+        first = false;
+        <option value="@l.Id" selected>
+            @l.FullAddressWithPhone
+        </option>
+    }
+    else
+    {
+        <option value="@l.Id">
+            @l.FullAddressWithPhone
+        </option>
+    }
+}

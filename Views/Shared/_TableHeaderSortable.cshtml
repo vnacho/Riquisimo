@@ -1,0 +1,19 @@
+﻿@using Ferpuser.Models.Core
+@model TableHeaderSortable
+
+@{
+    string sort = Model.Property;
+    if (Model.Property.Equals(Model.CurrentSort))
+    {
+        sort = sort + " desc";
+        <button type="submit" id="sort" name="sort" value="@sort" class="btn btn-link text-info font-weight-bold p-0 text-nowrap">@Html.Raw(Model.Display)&nbsp;<i class="fas fa-sort-amount-up fa-sm"></i></button>
+    }
+    else if ((Model.Property + " desc").Equals(Model.CurrentSort))
+    {
+        <button type="submit" id="sort" name="sort" value="@sort" class="btn btn-link text-info font-weight-bold p-0 text-nowrap">@Html.Raw(Model.Display)&nbsp;<i class="fas fa-sort-amount-down fa-sm"></i></button>
+    }
+    else
+    {
+        <button type="submit" id="sort" name="sort" value="@sort" class="btn btn-link text-info font-weight-bold p-0 text-nowrap">@Html.Raw(Model.Display)</button>
+    }
+}

@@ -1,0 +1,22 @@
+﻿@model IEnumerable<Registrant>
+@{
+    Layout = null;
+}
+
+@if (Model.Any())
+{
+    <div class="list-group list-group-flush w-100">
+        @foreach (var client in Model)
+        {
+            <a href="#" class="list-group-item text-dark registrant-search-item" data-id="@client.Id">
+                @client.FullName <small>(@client.NIF)</small>
+            </a>
+        }
+    </div>
+}
+else
+{
+    <div class="font-weight-bold text-center">
+        No se encontraron resultados
+    </div>
+}

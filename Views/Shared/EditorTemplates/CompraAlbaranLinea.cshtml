@@ -1,0 +1,99 @@
+﻿@model CompraAlbaranLinea
+
+@{
+    CompraAlbaranLinea linea = Model;
+}
+
+@Html.HiddenFor(f => linea.IdAlbaranLinea)
+@Html.HiddenFor(f => linea.Orden)
+@Html.HiddenFor(f => linea.UnidadesPendientes)
+@Html.HiddenFor(f => linea.CompraPedidoLineaId)
+@Html.HiddenFor(f => linea.CodigoPedido)
+<div class="modal-header">
+    <h5 class="modal-title" id="exampleModalLabel">
+        @if (Model != null && Model.Orden >= 0)
+        {
+            @:Editar línea
+        }
+        else
+        {
+            @:Nueva línea
+        }
+    </h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <div class="form-row">
+
+        @if (Model.UnidadesPendientes.HasValue)
+        {
+            <div class="form-group col-md-12">
+                @Html.LabelFor(f => linea.CodigoArticulo, new { @class = "small" })
+                <br />
+                <label class="small font-weight-bold">@Html.DisplayFor(f => linea.NombreArticulo)</label>
+                @Html.HiddenFor(model => model.CodigoArticulo)
+            </div>
+            <div class="form-group col-md-12">
+                <i class="fas fa-info-circle mr-2 text-info"></i><label class="small">Esta línea viene de un pedido. <span class="text-info">Máx. uds. (pendientes): @Model.UnidadesPendientes</span></label>
+            </div>
+        }
+        else
+        {
+    <div class="form-group col-md-12">
+        @Html.LabelFor(f => linea.CodigoArticulo, new { @class = "small" })
+        @Html.HiddenFor(f => linea.CodigoArticulo)
+        <partial name="~/Views/Articulos/Autocompletar.cshtml" />
+        @Html.ValidationMessageFor(f => linea.CodigoArticulo, "", new { @class = "text-danger small" })
+    </div>
+        }
+
+        <div class="form-group col-md-6">
+            @Html.LabelFor(f => linea.Unidades, new { @class = "small" })
+            @Html.EditorFor(f => linea.Unidades, new { htmlAttributes = new { @class = "form-control form-control-sm", onkeyup = "ReplaceDotByComma(this);" } })
+            @Html.ValidationMessageFor(f => linea.Unidades, "", new { @class = "text-danger small" })
+        </div>
+
+        @if (Model.UnidadesPendientes.HasValue)
+        {
+            <div class="form-group col-md-6">
+                @Html.LabelFor(f => linea.PrecioUnitario, new { @class = "small" })
+                <br />
+                <label class="small font-weight-bold">@Html.DisplayFor(f => linea.PrecioUnitario)</label>
+                @Html.HiddenFor(f => linea.PrecioUnitario)
+            </div>
+            <div class="form-group col-md-12">
+                @Html.LabelFor(f => linea.CodigoEvento, new { @class = "small" })
+                <br />
+                <label class="small font-weight-bold">@Html.DisplayFor(f => linea.NombreEvento)</label>
+                @Html.HiddenFor(f => linea.CodigoEvento)
+            </div>
+        }
+        else
+        {
+            <div class="form-group col-md-6">
+                @Html.LabelFor(f => linea.PrecioUnitario, new { @class = "small" })
+                @Html.EditorFor(f => linea.PrecioUnitario, new { htmlAttributes = new { @class = "form-control form-control-sm", onkeyup = "ReplaceDotByComma(this);" } })
+                @Html.ValidationMessageFor(f => linea.PrecioUnitario, "", new { @class = "text-danger small" })
+            </div>
+            <div class="form-group col-md-12">
+                @Html.LabelFor(f => linea.CodigoEvento, new { @class = "small" })
+                @Html.HiddenFor(f => linea.CodigoEvento)
+                <partial name="~/Views/Eventos/Autocompletar.cshtml" />
+                @Html.ValidationMessageFor(f => linea.CodigoEvento, "", new { @class = "text-danger small" })
+            </div>
+        }
+        <div class="form-group col-md-6">
+            @Html.LabelFor(f => linea.CodigoTipoIVA, new { @class = "small" })
+            @Html.DropDownListFor(model => linea.CodigoTipoIVA, new SelectList(ViewBag.TiposIVA, "Codigo", "Nombre", Model == null ? null : Model.CodigoTipoIVA), "-Seleccionar-", new { @class = "form-control form-control-sm" })
+            @Html.ValidationMessageFor(f => linea.CodigoTipoIVA, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-12">
+            @Html.LabelFor(f => linea.ObservacionesAlbaranLinea, new { @class = "small" })
+            @Html.EditorFor(f => linea.ObservacionesAlbaranLinea, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => linea.ObservacionesAlbaranLinea, "", new { @class = "text-danger small" })
+        </div>
+
+    </div>
+</div>

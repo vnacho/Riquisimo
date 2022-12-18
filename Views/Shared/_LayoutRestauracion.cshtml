@@ -1,0 +1,46 @@
+﻿@inject Microsoft.Extensions.Options.IOptions<AppSettings> AppSettings
+
+<!DOCTYPE html>
+<html lang="es-es">
+    <head>
+        <title>@ViewData["Title"] - @AppSettings.Value.Empresa</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <link async rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+        <link async rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" />
+    </head>
+
+    <body>
+
+        <div class="container">
+            <main role="main" class="py-3">           
+                @if (TempData["WarningMessage"] != null)
+                {
+                    <div class="alert alert-dismissible alert-warning">
+                      <button type="button" class="close" data-dismiss="alert">&times;</button>
+                      <h4 class="alert-heading">Advertencia</h4>
+                      <p class="mb-0">@TempData["WarningMessage"]</p>
+                    </div>
+                }
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-dismissible alert-success">
+                      <button type="button" class="close" data-dismiss="alert">&times;</button>
+                      <h4 class="alert-heading">Operación completada</h4>
+                      <p class="mb-0">@TempData["SuccessMessage"]</p>
+                    </div>
+                }
+
+                @RenderBody()
+            </main>
+        </div>
+
+        <script type="text/javascript" src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script type="text/javascript" src="~/mdb/js/popper.min.js"></script>
+        <script type="text/javascript" src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+        @RenderSection("Scripts", required: false)
+    </body>
+</html>
+
+

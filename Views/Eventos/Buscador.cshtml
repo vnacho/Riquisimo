@@ -1,0 +1,23 @@
+﻿@using Ferpuser.Models.Sage
+@model IEnumerable<Almacen>
+@{
+    Layout = null;
+}
+
+@if (Model != null && Model.Any())
+{
+    <div class="list-group list-group-flush w-100">
+        @foreach (var item in Model)
+        {
+            <a href="#" class="list-group-item text-dark client-search-item" onclick="EventoSeleccionado('@item.Codigo','@item.DisplayName')">
+                @item.DisplayName
+            </a>
+        }
+    </div>
+}
+else
+{
+    <div class="text-left mt-3 text-info">
+        No se encontraron resultados
+    </div>
+}

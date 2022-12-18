@@ -1,0 +1,27 @@
+﻿@model CentroCoste
+
+@Html.HiddenFor(f => f.Id)
+<div class="card mb-4 wow d-print-none">
+    <div class="form-row card-body">
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.NivelAnalitico1, new { @class = "small" })
+            @Html.EditorFor(f => f.NivelAnalitico1, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.NivelAnalitico1, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.NivelAnalitico2, new { @class = "small" })
+            @Html.EditorFor(f => f.NivelAnalitico2, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.NivelAnalitico2, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(f => f.Nombre, new { @class = "small" })
+            @Html.EditorFor(f => f.Nombre, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => f.Nombre, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(f => f.TipoCentroCosteId, new { @class = "small" })
+            @Html.DropDownListFor(f => f.TipoCentroCosteId, new SelectList(ViewBag.TiposCentroCoste, "Id", "Descripcion"), "-Seleccionar-", new { @class = "form-control form-control-sm select2" })
+            @Html.ValidationMessageFor(f => f.TipoCentroCosteId, "", new { @class = "text-danger small" })
+        </div>
+    </div>
+</div>

@@ -1,0 +1,813 @@
+﻿@using Ferpuser.Models.Core
+@using Ferpuser.BLL.Filters
+@model Congress
+@{
+    var IsCongress = Model.IsCongress;
+    var contador = 0;
+    var contadorDocs = 0;
+
+    List<KeyValuePair<string, string>> tipos = new List<KeyValuePair<string, string>>();
+    tipos.Add(new KeyValuePair<string, string>("C", "Congreso"));
+    tipos.Add(new KeyValuePair<string, string>("O", "Obra"));
+}
+    <div id="div_A_Reemplazar">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <a data-toggle="collapse" href=".congress-data" class="text-dark toggler">
+                            <h4 class="card-title d-flex justify-content-between">
+                                @if(Model.TipoCongress == null)
+                                {
+                                    @:Datos del centro de coste
+                                    Model.TipoCongress = "Z";
+                                }
+                                else
+                                {   
+                                    switch (Model.TipoCongress)
+                                    {
+                                        case "C":
+                                            @:Datos del congreso
+                                            break;
+                                        case "O":
+                                            @:Obra
+                                            break;
+                                        case "Z":
+                                            @:Datos del centro de coste
+                                            break;
+                                    }
+                                }
+                                <i class="fas fa-angle-down rotate-icon fa-rotate-180"></i>
+                            </h4>
+                        </a>
+                        <input hidden asp-for="Created" />
+                        <input hidden asp-for="Modified" />
+                        <input hidden asp-for="Id" />
+                        <input hidden asp-for="Deleted" />
+                        @Html.HiddenFor(f => Model.IsCongress)
+                        <div id="" class="row congress-data show">
+                            <div class="col-md-7">
+                                <div class="row">
+                                    <div class="form-group col-md-2">
+                                        @Html.LabelFor(f => f.TipoCongress, new { @class = "control-label" })
+                                        @Html.DropDownListFor(f => f.TipoCongress, new SelectList(tipos, "Key", "Value"), "-Seleccionar-", new { @class = "form-control", onchange = "refresh();" })
+                                        @Html.ValidationMessageFor(f => f.TipoCongress, "", new { @class = "text-danger" })
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label asp-for="Number" class="control-label"></label>
+                                            <select asp-for="Number" class="browser-default custom-select select2-number">
+                                                @foreach (var a in ViewBag.Almacen)
+                                                {
+                                                    @if (Int32.Parse(a.Codigo) == Model.Number)
+                                                    {
+                                                        <option data-almacen="@a.Nombre" value="@a.Codigo" selected>
+                                                            @a.Codigo @a.Nombre
+                                                        </option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option data-almacen="@a.Nombre" value="@a.Codigo">
+                                                            @a.Codigo @a.Nombre
+                                                        </option>
+                                                    }
+                                                }
+                                            </select>
+                                            <span asp-validation-for="Number" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label asp-for="Code" class="control-label"></label>
+                                            <input asp-for="Code" class="form-control" />
+                                            <span asp-validation-for="Code" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label asp-for="Place" class="control-label"></label>
+                                            <input asp-for="Place" class="form-control" />
+                                            <span asp-validation-for="Place" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <div class="form-group">
+                                            @Html.LabelFor(f => f.SociedadCientificaId, new { @class = "small" })
+                                            @Html.DropDownListFor(f => f.SociedadCientificaId, new SelectList(ViewBag.SociedadesCientificas, "Id", "Nombre"), "-Seleccionar-", new { @class = "form-control select2" })
+                                            @Html.ValidationMessageFor(f => f.SociedadCientificaId, "", new { @class = "text-danger small" })
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label asp-for="Name" class="control-label"></label>
+                                            <input asp-for="Name" class="form-control" />
+                                            <span asp-validation-for="Name" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="StartDate" class="control-label"></label>
+                                            <input asp-for="StartDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" type="date" class="form-control" />
+                                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="EndDate" class="control-label"></label>
+                                            <input asp-for="EndDate" value="@Model.EndDate.ToString("yyyy-MM-dd")" type="date" class="form-control" />
+                                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="row">
+                                    <div class="col-12 form-group d-flex flex-column">
+                                        <label asp-for="LogoBase64" class="control-label"></label>
+                                        <div>
+                                            <img data-for="LogoBase64" class="shadow img-fluid" src="@Model.LogoBase64" />
+                                        </div>
+                                        <div class="wrap-input-container text-center">
+                                            <label class="btn btn-primary custom-file-upload">
+                                                Subir logo <i class="fas fa-cloud-upload-alt ml-2"></i>
+                                            </label>
+                                            <input class="file-upload" data-for="LogoBase64" type="file">
+                                        </div>
+
+                                        <input asp-for="LogoBase64" hidden />
+                                        <span asp-validation-for="LogoBase64" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12 form-group d-flex flex-column">
+                                        <label asp-for="TailBase64" class="control-label"></label>
+                                        <div>
+                                            <img data-for="TailBase64" class="shadow img-fluid" src="@Model.TailBase64" />
+                                        </div>
+                                        <div class="wrap-input-container text-center">
+                                            <label class="btn btn-primary custom-file-upload">
+                                                Subir faldón <i class="fas fa-cloud-upload-alt ml-2"></i>
+                                            </label>
+                                            <input class="file-upload" data-for="TailBase64" type="file">
+                                        </div>
+
+                                        <input asp-for="TailBase64" hidden />
+                                        <span asp-validation-for="TailBase64" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-4 congress-data show">
+                            <div class="col-md-8">
+                                <div class="col-md-12">
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" asp-for="HideRegistrations">
+                                        <label class="custom-control-label" asp-for="HideRegistrations">@Html.DisplayNameFor(model => model.HideRegistrations)</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" asp-for="Ended">
+                                        <label class="custom-control-label" asp-for="Ended">@Html.DisplayNameFor(model => model.Ended)</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="Registrations" class="control-label">Inscripciones</label>
+                                    <input id="Registrations" value="@ViewData["Registered"]" readonly type="text" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <input id="save" value="Guardar" class="btn btn-primary" onclick="Guardar()" />
+                            @if(User.Claims.Any(c => c.Type.Equals("PermisoAdministracion")))
+                            {
+                                <button id="delete-btn" type="button" class="btn btn-outline-danger">Borrar <i class="fas fa-trash-alt ml-2"></i></button>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                @if (Model.TipoCongress != null && (Model.TipoCongress.Contains('C')))
+                {
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <a data-toggle="collapse" href=".certificate-data" class="text-dark toggler collapsed">
+                                <h4 class="card-title d-flex justify-content-between">
+                                    Datos de los certificados
+                                    <i class="fas fa-angle-down rotate-icon"></i>
+                                </h4>
+                            </a>
+                            <div class="row mb-4 certificate-data collapse">
+                                <div class="col-md-4 form-group">
+                                    <label asp-for="CertificateNumber" class="control-label"></label>
+                                    <input asp-for="CertificateNumber" class="form-control" />
+                                    <span asp-validation-for="CertificateNumber" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label asp-for="CertificateCreditor" class="control-label"></label>
+                                    <input asp-for="CertificateCreditor" class="form-control" />
+                                    <span asp-validation-for="CertificateCreditor" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label asp-for="CertificateCredits" class="control-label"></label>
+                                    <input asp-for="CertificateCredits" class="form-control" />
+                                    <span asp-validation-for="CertificateCredits" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label asp-for="CertificateCity" class="control-label"></label>
+                                    <input asp-for="CertificateCity" class="form-control" />
+                                    <span asp-validation-for="CertificateCity" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label asp-for="CertificateTime" class="control-label"></label>
+                                    <input asp-for="CertificateTime" value="@Model.CertificateTime.ToString("yyyy-MM-dd")" type="date" class="form-control" />
+                                    <span asp-validation-for="CertificateTime" class="text-danger"></span>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <a data-toggle="collapse" href=".connection-data" class="text-dark toggler collapsed">
+                                <h4 class="card-title d-flex justify-content-between">
+                                    Datos de conexión
+                                    <i class="fas fa-angle-down rotate-icon"></i>
+                                </h4>
+                            </a>
+                            
+                            <div class="row mb-4 connection-data collapse">
+                                <div class="col-md-12 col-12">
+                                    <span class="badge badge-pill badge-success">Datos de conexión</span>
+                                    <hr>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="DatabaseServer" class="control-label"></label>
+                                        <input asp-for="DatabaseServer" class="form-control readonly" readonly />
+                                        <span asp-validation-for="DatabaseServer" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Database" class="control-label"></label>
+                                        <input asp-for="Database" class="form-control readonly" readonly />
+                                        <span asp-validation-for="Database" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="DatabaseUser" class="control-label"></label>
+                                        <input asp-for="DatabaseUser" class="form-control readonly" readonly />
+                                        <span asp-validation-for="DatabaseUser" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="DatabasePassword" class="control-label"></label>
+                                        <input asp-for="DatabasePassword" class="form-control readonly" readonly />
+                                        <span asp-validation-for="DatabasePassword" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="DatabasePrefix" class="control-label"></label>
+                                        <input asp-for="DatabasePrefix" class="form-control readonly" readonly />
+                                        <span asp-validation-for="DatabasePrefix" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4 connection-data collapse">
+                                <div class="col-md-12 col-12">
+                                    <span class="badge badge-pill badge-success">Datos de conexión (Comité)</span>
+                                    <hr>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="DatabaseServerComite" class="control-label"></label>
+                                        <input asp-for="DatabaseServerComite" class="form-control readonly" readonly />
+                                        <span asp-validation-for="DatabaseServerComite" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="DatabaseComite" class="control-label"></label>
+                                        <input asp-for="DatabaseComite" class="form-control readonly" readonly />
+                                        <span asp-validation-for="DatabaseComite" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="DatabaseUserComite" class="control-label"></label>
+                                        <input asp-for="DatabaseUserComite" class="form-control readonly" readonly />
+                                        <span asp-validation-for="DatabaseUserComite" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="DatabasePasswordComite" class="control-label"></label>
+                                        <input asp-for="DatabasePasswordComite" class="form-control readonly" readonly />
+                                        <span asp-validation-for="DatabasePasswordComite" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="DatabasePrefixComite" class="control-label"></label>
+                                        <input asp-for="DatabasePrefixComite" class="form-control readonly" readonly />
+                                        <span asp-validation-for="DatabasePrefixComite" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <a data-toggle="collapse" href=".mail-data" class="text-dark toggler collapsed">
+                                <h4 class="card-title d-flex justify-content-between">
+                                    Datos del correo electrónico
+                                    <i class="fas fa-angle-down rotate-icon"></i>
+                                </h4>
+                            </a>
+                            <div class="row mb-4 mail-data collapse">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label asp-for="IncomingMailServer" class="control-label"></label>
+                                        <input asp-for="IncomingMailServer" class="form-control readonly" readonly />
+                                        <span asp-validation-for="IncomingMailServer" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="IncomingMailPort" class="control-label"></label>
+                                        <input asp-for="IncomingMailPort" class="form-control readonly" readonly />
+                                        <span asp-validation-for="IncomingMailPort" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label asp-for="OutgoingMailServer" class="control-label"></label>
+                                        <input asp-for="OutgoingMailServer" class="form-control readonly" readonly />
+                                        <span asp-validation-for="OutgoingMailServer" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="OutgoingMailPort" class="control-label"></label>
+                                        <input asp-for="OutgoingMailPort" class="form-control readonly" readonly />
+                                        <span asp-validation-for="OutgoingMailPort" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="MailUser" class="control-label"></label>
+                                        <input asp-for="MailUser" class="form-control readonly" readonly />
+                                        <span asp-validation-for="MailUser" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="MailPassword" class="control-label"></label>
+                                        <input asp-for="MailPassword" class="form-control readonly" readonly />
+                                        <span asp-validation-for="MailPassword" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="SignatureSummernote" class="control-label"></label>
+                                        <div id="SignatureSummernote">
+                                            @Html.Raw(Model.SignatureAfter)
+                                        </div>
+                                        <textarea asp-for="SignatureAfter" hidden>
+                                        </textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-12">
+                        <div class="card-body">
+                            <a data-toggle="collapse" href=".extra-data" class="text-dark toggler collapsed">
+                                <h4 class="card-title d-flex justify-content-between">
+                                    Datos extra
+                                    <i class="fas fa-angle-down rotate-icon"></i>
+                                </h4>
+                            </a>
+                            <div class="row mb-4 extra-data collapse">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="InternalCode" class="control-label"></label>
+                                        <input asp-for="InternalCode" class="form-control" />
+                                        <span asp-validation-for="InternalCode" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Organizer" class="control-label"></label>
+                                        <input asp-for="Organizer" class="form-control" />
+                                        <span asp-validation-for="Organizer" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="WebDomain" class="control-label"></label>
+                                        <input asp-for="WebDomain" class="form-control" />
+                                        <span asp-validation-for="WebDomain" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Headquarters" class="control-label"></label>
+                                        <input asp-for="Headquarters" class="form-control" />
+                                        <span asp-validation-for="Headquarters" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Attendants" class="control-label"></label>
+                                        <input asp-for="Attendants" class="form-control" />
+                                        <span asp-validation-for="Attendants" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="InscriptionFee" class="control-label"></label>
+                                        <input asp-for="InscriptionFee" class="form-control" />
+                                        <span asp-validation-for="InscriptionFee" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="SpeakersHotel" class="control-label"></label>
+                                        <input asp-for="SpeakersHotel" class="form-control" />
+                                        <span asp-validation-for="SpeakersHotel" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Catering" class="control-label"></label>
+                                        <input asp-for="Catering" class="form-control" />
+                                        <span asp-validation-for="Catering" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="President" class="control-label"></label>
+                                        <input asp-for="President" class="form-control" />
+                                        <span asp-validation-for="President" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Workplace" class="control-label"></label>
+                                        <input asp-for="Workplace" class="form-control" />
+                                        <span asp-validation-for="Workplace" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Position" class="control-label"></label>
+                                        <input asp-for="Position" class="form-control" />
+                                        <span asp-validation-for="Position" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="PersonalPhone" class="control-label"></label>
+                                        <input asp-for="PersonalPhone" class="form-control" />
+                                        <span asp-validation-for="PersonalPhone" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="CorporatePhone" class="control-label"></label>
+                                        <input asp-for="CorporatePhone" class="form-control" />
+                                        <span asp-validation-for="CorporatePhone" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Email" class="control-label"></label>
+                                        <input asp-for="Email" class="form-control" />
+                                        <span asp-validation-for="Email" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Email2" class="control-label"></label>
+                                        <input asp-for="Email2" class="form-control" />
+                                        <span asp-validation-for="Email2" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="CommunicationsAndType" class="control-label"></label>
+                                        <input asp-for="CommunicationsAndType" class="form-control" />
+                                        <span asp-validation-for="CommunicationsAndType" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="TechnicalSecretariat" class="control-label"></label>
+                                        <input asp-for="TechnicalSecretariat" class="form-control" />
+                                        <span asp-validation-for="TechnicalSecretariat" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="ScientificSecretariat" class="control-label"></label>
+                                        <input asp-for="ScientificSecretariat" class="form-control" />
+                                        <span asp-validation-for="ScientificSecretariat" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Infrastructures" class="control-label"></label>
+                                        <input asp-for="Infrastructures" class="form-control" />
+                                        <span asp-validation-for="Infrastructures" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="CommunicationsAndSocialMedia" class="control-label"></label>
+                                        <input asp-for="CommunicationsAndSocialMedia" class="form-control" />
+                                        <span asp-validation-for="CommunicationsAndSocialMedia" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Financing" class="control-label"></label>
+                                        <input asp-for="Financing" class="form-control" />
+                                        <span asp-validation-for="Financing" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Travels" class="control-label"></label>
+                                        <input asp-for="Travels" class="form-control" />
+                                        <span asp-validation-for="Travels" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Budget" class="control-label"></label>
+                                        <input asp-for="Budget" class="form-control" />
+                                        <span asp-validation-for="Budget" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Notes" class="control-label"></label>
+                                        <input asp-for="Notes" class="form-control" />
+                                        <span asp-validation-for="Notes" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="IBAN" class="control-label"></label>
+                                        <input asp-for="IBAN" class="form-control" />
+                                        <span asp-validation-for="IBAN" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="SageAccount" class="control-label"></label>
+                                        <input asp-for="SageAccount" class="form-control" />
+                                        <span asp-validation-for="SageAccount" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="SwiftCode" class="control-label"></label>
+                                        <input asp-for="SwiftCode" class="form-control" />
+                                        <span asp-validation-for="SwiftCode" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }else{
+                    @if (Model.TipoCongress != null && Model.TipoCongress.Contains('O'))
+                        {
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <a data-toggle="collapse" href=".obra-data" class="text-dark toggler collapse">
+                                        <h4 class="card-title d-flex justify-content-between">
+                                            Es Obra
+                                            <i class="fas fa-angle-down rotate-icon"></i>
+                                        </h4>
+                                    </a>
+                                    <div class="row mb-12 obra-data">
+                                        <div class="col-md-8 form-group">
+                                            <div class="row">
+                                                <div class="form-group col-md-5">
+                                                    @Html.LabelFor(f => f.NombreCliente, new { @class = "control-label" })
+                                                    @Html.DropDownListFor(f => f.NombreCliente, new SelectList(ViewBag.Clientes, "Codigo", "Nombre"), "-Seleccionar-", new { @class = "form-control form-control-sm select2-NombreCliente" })
+                                                    @Html.ValidationMessageFor(f => f.NombreCliente, "", new { @class = "text-danger small" })
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <label asp-for="DireccionObra" class="control-label"></label>
+                                                    <input asp-for="DireccionObra" class="form-control" />
+                                                    <span asp-validation-for="DireccionObra" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-md-2">
+                                                    @Html.LabelFor(f => f.CodigoPostalObra, new { @class = "control-label" })
+                                                    @Html.DropDownListFor(f => f.CodigoPostalObra, new SelectList(ViewBag.CodPost, "CODIGO",  "CODIGO"), "-Seleccionar-", new { @class = "form-control form-control-sm select2-postal", id="CodPostalObra", name="CodPostalObra" })
+                                                    @Html.ValidationMessageFor(f => f.CodigoPostalObra, "", new { @class = "text-danger small" })
+                                                </div>
+                                                <div class="col-md-5">
+                                                    <label asp-for="PoblacionObra" class="control-label"></label>
+                                                    <input asp-for="PoblacionObra" class="form-control" />
+                                                    <span asp-validation-for="PoblacionObra" class="text-danger"></span>
+                                                </div>
+                                                <div class="col-md-5">
+                                                    <label asp-for="ProvinciaObra" class="control-label"></label>
+                                                    <input asp-for="ProvinciaObra" class="form-control" />
+                                                    <span asp-validation-for="ProvinciaObra" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-md-3">
+                                                    @Html.LabelFor(f => f.Usuario, new { @class = "small" })
+                                                    @Html.EditorFor(f => f.Usuario, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+                                                    @Html.ValidationMessageFor(f => f.Usuario, "", new { @class = "text-danger small" })
+                                                </div>
+                                                <div class="form-group col-md-3">
+                                                    <label asp-for="Contraseña" class="small">Contraseña</label>
+                                                    <input asp-for="Contraseña" class="form-control  form-control-sm" />
+                                                    <span asp-validation-for="Contraseña" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-md-3">
+                                                    @Html.LabelFor(f => f.Plataforma, new { @class = "small" })
+                                                    @Html.EditorFor(f => f.Plataforma, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+                                                    @Html.ValidationMessageFor(f => f.Plataforma, "", new { @class = "text-danger small" })
+                                                </div>
+                                                <div class="form-group col-md-9">
+                                                    @Html.LabelFor(f => f.Url, new { @class = "small" })
+                                                    @Html.EditorFor(f => f.Url, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+                                                    @Html.ValidationMessageFor(f => f.Url, "", new { @class = "text-danger small" })
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                        <label asp-for="FechaInicio" class="control-label"></label>
+                                                        <input asp-for="FechaInicio" value="@Model.FechaInicio.ToString("yyyy-MM-dd")" type="date" class="form-control" />
+                                                        <span asp-validation-for="FechaInicio" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <label asp-for="EmailFacturacion" class="control-label"></label>
+                                                    <textarea asp-for="EmailFacturacion" class="form-control"  style="width:500px;height:150px;"></textarea>
+                                                    <span asp-validation-for="EmailFacturacion" class="text-danger"></span>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label asp-for="EmailDocumentacion" class="control-label"></label>
+                                                    <textarea asp-for="EmailDocumentacion" class="form-control"  style="width:500px;height:150px;"></textarea>
+                                                    <span asp-validation-for="EmailDocumentacion" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                            <br>
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input" asp-for="Finalizada">
+                                                <label class="custom-control-label" asp-for="Finalizada">@Html.DisplayNameFor(model => model.Finalizada)</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 form-group">
+                                            <form id="formDocumentosObra" method="post" enctype="multipart/form-data" action="@Url.Action("UploadDocumentoObra", "Congresses")" >
+                                                <input type="hidden" id="IdCongressObra" name="IdCongressObra" value="@Model.Id" />
+                                                <div class="card">
+                                                    <div class="card-body row justify-content-between align-items-center py-2">
+                                                        <div class="col-md-12">
+                                                            <h6 class="text-muted">Ficheros Obra </h6>
+                                                        </div>
+                                                        <div class="col-md-12 border-right align-self-start">
+                                                            <span class="badge badge-danger">Documentos Obra</span>
+                                                            <table id="tablaDocumentosObra" class="table table-sm bg-white my-2">
+                                                                @foreach (var doc in Model.DocumentosObra)
+                                                                {
+                                                                    <tr>
+                                                                        <td>
+                                                                            <a class="text-info" download="@doc.FicheroNombre" href="@Url.Content(doc.FicheroUrl)">@doc.FicheroNombre</a>
+                                                                        </td>
+                                                                        <td class="text-right">
+                                                                            <a href="@Url.Action("BorrarDocumentoObra","Congresses", new { Id = doc.Id, IdCongressObra = Model.Id })" onclick="return confirm('¿Está seguro de querer borrar el documento?')">
+                                                                                <i class="fas fa-times ml-2"></i>
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                }
+                                                            </table>
+                                                            <div class="form-group col-md-12">
+                                                                <label for="Fichero">Adjuntar otros ficheros</label>
+                                                                <input type="file" class="form-control form-control-sm" id="fileDocumentacionObra" name="fileDocumentacionObra" onchange="SubirFicheroObra()">
+                                                                <input type="hidden" id="hfFicheros" name="hfFicheros" />
+                                                                <br />
+                                                                <ul id="ulFicheros" class="small"></ul>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-12 obra-data">
+                                        <div class="col-md-12 form-group">
+                                            <a class="col-md-2  btn btn-blue-grey btn-sm text-nowrap" data-toggle="modal" data-target="#ContratoObraModal" onclick="AddLineaContrato();">Añadir contrato obra <i class="fas fa-plus ml-2"></i></a>
+                                            <a class="col-md-2 offset-md-3 btn-outline-danger text-right text-nowrap disabled" >Total contratos: <strong>@ViewData["totalContratos"]</strong> </a>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-hover table-striped bg-white">
+                                                <thead class="font-weight-bolder" >
+                                                    <tr>
+                                                        <th scope="col" class="text-center">CodigoContrato
+                                                        </th>
+                                                        <th scope="col" class="text-center">FechaContratoInicio
+                                                        </th>
+                                                        <th scope="col" class="text-center">ImporteContrato
+                                                        </th>
+                                                        <th scope="col" class="text-center">FechaContratoFin
+                                                        </th>
+                                                        <th scope="col" class="text-right">
+                                                        </th>
+                                                        <th scope="col" class="text-center">
+                                                        </th>
+                                                        <th scope="col"></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ( ContratoObra item in Model.ContratosObra.OrderBy(f=>f.FechaContratoInicio))
+                                                    {
+                                                        <tr>
+                                                            <td class="text-center">@item.CodigoContrato</td>
+                                                            <td class="text-center">@item.FechaContratoInicio.ToShortDateString()</td>
+                                                            <td class="text-center font-weight-bold text-nowrap">@item.ImporteContrato.ToString("C")</td>
+                                                            <td class="text-center"> @if(@item.FechaContratoFin.HasValue) @item.FechaContratoFin.Value.ToShortDateString().ToString()</td>
+                                                            <td class="text-center text-nowrap">
+                                                            </td>
+                                                            <td class="text-right text-nowrap">
+                                                                <a href="#" class="text-info mr-2" data-toggle="modal" data-target="#ContratoObraModal" onclick="EditLineaContrato('@item.Id');">
+                                                                    <i class="fas fa-pencil-alt"></i>
+                                                                </a>
+                                                                <a class="text-danger mr-2" href="@Url.Action("DeleteContrato","Congresses", new { ContratoObraId = item.Id, IdCongressObra = Model.Id })" onclick="return confirm('¿Está seguro de que quiere eliminar este registro?')">
+                                                                    <i class="fas fa-times"></i>
+                                                                </a>
+                                                                <input type="hidden" id="ContratosObra[@contador].Id" name='ContratosObra[@contador].Id' value="@item.Id" />
+                                                                <input type="hidden" id="ContratosObra[@contador].Created" name='ContratosObra[@contador].Created' value="@item.Created" />
+                                                                <input type="hidden" id="ContratosObra[@contador].Modified" name='ContratosObra[@contador].Modified' value="@item.Modified" />
+                                                                <input type="hidden" id="ContratosObra[@contador].Deleted" name='ContratosObra[@contador].Deleted' value="@item.Deleted" />
+                                                                <input type="hidden" id="ContratosObra[@contador].CongressID" name='ContratosObra[@contador].CongressID' value="@item.CongressID" />
+                                                                <input type="hidden" id="ContratosObra[@contador].CodigoContrato" name='ContratosObra[@contador].CodigoContrato' value="@item.CodigoContrato" />
+                                                                <input type="hidden" id="ContratosObra[@contador].FechaContratoInicio" name='ContratosObra[@contador].FechaContratoInicio' value="@item.FechaContratoInicio" />
+                                                                <input type="hidden" id="ContratosObra[@contador].FechaContratoFin" name='ContratosObra[@contador].FechaContratoFin' value="@item.FechaContratoFin" />
+                                                                <input type="hidden" id="ContratosObra[@contador].ImporteContrato" name='ContratosObra[@contador].ImporteContrato' value="@item.ImporteContrato" />
+                                                                @foreach (DocumentoContratoObra doc in @item.DocumentosContratoObra)
+                                                                {
+                                                                    <input type="hidden" id="DocumentosContratoObra[@contadorDocs].Id" name='DocumentosContratoObra[@contadorDocs].Id' value="@doc.Id" />
+                                                                    <input type="hidden" id="DocumentosContratoObra[@contadorDocs].CodigoEvento" name='DocumentosContratoObra[@contadorDocs].FicheroUrl' value="@doc.FicheroUrl" />
+                                                                    <input type="hidden" id="DocumentosContratoObra[@contadorDocs].NombreEvento" name='DocumentosContratoObra[@contadorDocs].FicheroNombre' value="@doc.FicheroNombre" />
+                                                                    <input type="hidden" id="DocumentosContratoObra[@contadorDocs].CodigoArticulo" name='DocumentosContratoObra[@contadorDocs].ContratoObraId' value="@doc.ContratoObraId" />
+                                                                    contadorDocs++;
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                        contadorDocs = 0;
+                                                        contador++;
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <partial name="_ContratoObra.cshtml" model=Model />
+                        }
+                }
+    </div>

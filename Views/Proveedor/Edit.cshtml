@@ -1,0 +1,337 @@
+﻿@model Proveedor
+
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+
+    List<KeyValuePair<bool, string>> listaRetencion = new List<KeyValuePair<bool, string>>();
+    listaRetencion.Add(new KeyValuePair<bool, string>(true, "Sobre la base"));
+    listaRetencion.Add(new KeyValuePair<bool, string>(false, "Sobre total factura"));
+}
+
+<form method="post" id="form" enctype="multipart/form-data">
+
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Detalle de proveedor
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                <button type="submit" name="guardar" class="btn btn-secondary btn-sm text-nowrap">Guardar <i class="fas fa-save ml-2"></i></button>
+                <a asp-action="Index" class="btn btn-grey btn-sm text-nowrap">Volver <i class="fas fa-arrow-left ml-2"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <input hidden asp-for="CODPOST" />
+    @*    @Html.EditorForModel()*@    
+
+    <div id="proveedor-container" class="card mb-4 wow d-print-none">
+        <div class="form-row card-body">
+           <div class="row col-md-12">
+                <div class="form-group col-md-1">
+                    @Html.LabelFor(f => f.CUENTACONTABLE, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.CUENTACONTABLE, new { htmlAttributes = new { @class = "form-control  ", @readonly = "true"}})
+                    @Html.ValidationMessageFor(f => f.CUENTACONTABLE, "", new { @class = "text-danger small" })
+                </div>
+                <div class="form-group col-md-1">
+                    @Html.LabelFor(f => f.NIF, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.NIF, new { htmlAttributes = new { @class = "form-control  ", @readonly = "true"}})
+                    @Html.ValidationMessageFor(f => f.NIF, "", new { @class = "text-danger small" })
+                </div>
+               <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.NOMBRECOMERCIAL, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.NOMBRECOMERCIAL, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.NOMBRECOMERCIAL, "", new { @class = "text-danger small" })
+                </div>
+                <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.RAZONSOCIAL, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.RAZONSOCIAL, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.RAZONSOCIAL, "", new { @class = "text-danger small" })
+                </div>
+             </div>
+           <div class="row col-md-12">
+                <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.DIRECCION, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.DIRECCION, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.DIRECCION, "", new { @class = "text-danger small" })
+                </div>
+                <div class="form-group col-md-2">
+                    @Html.LabelFor(f => f.CODPOST, new { @class = "control-label" })
+                    @Html.DropDownListFor(f => f.CODPOST, new SelectList(ViewBag.CodPost, "CODIGO",  "CODIGO"), "-Seleccionar-", new { @class = "form-control  select2-postal" })
+                    @Html.ValidationMessageFor(f => f.CODPOST, "", new { @class = "text-danger small" })
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="LOCALIDAD" class="control-label"></label>
+                    <input asp-for="LOCALIDAD" class="form-control" />
+                    <span asp-validation-for="LOCALIDAD" class="text-danger"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="PROVINCIA" class="control-label"></label>
+                    <input asp-for="PROVINCIA" class="form-control" />
+                    <span asp-validation-for="PROVINCIA" class="text-danger"></span>
+                </div>
+            </div>
+           <div class="row col-md-12">
+                <div class="form-group col-md-2">
+                    @Html.LabelFor(f => f.PAIS, new { @class = "control-label" })
+                    @Html.DropDownListFor(f => f.PAIS, new SelectList(ViewBag.Paises, "CODIGO", "NOMBRE", Model == null ? null : Model.PAIS), "-Seleccionar-", new { @class = "form-control  select2-otros" })
+                    @Html.ValidationMessageFor(f => f.PAIS, "", new { @class = "text-danger small" })
+                </div>        
+            </div>        
+           <div class="row col-md-12">
+                <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.PERSONACONTACTO, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.PERSONACONTACTO, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.PERSONACONTACTO, "", new { @class = "text-danger small" })
+                </div>
+                <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.CARGO, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.CARGO, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.CARGO, "", new { @class = "text-danger small" })
+                </div>
+            </div>
+           <div class="row col-md-12">
+                <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.EMAIL, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.EMAIL, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.EMAIL, "", new { @class = "text-danger small" })
+                </div>
+                <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.TELEFONO, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.TELEFONO, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.TELEFONO, "", new { @class = "text-danger small" })
+                </div>
+                <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.TELEFONO2, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.TELEFONO2, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.TELEFONO2, "", new { @class = "text-danger small" })
+                </div>
+                <div class="w-100"></div>
+                <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.PAGINAWEB, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.PAGINAWEB, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.PAGINAWEB, "", new { @class = "text-danger small" })
+                </div>
+            </div>
+            <div class="row col-md-12">
+                <div class="form-group col-md-2">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" asp-for="TIPO_RET">
+                        <label class="custom-control-label" asp-for="TIPO_RET">@Html.DisplayNameFor(model => model.TIPO_RET)</label>
+                    </div>
+                </div>
+            </div>
+            <div class="w-100"></div>
+            <div class="row col-md-12" id="grupoRetencion" aria-hidden="true">
+                <div class="form-group col-md-2">
+                    @Html.LabelFor(f => f.MODO_RET, new { @class = "control-label" })
+                    @Html.DropDownListFor(f => f.MODO_RET, new SelectList(listaRetencion, "Key", "Value", Model == null ? false : Model.MODO_RET), "-Seleccionar-", new { @class = "form-control  select2-otros" })      
+                    @Html.ValidationMessageFor(f => f.MODO_RET, "", new { @class = "text-danger small" })
+                </div>
+                <div class="form-group col-md-2">
+                    @Html.LabelFor(f => f.RETENCION, new { @class = "control-label" })
+                    @Html.DropDownListFor(f => f.RETENCION, new SelectList(ViewBag.TipoRet,"CODIGO", "NOMBRE", Model == null ? "" : Model.RETENCION), "-Seleccionar-", new { @class = "form-control  select2-otros" })      
+                    @Html.ValidationMessageFor(f => f.RETENCION, "", new { @class = "text-danger small" })
+                </div>
+            </div>
+            <div class="row col-md-12">
+                <div class="form-group col-md-2">
+                    @Html.LabelFor(f => f.FORMAPAGO, new { @class = "control-label" })
+                    @Html.DropDownListFor(f => f.FORMAPAGO, new SelectList(ViewBag.FPago,"Codigo", "Nombre", Model == null ? "" : Model.FORMAPAGO), "-Seleccionar-", new { @class = "form-control  select2-otros" })      
+                    @Html.ValidationMessageFor(f => f.FORMAPAGO, "", new { @class = "text-danger small" })
+                </div>
+                <div class="form-group col-md-3">
+                    @Html.LabelFor(f => f.COMISIONES, new { @class = "control-label" })
+                    @Html.EditorFor(f => f.COMISIONES, new { htmlAttributes = new { @class = "form-control " } })
+                    @Html.ValidationMessageFor(f => f.COMISIONES, "", new { @class = "text-danger small" })
+                </div>        
+            </div>        
+            <div class="form-group col-md-12">
+                @Html.LabelFor(f => f.OBSERVACIONES, new { @class = "control-label" })
+                @Html.EditorFor(f => f.OBSERVACIONES, new { htmlAttributes = new { @class = "form-control " } })
+                @Html.ValidationMessageFor(f => f.OBSERVACIONES, "", new { @class = "text-danger small" })
+            </div>
+        </div>
+    </div>
+
+</form>
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/lib/jqueryui/jqueryui/jquery-ui.min.css">
+}
+@section Scripts
+{
+    <script src="~/lib/jqueryui/jqueryui/jquery-ui.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $('[data-toggle="tooltip"]').tooltip();
+
+        var lastNif = "";
+        $(document).ready(function () {
+
+            $("#TIPO_RET").click(function () {
+                if($(this).is(':checked'))
+                    $("#grupoRetencion").show();
+                else
+                    $('#grupoRetencion').hide();
+            });
+
+            if($("#TIPO_RET").is(':checked'))
+                $("#grupoRetencion").show();
+            else
+                $('#grupoRetencion').hide();
+
+            Combos();
+
+            function stringMatch(term, candidate) {
+                return candidate && candidate.toLowerCase().indexOf(term.toLowerCase()) >= 0;
+            }
+
+            function matchCustom(params, data) {
+                // If there are no search terms, return all of the data
+                if ($.trim(params.term) === '') {
+                    return data;
+                }
+                // Do not display the item if there is no 'text' property
+                if (typeof data.text === 'undefined') {
+                    return null;
+                }
+                // Match text of option
+                if (stringMatch(params.term, data.text)) {
+                    return data;
+                }
+                // Match attribute "data-foo" of option
+                if (stringMatch(params.term, $(data.element).attr('data-almacen'))) {
+                    return data;
+                }
+                // Return `null` if the term should not be displayed
+                return null;
+            }
+
+            function formatCustom(state) {
+                return $(
+                    '<div class="product-select-list">' + state.text + '<span class="product-name">'
+                    + '</span></div>'
+                    //+ $(state.element).attr('data-almacen')
+                );
+            }
+        });
+
+            function stringMatch(term, candidate) {
+                return candidate && candidate.toLowerCase().indexOf(term.toLowerCase()) >= 0;
+            }
+            
+            function matchCustom(params, data) {
+            // If there are no search terms, return all of the data
+            if ($.trim(params.term) === '') {
+                return data;
+            }
+            // Do not display the item if there is no 'text' property
+            if (typeof data.text === 'undefined') {
+                return null;
+            }
+            // Match text of option
+            if (stringMatch(params.term, data.text)) {
+                return data;
+            }
+            // Match attribute "data-foo" of option
+            if (stringMatch(params.term, $(data.element).attr('data-almacen'))) {
+                return data;
+            }
+            // Return `null` if the term should not be displayed
+            return null;
+        }
+
+        function formatCustom(state) {
+            return $(
+                '<div class="product-select-list">' + state.text + '<span class="product-name">'
+                + '</span></div>'
+                //+ $(state.element).attr('data-almacen')
+            );
+        }
+
+        function Combos(){
+            $('body').on('select2:select', 'select[name="Number"]', ev => {
+                $('input[name="Name"] ').val(ev.params.data.element.dataset["almacen"]);
+            });
+
+            $(".select2-otros").select2({
+                matcher: matchCustom,
+                templateResult: formatCustom
+            });
+           
+            $(".select2-postal").select2({
+                id: function (e) {return e.id},
+                text: function (e) {return e.id},
+                dropdownAutoWidth: 'true',
+                templateSelection: function (e) 
+                                    {
+                                        if(e.id=='')
+                                            return '@Model.CODPOST';
+                                        else
+                                        {
+                                            //var cadenaCompleta = e.params.data.text;
+                                            var cadenaCompleta = e.text;
+                                            var indicePoblacion = cadenaCompleta.indexOf(' ');
+                                            if (indicePoblacion!=null){
+                                                var indiceProvincia = cadenaCompleta.indexOf('->');
+                                                var poblacion = cadenaCompleta.substring(indicePoblacion,indiceProvincia).trim();
+                                                var provincia = cadenaCompleta.substring(indiceProvincia+2);
+                                                var codigoPostal = cadenaCompleta.substring(0,indicePoblacion).trim();
+                                                $('#LOCALIDAD').val(poblacion);
+                                                $('#PROVINCIA').val(provincia);
+                                                $('#CODPOST').val(codigoPostal);
+                                                //$('<input>').attr({
+                                                //    type: 'hidden',
+                                                //    id: 'CODPOST',
+                                                //    name: 'CODPOST',
+                                                //    value: json.CODPOST
+                                                //}).appendTo('form');
+                                            }
+                                            return e.id;
+                                        }
+                                    },
+                minimumInputLength: 3,
+                allowClear: true,
+                languaje: 'es',
+                ajax: {
+                    url: "@Url.Action("FiltrarCodigosPostales", "Proveedor")",
+                    dataType: "json",
+                    type: "POST",
+                    params: {
+                        contentType:'application/json; chasert=utf-8'
+                    },
+                    data: function (term, page){
+                        return "{ 'q':'" + term.term + "', 'page_limit': 10}";
+                    },
+                    processResults: function (data) {
+                      return {
+                        results: data
+                      };
+                    }
+                },
+                formatSelection: formatCustom,
+                templateResult: formatCustom,
+                escapeMarkup: function(m){ return m;}
+            });
+        }
+        //function CambioEnRetencion(){
+        //    var valorRet = $("#IDMODO_RET").value;
+        //    //{
+        //    if(valorRet){
+        //        $("#IDTIPO_RET").removeAttr("disabled");
+        //        $("#IDRETENCION").removeAttr("disabled");
+        //    }else{
+        //        $("#IDTIPO_RET").attr("disabled", "disabled");
+        //        $("#IDRETENCION").attr("disabled", "disabled");
+        //    }
+        //    //});
+        //}
+    </script>
+}

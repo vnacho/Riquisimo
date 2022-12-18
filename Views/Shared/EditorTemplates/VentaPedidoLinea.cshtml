@@ -1,0 +1,112 @@
+﻿@model VentaPedidoLinea
+
+@{ 
+    VentaPedidoLinea linea = Model;
+    string dnonedescampliada = "d-none";
+    string dnonetiempo = "d-none";
+    if (Model != null && Model.DescripcionAmpliada)
+    {
+        dnonedescampliada = string.Empty;
+    }
+    if (Model != null && Model.TieneTiempo)
+    {
+        dnonetiempo = string.Empty;
+    }
+}
+
+@Html.HiddenFor(f => linea.IdPedidoLinea)
+@Html.HiddenFor(f => linea.Orden)
+@Html.HiddenFor(f => linea.UnidadesPendientes)
+@Html.HiddenFor(f => linea.ImporteDescuento)
+<div class="modal-header">
+    <h5 class="modal-title" id="exampleModalLabel">
+        @if (Model == null || Model.IdPedidoLinea <= 0)
+        {
+            @:Nueva línea
+        }
+        else
+        {
+            @:Editar línea
+        }
+    </h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <div class="form-row">
+        <div class="form-group col-md-12">
+            @Html.LabelFor(f => linea.CodigoArticulo, new { @class = "small" })
+            @Html.DropDownListFor(f => linea.CodigoArticulo, new SelectList(ViewBag.Articulos, "Codigo", "Display"), "-Seleccionar-", new { @class = "form-control form-control-sm select2", onchange="ArticuloChanged(this)" })
+            @Html.ValidationMessageFor(f => linea.CodigoArticulo, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-12">
+            @Html.EditorFor(f => linea.NombreArticulo, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(f => linea.NombreArticulo, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-6">
+            <div class="form-check">
+                @Html.CheckBoxFor(f => linea.DescripcionAmpliada, new { @class = "form-check-input", onchange="DescripcionAmpliadaChanged(this)" })
+                @Html.LabelFor(f => linea.DescripcionAmpliada, new { @class = "form-check-label small" })                
+                @Html.ValidationMessageFor(f => linea.DescripcionAmpliada, "", new { @class = "text-danger small" })
+            </div>
+        </div>
+        <div class="form-group col-md-6">
+            <div class="form-check">
+                @Html.CheckBoxFor(f => linea.TieneTiempo, new { @class = "form-check-input", onchange="TieneTiempoChanged(this)" })
+                @Html.LabelFor(f => linea.TieneTiempo, new { @class = "form-check-label small" })                
+                @Html.ValidationMessageFor(f => linea.TieneTiempo, "", new { @class = "text-danger small" })
+            </div>
+        </div>
+        <div id="divTextoDescripcionAmpliada" class="form-group col-md-12 @Html.Raw(dnonedescampliada)">                        
+            @Html.LabelFor(f => linea.TextoDescripcionAmpliada, new { @class = "small" })                
+            @Html.EditorFor(f => linea.TextoDescripcionAmpliada, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => linea.TextoDescripcionAmpliada, "", new { @class = "text-danger small" })            
+        </div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(f => linea.Unidades, new { @class = "small" })
+            @Html.EditorFor(f => linea.Unidades, new { htmlAttributes = new { @class = "form-control form-control-sm", onkeyup = "ReplaceDotByComma(this);" } })
+            @Html.ValidationMessageFor(f => linea.Unidades, "", new { @class = "text-danger small" })
+        </div>
+        <div id="divTiempo" class="form-group col-md-4 @Html.Raw(dnonetiempo)">
+            @Html.LabelFor(f => linea.Tiempo, new { @class = "small" })
+            @Html.EditorFor(f => linea.Tiempo, new { htmlAttributes = new { @class = "form-control form-control-sm", onkeyup = "ReplaceDotByComma(this);" } })
+            @Html.ValidationMessageFor(f => linea.Tiempo, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(f => linea.PrecioUnitario, new { @class = "small" })
+            @Html.EditorFor(f => linea.PrecioUnitario, new { htmlAttributes = new { @class = "form-control form-control-sm", onkeyup = "ReplaceDotByComma(this);" } })
+            @Html.ValidationMessageFor(f => linea.PrecioUnitario, "", new { @class = "text-danger small" })
+        </div>
+        <div class="w-100"></div>
+        <div class="form-group col-md-4">
+            @Html.LabelFor(f => linea.Descuento, new { @class = "small" })
+            @Html.EditorFor(f => linea.Descuento, new { htmlAttributes = new { @class = "form-control form-control-sm", onkeyup = "ReplaceDotByComma(this);" } })
+            @Html.ValidationMessageFor(f => linea.Descuento, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-8">
+            @Html.LabelFor(f => linea.CodigoTipoIVA, new { @class = "small" })
+            @Html.DropDownListFor(model => linea.CodigoTipoIVA, new SelectList(ViewBag.TiposIVA, "Codigo", "Nombre", Model == null ? null : Model.CodigoTipoIVA), "-Seleccionar-", new { @class = "form-control form-control-sm" })
+            @Html.ValidationMessageFor(f => linea.CodigoTipoIVA, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-12">
+            @Html.LabelFor(f => linea.CodigoEvento, new { @class = "small" })
+            @Html.DropDownListFor(f => linea.CodigoEvento, new SelectList(ViewBag.Eventos, "Codigo", "Nombre"), "-Seleccionar-", new { @class = "form-control form-control-sm select2" })
+            @Html.ValidationMessageFor(f => linea.CodigoEvento, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-12">
+            @Html.LabelFor(f => linea.ObservacionesPedidoLinea, new { @class = "small" })
+            @Html.EditorFor(f => linea.ObservacionesPedidoLinea, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => linea.ObservacionesPedidoLinea, "", new { @class = "text-danger small" })
+        </div>
+    </div>
+</div>
+
+<partial name="_VentasLineasScriptsPartial"></partial>
+<script>
+    $(document).ready(function () {
+        $('.select2').select2({
+            dropdownParent: $('#NuevaLineaModal')
+        });
+    });
+</script>

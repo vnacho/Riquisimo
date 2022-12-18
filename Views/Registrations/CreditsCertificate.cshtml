@@ -1,0 +1,66 @@
+﻿@model Ferpuser.Models.Registration
+@{
+    ViewData["Title"] = "Certificado de créditos";
+    ViewData["Create"] = false;
+    string category = Model.Registrant.CategoriaInscrito == null ? Model.Registrant.Category : Model.Registrant.CategoriaInscrito.Nombre;
+}
+
+
+    <div class="text-center d-flex flex-column">
+        <img class="img-fluid" src="@Model.Congress.LogoBase64" />
+        <h4 class="text-uppercase mt-5">
+            Certificado
+        </h4>
+        <small>
+            Otorgado a:
+        </small>
+        <p class="font-weight-bold">
+            @Model.Registrant.FullName
+        </p>
+        <p>
+            Por su participación como
+        </p>
+        <p class="font-weight-bold text-uppercase">
+            @category
+        </p>
+        <p>
+            En
+        </p>
+        <p class="font-weight-bold text-uppercase">
+            “@Model.Congress.Name”
+        </p>
+        <p>
+            <small>
+                “Esta actividad docente, con nº de expediente @Model.Congress.CertificateNumber, ha sido acreditada por la @Model.Congress.CertificateCreditor con @Model.Congress.CertificateCredits créditos de formación continuada”.
+            </small>
+        </p>
+
+        <small class="font-weight-bold">
+            “Los créditos de esta actividad formativa no son aplicables a los profesionales, que participen en la misma, y que estén formándose como especialistas en Ciencias de la Salud”
+        </small>
+        <p>
+            <span>Celebrado en </span>@Model.Congress.GetDayAndTimePrint()
+        </p>
+        <div class="row">
+            <div class="col">
+                <img />
+                <p class="font-weight-bold">
+                    Doctor Who
+                </p>
+                <small>
+                    Wibly Wobly
+                </small>
+            </div>
+            <div class="col">
+                <img />
+                <p class="font-weight-bold">
+                    Luke Skywalker
+                </p>
+                <small>
+                    Maestro Jedi
+                </small>
+            </div>
+        </div>
+
+        <img class="img-fluid" src="@Model.Congress.TailBase64" />
+    </div>

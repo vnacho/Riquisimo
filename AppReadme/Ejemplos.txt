@@ -1,0 +1,4 @@
+﻿-Pagina Editar Pedido venta
+	Evento con cabecera y faldón: UTILITZACIÓ DE LES DADES-ACDI – 18 MARZO 2021
+
+-Guardar estado de listado con paginación, ordenación y filtros => Ver ejemplo en Index Personal, Create y Edit

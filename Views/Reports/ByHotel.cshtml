@@ -1,0 +1,161 @@
+﻿@model IEnumerable<Ferpuser.Models.Accommodation>
+
+@{
+    ViewData["Title"] = "Listado por hotel";
+    ViewData["Create"] = false;
+    ViewData["Back"] = false;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+    ViewData["Report"] = true;
+}
+<div class="row d-print-none mb-4">
+    <div class="col-12">
+        <div class="card">
+            <form class="card-body d-flex justify-content-around align-items-end flex-column flex-sm-row">
+                <div class="form-group flex-grow-1">
+                    <label for="CongressId" class="control-label">Congreso</label>
+                    <select id="CongressId" name="CongressId" class="browser-default custom-select select2" asp-items="ViewBag.CongressId">
+                        <option value="">
+                            Todos
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group flex-grow-1 ml-2">
+                    <label for="Hotel" class="control-label">Hotel</label>
+                    <select id="Hotel" name="Hotel" class="browser-default custom-select select2" asp-items="ViewBag.Hotels">
+                        <option value="">
+                            Todos
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group btn-group btn-group-sm mb-2">
+                    <button class="btn btn-primary btn-sm"><i class="fas fa-sync fa-2x"></i></button>
+                    @if (Model.Any())
+                    {
+                        <button class="btn btn-primary btn-sm" type="button" onclick="window.print()"><i class="fas fa-print fa-2x"></i></button>                        
+                        <button class="btn btn-primary btn-sm" asp-action="ByHotelCsv">
+                            <i class="fas fa-file-csv fa-2x"></i>
+                        </button>
+                    }
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+@if (Model != null && Model.Any())
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                @if (Model.GroupBy(r => r.CongressId).Count() == 1)
+                {
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <img src="@Model.FirstOrDefault().Congress.LogoBase64" class="w-50" />
+                        <img src="~/img/sanicongress.jpg" class="w-25" />
+                    </div>
+                }
+
+                @if (Model.GroupBy(r => r.Hotel).Count() > 1)
+                {
+                    <div class="col-12 text-center">
+                        <h1 class="mb-2 mb-sm-0 pt-1 h4">
+                            @ViewData["Title"]
+                        </h1>
+                    </div>
+                }
+                <div class="card-body pb-0">
+                    @foreach (var g in Model.GroupBy(a => a.Hotel))
+                    {
+                        <h4>
+                            Hotel @g.Key
+                        </h4>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Registrant.Surnames)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Registrant.Name)
+                                    </th>
+                                    <th class="text-right">
+                                        @Html.DisplayNameFor(model => model.StartDate)
+                                    </th>
+                                    <th class="text-right">
+                                        @Html.DisplayNameFor(model => model.EndDate)
+                                    </th>
+                                    <th class="text-right">
+                                        Noches
+                                    </th>
+                                    <th>
+                                        Tipo de habitación
+                                    </th>
+                                    <th class="text-right">
+                                        @Html.DisplayNameFor(model => model.RoomType.Occupants)
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in g)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Registrant.Surnames)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Registrant.Treatment.Name) @Html.DisplayFor(modelItem => item.Registrant.Name)
+                                        </td>
+                                        <td class="text-right">
+                                            @item.StartDate.ToShortDateString()
+                                        </td>
+                                        <td class="text-right">
+                                            @item.EndDate.ToShortDateString()
+                                        </td>
+                                        <td class="text-right">
+                                            @((item.EndDate - item.StartDate).Days)
+                                        </td>
+                                        <td>
+                                            @item.RoomType.Description
+                                        </td>
+                                        <td class="text-right">
+                                            @item.RoomType.Occupants
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="6">
+                                        @ViewHelpers.PadCongress(Model.FirstOrDefault().Congress.Number)
+                                        @Model.FirstOrDefault().Congress.Name
+                                    </th>
+                                    <th class="text-right">
+                                        @g.Count() habitaciones
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    }
+
+                </div>
+                <div class="card-footer text-right">
+                    <span>
+                        Alojamientos: @Model.Count()
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#CongressId").change(function () {
+                $("#InscriptionTypeId")[0].selectedIndex = 0;
+                $("#InscriptionTypeId").trigger("change");
+            });
+        });
+    </script>
+}

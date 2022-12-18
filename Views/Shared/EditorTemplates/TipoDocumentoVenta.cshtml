@@ -1,0 +1,13 @@
+﻿@using Ferpuser.Models.Consts
+@model TipoDocumentoVenta
+
+@Html.HiddenFor(f => f.Id)
+<div class="card mb-4 wow d-print-none">
+    <div class="form-row card-body">
+        <div class="form-group col-md-6">
+            @Html.LabelFor(f => f.Descripcion, new { @class = "small" })
+            @Html.EditorFor(f => f.Descripcion, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.Descripcion, "", new { @class = "text-danger small" })
+        </div>
+    </div>
+</div>

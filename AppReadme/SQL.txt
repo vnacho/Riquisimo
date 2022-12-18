@@ -1,0 +1,3 @@
+﻿UPDATE       RegistrationTypes
+SET                Deleted = '2022-07-26'
+WHERE        (Deleted IS NULL)

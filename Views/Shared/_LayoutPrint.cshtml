@@ -1,0 +1,41 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Ferpuser</title>
+    <link async rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link async rel="stylesheet" href="~/mdb/css/mdb.lite.min.css" />
+    <link async rel="stylesheet" href="~/mdb/css/style.css" />
+    <link async rel="stylesheet" href="~/css/Museo.css" />
+    @*<link async rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daemonite-material@4.1.1/css/material.min.css" />*@
+    <link async rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" />
+</head>
+<body>
+    <div class="container">
+        <main role="main" class="pb-3">
+            <table class="table table-borderless">
+                <tr>
+                    <td>
+                        <h3>@ViewBag.Title</h3>
+                        <small>Impreso día @DateTime.Now.ToShortDateString() a las @DateTime.Now.ToString("HH:mm:ss")</small>
+                    </td>
+                    <td class="text-right">
+                        <img src="~/img/logo.png" />
+                    </td>
+                </tr>
+            </table>
+            @RenderBody()
+        </main>
+    </div>
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2021 - OliBrok | Aceites de Oliva Brokers S.L.
+        </div>
+    </footer>
+</body>
+

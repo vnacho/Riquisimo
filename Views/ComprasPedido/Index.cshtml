@@ -1,0 +1,154 @@
+﻿@using Ferpuser.Models.Core
+@using Ferpuser.Models.Enums
+@using Ferpuser.BLL.Filters
+@model IEnumerable<CompraPedido>
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+    TableHeaderSortable th;
+    var pager = ViewData["Pager"];
+    CompraPedidoFilter filter = new CompraPedidoFilter();
+
+    var listadoEstados = new SelectList(new[]
+    {
+        new { Value = "0", Text = "Pendiente" },
+        new { Value = "2", Text = "Servido" },
+    }, "Value", "Text");
+}
+
+<form>
+
+    <input type="hidden" name="currentsort" id="currentsort" value="@ViewData["Sort"].ToString()" />
+
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Listado de pedidos de compra
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                <a asp-action="Create" asp-controller="ComprasPedido" class="btn btn-secondary btn-sm text-nowrap">Nuevo <i class="fas fa-plus ml-2"></i></a>
+                <button type="submit" class="btn btn-grey btn-sm text-nowrap" asp-action="ExportPdf" asp-controller="ComprasPedido">
+                    Imprimir <i class="fas fa-print ml-2"></i>
+                </button>
+                <button type="submit" class="btn btn-grey btn-sm text-nowrap" asp-action="ExportCsv" asp-controller="ComprasPedido">
+                    Exportar <i class="fas fa-file-csv ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            @Html.LabelFor(f => filter.CodigoProveedor, new { @class = "small" })            
+            @Html.DropDownListFor(f => filter.CodigoProveedor, new SelectList(ViewBag.Proveedores, "CODIGO", "DisplayName", Model == null ? null : filter.CodigoProveedor), "-Seleccionar-", new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(f => filter.CodigoProveedor, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-6">
+            @Html.LabelFor(f => filter.CodigoEvento, new { @class = "small" })
+            @Html.DropDownListFor(f => filter.CodigoEvento, new SelectList(ViewBag.Eventos, "Codigo", "DisplayName", Model == null ? null : filter.CodigoEvento), "-Seleccionar-", new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(f => filter.CodigoEvento, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.FechaDesde, new { @class = "small" })
+            @Html.EditorFor(f => filter.FechaDesde, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => filter.FechaDesde, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.FechaHasta, new { @class = "small" })
+            @Html.EditorFor(f => filter.FechaHasta, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => filter.FechaHasta, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => filter.EstadoPedido, new { @class = "small" })
+            @*@Html.DropDownListFor(f => filter.EstadoPedido, new SelectList(Html.GetEnumSelectList<EstadoPedido>(), "Value", "Text", Model == null ? null : filter.EstadoPedido), "-Seleccionar-", new { @class = "form-control form-control-sm" })*@
+            @Html.DropDownListFor(f => filter.EstadoPedido, listadoEstados, "-Seleccionar-", new { @class = "form-control form-control-sm" })
+            @Html.ValidationMessageFor(f => filter.EstadoPedido, "", new { @class = "text-danger small" })
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="col text-right">
+            <button type="submit" id="btnFiltrar" class="btn btn-sm btn-blue-grey">Filtrar <i class="fas fa-search ml-2"></i></button>
+            <a href="@Url.Action("Index","ComprasPedido")" class="btn btn-sm btn-grey">Limpiar <i class="fas fa-eraser ml-2"></i></a>
+        </div>
+    </div>
+
+    <hr />
+
+    <partial name="_Pager" model="pager" />
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive mt-2">
+            <table class="table table-sm table-hover table-striped bg-white">
+                <thead class="font-weight-bolder">
+                    <tr>
+                        <th scope="col" class="text-center">
+                            @{ th = new TableHeaderSortable() { Property = "CodigoPedido", Display = Html.DisplayNameFor(f => f.CodigoPedido).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col" class="text-center">
+                            @{ th = new TableHeaderSortable() { Property = "Fecha", Display = Html.DisplayNameFor(f => f.Fecha).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col">
+                            @{ th = new TableHeaderSortable() { Property = "NombreProveedor", Display = Html.DisplayNameFor(f => f.NombreProveedor).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col">
+                            @{ th = new TableHeaderSortable() { Property = "NombreOperario", Display = Html.DisplayNameFor(f => f.NombreOperario).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col">
+                            @{ th = new TableHeaderSortable() { Property = "NombreEvento", Display = Html.DisplayNameFor(f => f.NombreEvento).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col" class="text-right">
+                            @{ th = new TableHeaderSortable() { Property = "Total", Display = Html.DisplayNameFor(f => f.Total).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col" class="text-center">
+                            @{ th = new TableHeaderSortable() { Property = "EstadoPedido", Display = Html.DisplayNameFor(f => f.EstadoPedido).ToString(), CurrentSort = ViewData["Sort"].ToString() }; }
+                            <partial name="_TableHeaderSortable" model="th" />
+                        </th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (CompraPedido item in Model)
+                    {
+                        <tr>
+                            <td class="text-center">@item.CodigoPedido</td>
+                            <td class="text-center">@item.Fecha.ToShortDateString()</td>
+                            <td>@item.NombreProveedor</td>
+                            <td>@item.NombreOperario</td>
+                            <td>@item.NombreEvento</td>
+                            <td class="text-right font-weight-bold text-nowrap">@item.Total.ToString("C")</td>
+                            <td class="text-center">@Html.DisplayFor(f => item.EstadoPedido)</td>
+                            <td class="text-right text-nowrap">
+                                <a class="text-info mx-2" href="@Url.Action("Edit", "ComprasPedido", new { Id = item.Id })">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+                                @if (item.EstadoPedido == EstadoPedido.Pendiente)
+                                {
+                                    <a class="text-danger mr-2" asp-controller="ComprasPedido" asp-action="Delete" asp-route-id="@item.Id" onclick="return confirm('¿Está seguro de que quiere eliminar este registro?');">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <partial name="_Empty" model="string.Empty" />
+    }
+
+    <partial name="_Pager" model="pager" />
+
+</form>

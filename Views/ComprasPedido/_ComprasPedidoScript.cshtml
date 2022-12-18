@@ -1,0 +1,123 @@
+﻿
+
+<script>
+    function AddPedidoLinea() {
+        var codigoEvento = $("#CodigoEvento").val();
+        $("#divPedidoLinea").load('@Url.Action("AddLinea", "ComprasPedido")' + '?CodigoEvento=' + codigoEvento);
+    }
+
+    function EditPedidoLinea(orden) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("EditLinea", "ComprasPedido")" + "?orden=" + orden,
+            data: $('#form').serialize(),
+            success: function (response) {
+                $("#divPedidoLinea").html(response);
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    }
+
+    function SaveLinea() {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("SaveLinea", "ComprasPedido")",
+            data: $('#form').serialize(),
+            dataType: 'JSON',
+            success: function (response) {
+                if (response.status == 1) {
+                    $("#divLineas").html(response.data);
+                    $('#NuevaLineaModal').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                }
+                else {
+                    $("#divPedidoLinea").html(response.data);
+                }
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    }
+
+    function DeleteLinea(orden) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("DeleteLinea", "ComprasPedido")" + "?orden=" + orden,
+            data: $('#form').serialize(),
+            success: function (response) {
+                $("#divLineas").html(response);
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        }); 
+    }
+
+    function AutocompletarArticuloSeleccionado(codigo) {
+        $("#linea_CodigoArticulo").val(codigo);
+
+        var codigoArticulo = $("#linea_CodigoArticulo").val();
+        var codigoProveedor = $("#CodigoProveedor").val();
+
+        if (codigoArticulo != '' && codigoProveedor != '') {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetFirstOrDefault", "PreciosProveed")" + "?codigoArticulo=" + codigoArticulo + "&codigoProveedor=" + codigoProveedor,
+                dataType: 'JSON',
+                success: function (response) {
+                    if (response != null) {
+                        $("#linea_PrecioUnitario").val(response.pcompra.toString().replace(".", ","));
+                    }
+                    else {
+                        $("#linea_PrecioUnitario").val('');
+                    }
+                },
+                failure: function (response) {
+                    console.log(response.responseText);
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    console.log(response.responseText);
+                    alert(response.responseText);
+                }
+            });
+        }
+
+        if (codigoArticulo != '') {
+            //Obtener el IVA por defecto del artículo
+            $.ajax({
+                url: "@Url.Action("GetFirstOrDefault", "TipoIVA")" + "?codigoArticulo=" + codigoArticulo,
+                success: function (response) {
+                    if (response != null) {
+                        $("#linea_CodigoTipoIVA").val(response.codigotipoiva);
+                    }
+                    else {
+                        $("#linea_CodigoTipoIVA").val('');
+                    }
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        }
+    }
+    function AutocompletarEventoSeleccionado(codigo) {
+        $("#linea_CodigoEvento").val(codigo);
+    }
+</script>

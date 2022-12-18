@@ -1,0 +1,110 @@
+﻿@using Ferpuser.Models.ViewModels
+@model ContratoObra
+
+@{
+    ContratoObra contratoObra = Model;
+    var editando = true;
+}
+@Html.HiddenFor(f => contratoObra.CongressID)
+@Html.HiddenFor(f => contratoObra.Id)
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">
+                    @if (Model != null && Model.CodigoContrato=="AñadiendoNuevoContrato") // && Model. >= 0)
+                    {
+                        contratoObra.CodigoContrato = "";
+                        editando = false;
+                        @:Nuevo Contrato
+                    }
+                    else
+                    {
+                        @:Editar Contrato
+                    }
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row">
+                    <div class="form-group col-md-12">
+                        @Html.LabelFor(f => contratoObra.CodigoContrato, new { @class = "small" })
+                        <label class="small font-weight-bold">@Html.DisplayFor(f => contratoObra.CodigoContrato)</label>
+                        @Html.EditorFor(f => contratoObra.CodigoContrato, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+                    </div>
+                    <div class="form-group col-md-12">
+                        @Html.LabelFor(f => contratoObra.ImporteContrato, new { @class = "small" })
+                        @Html.EditorFor(f => contratoObra.ImporteContrato, new { htmlAttributes = new { @class = "form-control form-control-sm", onkeyup = "ReplaceDotByComma(this);" } })
+                        @Html.ValidationMessageFor(f => contratoObra.ImporteContrato, "", new { @class = "text-danger small" })
+                    </div>
+                    <div class="form-group col-md-6">
+                        @Html.LabelFor(f => contratoObra.FechaContratoInicio, new { @class = "small" })
+                        @Html.EditorFor(f => contratoObra.FechaContratoInicio, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+                        @Html.ValidationMessageFor(f => contratoObra.FechaContratoInicio, "", new { @class = "text-danger small" })
+                    </div>
+                    <div class="form-group col-md-6">
+                        @Html.LabelFor(f => contratoObra.FechaContratoFin, new { @class = "small" })
+                        @Html.EditorFor(f => contratoObra.FechaContratoFin, new { htmlAttributes = new { @class = "form-control-sm" } })
+                        @Html.ValidationMessageFor(f => contratoObra.FechaContratoFin, "", new { @class = "text-danger small" })
+                    </div>
+                </div>
+            </div>
+
+        @if (editando)
+        {
+            <form id="formDocumentos" method="post" enctype="multipart/form-data" action="@Url.Action("UploadDocumento", "Congresses")" >
+                <input type="hidden" id="IdcontratoObra" name="IdcontratoObra" value="@Model.Id" />
+                <div class="card">
+                    <div class="card-body row justify-content-between align-items-center py-2">
+                        <div class="col-md-12">
+                            <h6 class="text-muted">Ficheros</h6>
+                        </div>
+                        <div class="col-md-12 border-right align-self-start">
+                            <span class="badge badge-danger">Documentación Contrato Obra</span>
+                            <table id="tablaDocumentos" class="table table-sm bg-white my-2">
+                                @foreach (var doc in Model.DocumentosContratoObra)
+                                {
+                                    <tr>
+                                        <td>
+                                            <a class="text-info" download="@doc.FicheroNombre" href="@Url.Content(doc.FicheroUrl)">@doc.FicheroNombre</a>
+                                        </td>
+                                        <td class="text-right">
+                                            <a href="@Url.Action("BorrarDocumento","Congresses", new { Id = doc.Id, IdContrato = Model.CongressID })" onclick="return confirm('¿Está seguro de querer borrar el documento?')">
+                                                <i class="fas fa-times ml-2"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                            <div class="form-group col-md-12">
+                                <label for="Fichero">Adjuntar otros ficheros</label>
+                                <input type="file" class="form-control form-control-sm" id="fileDocumentacion" name="fileDocumentacion" onchange="SubirFicheroContrato()" placeholder="Introduzca direcciones de correo electrónico separadas por ;">
+                                <input type="hidden" id="hfFicheros" name="hfFicheros" />
+                                <br />
+                                <ul id="ulFicheros" class="small"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>  
+        }
+
+    <script>
+        //$('[data-toggle="tooltip"]').tooltip();
+
+        //function ActivaSubirFichero2() {
+            
+        //    var datosFormulario = new FormData($("#formDocumentos"));
+        //    $.ajax({
+        //        type: "POST",
+        //        url: "@Url.Action("UploadDocumento", "Congresses")",
+        //        data: datosFormulario,
+        //        success: function (dataRetorno, textStatus, jqXHR) {
+        //            $("#divLineaContrato").html(dataRetorno.data);
+        //        }
+        //    });
+        //}
+        $(document).ready(function () {
+            $('.select2').select2();
+        });
+    </script>

@@ -1,0 +1,145 @@
+﻿@using Ferpuser.Models.Dtos
+@model DatosEmpresaDto
+
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;    
+}
+
+<form method="post" enctype="multipart/form-data">
+     <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Datos de empresa
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                <button type="submit" class="btn btn-secondary btn-sm text-nowrap">Guardar <i class="fas fa-save ml-2"></i></button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4 wow d-print-none">
+        <div class="form-row card-body">
+            <div class="form-group col-md-6">
+                @Html.LabelFor(f => f.Nombre, new { @class = "small" })
+                @Html.EditorFor(f => f.Nombre, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(f => f.Nombre, "", new { @class = "text-danger small" })
+            </div>
+            <div class="form-group col-md-2">
+                @Html.LabelFor(f => f.NifCif, new { @class = "small" })
+                @Html.EditorFor(f => f.NifCif, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(f => f.NifCif, "", new { @class = "text-danger small" })
+            </div>  
+            <div class="w-100"></div>
+            <div class="form-group col-md-6">
+                @Html.LabelFor(f => f.Direccion, new { @class = "small" })
+                @Html.EditorFor(f => f.Direccion, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(f => f.Direccion, "", new { @class = "text-danger small" })
+            </div>
+            <div class="form-group col-md-2">
+                @Html.LabelFor(f => f.CodigoPostal, new { @class = "small" })
+                @Html.EditorFor(f => f.CodigoPostal, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(f => f.CodigoPostal, "", new { @class = "text-danger small" })
+            </div>
+            <div class="form-group col-md-2">
+                @Html.LabelFor(f => f.Poblacion, new { @class = "small" })
+                @Html.EditorFor(f => f.Poblacion, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(f => f.Poblacion, "", new { @class = "text-danger small" })
+            </div>
+            <div class="form-group col-md-2">
+                @Html.LabelFor(f => f.Provincia, new { @class = "small" })
+                @Html.EditorFor(f => f.Provincia, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(f => f.Provincia, "", new { @class = "text-danger small" })
+            </div>                     
+            <div class="form-group col-md-6">
+                @Html.LabelFor(f => f.NombreRepresentante, new { @class = "small" })
+                @Html.EditorFor(f => f.NombreRepresentante, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(f => f.NombreRepresentante, "", new { @class = "text-danger small" })
+            </div>
+            <div class="form-group col-md-2">
+                @Html.LabelFor(f => f.NifCifRepresentante, new { @class = "small" })
+                @Html.EditorFor(f => f.NifCifRepresentante, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(f => f.NifCifRepresentante, "", new { @class = "text-danger small" })
+            </div>
+            <div class="w-100"></div>
+            <div class="form-group col-md-6">
+                @Html.LabelFor(f => f.Logo, new { @class = "small" })
+                <div class="input-group">                   
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" name="LogoFile" id="LogoFile" accept=".jpg" />
+                        <label class="custom-file-label" for="LogoFile"></label>
+                    </div>
+                </div>
+                @Html.HiddenFor(f => f.Logo)
+                @Html.ValidationMessageFor(f => f.Logo, "", new { @class = "text-danger small" })
+
+                <p>
+                    @if (string.IsNullOrWhiteSpace(Model.Logo))
+                    {
+                        <img id="LogoPreview" class="img-fluid mt-3" />
+                    }
+                    else
+                    {
+                        <img id="LogoPreview" class="img-fluid mt-3" src="@Model.Logo" />
+                    }
+                </p>
+                
+            </div>
+            <div class="form-group col-md-6">
+                @Html.LabelFor(f => f.Firma, new { @class = "small" })
+                <div class="input-group">                   
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" name="FirmaFile" id="FirmaFile" accept=".jpg" />
+                        <label class="custom-file-label" for="FirmaFile"></label>
+                    </div>
+                </div>
+                @Html.HiddenFor(f => f.Firma)
+                @Html.ValidationMessageFor(f => f.Firma, "", new { @class = "text-danger small" })
+
+                <p>
+                    @if (string.IsNullOrWhiteSpace(Model.Firma))
+                    {
+                        <img id="FirmaPreview" class="img-fluid mt-3" />
+                    }
+                    else
+                    {
+                        <img id="FirmaPreview" class="img-fluid mt-3" src="@Model.Firma" />
+                    }
+                </p>
+                
+                
+            </div>
+        </div>
+    </div>
+
+</form>
+
+@section Scripts
+{
+    <script>
+        function readURL(input, img_id, hf_id) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $(img_id).attr('src', e.target.result);
+                    $(hf_id).val(e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);  
+            }
+        }
+
+        $("#LogoFile").change(function(){
+            readURL(this, '#LogoPreview', '#Logo');
+        });   
+        
+        $("#FirmaFile").change(function(){
+            readURL(this, '#FirmaPreview', '#Firma');
+        });   
+    </script>
+}
+
+
+

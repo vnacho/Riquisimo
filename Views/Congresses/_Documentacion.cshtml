@@ -1,0 +1,10 @@
+﻿@using Ferpuser.Models.ViewModels
+@model DocumentoContratoObra
+@Html.HiddenFor(f => f.Id)
+<div class="form-row">
+    <div class="form-group col-md-12">
+        @Html.LabelFor(f => f.FicheroNombre, new { @class = "small" })
+        @Html.EditorFor(f => f.FicheroNombre, new { htmlAttributes = new { @class = "form-control" } })
+        @Html.ValidationMessageFor(f => f.FicheroNombre, "", new { @class = "text-danger small" })
+    </div>
+</div>

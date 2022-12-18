@@ -1,0 +1,245 @@
+﻿@using Ferpuser.Models.Core
+@model CompraFactura
+
+@{
+    Fichero fichero = new Fichero()
+    {
+        CampoNombre = "FicheroNombre",
+        CampoUrl = "FicheroUrl",
+        Url = Model?.FicheroUrl,
+        Nombre = Model?.FicheroNombre
+    };
+}
+
+@Html.HiddenFor(f => f.Id)
+@Html.HiddenFor(f => f.CodigoSage)
+@Html.HiddenFor(f => f.Total)
+@Html.HiddenFor(f => f.NombreProveedor)
+@Html.HiddenFor(f => f.NombreOperario)
+@Html.HiddenFor(f => f.EstadoFactura)
+
+@if (Model == null || Model.EstadoFactura != EstadoFactura.TaspasadoSAGE)
+{
+    <div class="card mb-4 wow d-print-none">
+        <div class="form-row card-body">
+            <div class="form-group col-md-2">
+                @Html.LabelFor(f => f.NumeroFactura, new { @class = "small" })
+                @Html.EditorFor(f => f.NumeroFactura, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+                @Html.ValidationMessageFor(f => f.NumeroFactura, "", new { @class = "text-danger small" })
+            </div>
+            <div class="form-group col-md-2">
+                @Html.LabelFor(f => f.Registro, new { @class = "small" })
+                @Html.EditorFor(f => f.Registro, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+                @Html.ValidationMessageFor(f => f.Registro, "", new { @class = "text-danger small" })
+            </div>
+            <div class="form-group col-md-2">
+                @Html.LabelFor(f => f.Fecha, new { @class = "small" })
+                @Html.EditorFor(f => f.Fecha, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+                @Html.ValidationMessageFor(f => f.Fecha, "", new { @class = "text-danger small" })
+            </div>
+            <div class="form-group col-md-4">
+                @Html.LabelFor(f => f.NombreOperario, new { @class = "small" })
+                @if (Model == null || string.IsNullOrWhiteSpace(Model.CodigoOperario) || User.Claims.Any(c => c.Type.Equals(Consts.CLAIM_PERMISO_ADMINISTRACION)))
+                {
+                    @Html.DropDownListFor(model => model.CodigoOperario, new SelectList(ViewBag.Operarios, "CODIGO", "NOMBRE", Model == null ? null : Model.CodigoOperario), "-Seleccionar-", new { @class = "form-control form-control-sm" })
+                }
+                else
+                {
+                    @Html.HiddenFor(model => model.CodigoOperario)
+                    <input type="text" class="form-control form-control-sm" value="@Model.NombreOperario" disabled />
+                }
+                @Html.ValidationMessageFor(f => f.CodigoOperario, "", new { @class = "text-danger small" })
+            </div>
+            <div class="w-100"></div>
+            <div class="col-md-2">
+                <a asp-action="CrearProveedorFactura" asp-controller="Proveedor" asp-route-origen="@Model.Id-Factura" class="btn btn-secondary btn-sm ">Nuevo proveedor <i class="fas fa-plus ml-2"></i></a>
+            </div>
+            <div class="form-group col-md-10"></div>
+            <div class="form-group col-md-6">
+                @Html.LabelFor(f => f.NombreProveedor, new { @class = "small" })
+                @Html.DropDownListFor(f => f.CodigoProveedor, new SelectList(ViewBag.Proveedores, "CODIGO", "DisplayName", Model == null ? null : Model.CodigoProveedor), "-Seleccionar-", new { @class = "form-control select2" })
+                @Html.ValidationMessageFor(f => f.CodigoProveedor, "", new { @class = "text-danger small" })
+            </div>
+
+            <div class="form-group col-md-6">
+                @Html.LabelFor(f => f.CodigoEvento, new { @class = "small" })
+                @Html.DropDownListFor(model => model.CodigoEvento, new SelectList(ViewBag.Eventos, "Codigo", "DisplayName", Model == null ? null : Model.CodigoEvento), "-Seleccionar-", new { @class = "form-control select2" })
+                @Html.ValidationMessageFor(f => f.CodigoEvento, "", new { @class = "text-danger small" })
+            </div>
+
+            <div class="form-group col-md-12">
+                <div class="form-check">
+                    @Html.EditorFor(f => f.TieneRetencion, new { htmlAttributes = new { type = "checkbox", @class = "form-check-input", onchange = "ChangeTieneRetencion()" } })
+                    @Html.LabelFor(f => f.TieneRetencion, new { @class = "small form-check-label" })
+                </div>
+                @Html.ValidationMessageFor(f => f.TieneRetencion, "", new { @class = "text-danger small" })
+            </div>
+            <div class="form-group col-md-12">
+                @Html.LabelFor(f => f.Observaciones, new { @class = "small" })
+                @Html.EditorFor(f => f.Observaciones, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+                @Html.ValidationMessageFor(f => f.Observaciones, "", new { @class = "text-danger small" })
+            </div>
+            @if (Model.Id != 0)
+            {
+                <div class="col-md-4 form-group">
+                        <input type="hidden" id="tablaID" name="tablaID" value="@Model.Id" />
+                        <div class="card">
+                            <div class="card-body row justify-content-between align-items-center py-2">
+                                <div class="col-md-12">
+                                    <h6 class="text-muted">Ficheros Factura Compra </h6>
+                                </div>
+                                <div class="col-md-12 border-right align-self-start">
+                                    <span class="badge badge-danger">Documentos</span>
+                                    <table id="tablaDocumentos" class="table table-sm bg-white my-2">
+                                        @foreach (var doc in Model.documentos)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <a class="text-info" download="@doc.FicheroNombre" href="@Url.Content(doc.FicheroUrl)">@doc.FicheroNombre</a>
+                                                </td>
+                                                <td class="text-right">
+                                                    <a href="@Url.Action("BorrarDocumento","ComprasFactura", new { IdArchivo = doc.Id, IdTabla = Model.Id })" onclick="return confirm('¿Está seguro de querer borrar el documento?')">
+                                                        <i class="fas fa-times ml-2"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </table>
+                                    <div class="form-group col-md-12">
+                                        <label for="Fichero">Adjuntar otros ficheros</label>
+                                        <input type="file" class="form-control form-control-sm" id="fileDocumentacion" name="fileDocumentacion" onchange="SubirDocumento()">
+                                        <input type="hidden" id="hfFicheros" name="hfFicheros" />
+                                        <br />
+                                        <ul id="ulFicheros" class="small"></ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            } 
+            @if (Model != null && Model.Id != 0)
+            {
+                <div class="w-100"></div>
+                <div class="form-group col-md-12 text-right">
+                    <span class="badge badge-danger">[Registro] @Model.Registro</span>
+                </div>
+            }
+        </div>
+        </div>
+}
+else
+{
+    <div class="card mb-4 wow d-print-none">
+        <div class="form-row card-body">
+            <div class="form-group col-md-2">
+                @Html.LabelFor(f => f.NumeroFactura, new { @class = "small" })
+                @Html.HiddenFor(f => f.NumeroFactura)
+                <br />
+                <label class="small font-weight-bold">@Html.DisplayFor(f => f.NumeroFactura)</label>
+            </div>
+            <div class="form-group col-md-2">
+                @Html.LabelFor(f => f.Fecha, new { @class = "small" })
+                @Html.HiddenFor(f => f.Fecha)
+                <br />
+                <label class="small font-weight-bold">@Model.Fecha.ToShortDateString()</label>
+            </div>
+            <div class="form-group col-md-4">
+                @Html.LabelFor(f => f.NombreProveedor, new { @class = "small" })
+                @Html.HiddenFor(f => f.NombreProveedor)
+                @Html.HiddenFor(f => f.CodigoProveedor)
+                <br />
+                <label class="small font-weight-bold">@Html.DisplayFor(f => f.NombreProveedor)</label>
+            </div>
+            <div class="form-group col-md-4">
+                @Html.LabelFor(f => f.NombreOperario, new { @class = "small" })
+                @Html.HiddenFor(f => f.NombreOperario)
+                @Html.HiddenFor(f => f.CodigoOperario)
+                <br />
+                <label class="small font-weight-bold">@Html.DisplayFor(f => f.NombreOperario)</label>
+            </div>
+            <div class="form-group col-md-4">
+                @Html.LabelFor(f => f.CodigoEvento, new { @class = "small" })
+                @Html.HiddenFor(f => f.NombreEvento)
+                @Html.HiddenFor(f => f.CodigoEvento)
+                <br />
+                <label class="small font-weight-bold">@Html.DisplayFor(f => f.NombreEvento)</label>
+            </div>
+            <div class="form-group col-md-4">
+                @Html.LabelFor(f => f.TieneRetencion, new { @class = "small" })
+                @Html.HiddenFor(f => f.TieneRetencion)
+                <br />
+                <label class="small font-weight-bold">@Html.DisplayFor(f => f.TieneRetencion)</label>
+            </div>
+            <div class="form-group col-md-12">
+                @Html.LabelFor(f => f.Observaciones, new { @class = "small" })
+                @Html.HiddenFor(f => f.Observaciones)
+                <br />
+                <label class="small font-weight-bold">@Html.DisplayFor(f => f.Observaciones)</label>
+            </div>
+@*            <div class="form-group col-md-10">
+                @Html.LabelFor(f => f.FicheroNombre, new { @class = "small" })
+                @Html.EditorFor(f => fichero, "File")
+                @Html.ValidationMessageFor(f => f.FicheroUrl, "", new { @class = "text-danger small" })
+            </div>
+*@
+                <div class="col-md-4 form-group">
+                        <input type="hidden" id="tablaID" name="tablaID" value="@Model.Id" />
+                        <div class="card">
+                            <div class="card-body row justify-content-between align-items-center py-2">
+                                <div class="col-md-12">
+                                    <h6 class="text-muted">Ficheros Factura Compra </h6>
+                                </div>
+                                <div class="col-md-12 border-right align-self-start">
+                                    <span class="badge badge-danger">Documentos</span>
+                                    <table id="tablaDocumentos" class="table table-sm bg-white my-2">
+                                        @foreach (var doc in Model.documentos)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <a class="text-info" download="@doc.FicheroNombre" href="@Url.Content(doc.FicheroUrl)">@doc.FicheroNombre</a>
+                                                </td>
+                                                <td class="text-right">
+                                                    <a href="@Url.Action("BorrarDocumento","ComprasFactura", new { IdArchivo = doc.Id, IdTabla = Model.Id })" onclick="return confirm('¿Está seguro de querer borrar el documento?')">
+                                                        <i class="fas fa-times ml-2"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </table>
+                                    <div class="form-group col-md-12">
+                                        <label for="Fichero">Adjuntar otros ficheros</label>
+                                        <input type="file" class="form-control form-control-sm" id="fileDocumentacion" name="fileDocumentacion" onchange="SubirDocumento()">
+                                        <input type="hidden" id="hfFicheros" name="hfFicheros" />
+                                        <br />
+                                        <ul id="ulFicheros" class="small"></ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+
+            <div class="form-group col-md-2 text-right">
+                <span class="badge badge-danger">[Registro] @Model.Registro</span>
+            </div>
+
+        </div>
+    </div>
+
+
+}
+<partial name="_FacturaLineas" />
+
+
+<script>
+    function EventoSeleccionado(codigo, nombre) {
+        $("#CodigoEvento").val(codigo);
+        $("#BuscadorEventoTexto").val(nombre);
+        $("#BuscadorEventoModal").modal("hide");
+    }
+
+    function ProveedorSeleccionado(codigo, nombre) {
+        $("#CodigoProveedor").val(codigo);
+        $("#BuscadorProveedorTexto").val(nombre);
+        $("#BuscadorProveedorModal").modal("hide");
+    }
+</script>

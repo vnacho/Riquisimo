@@ -1,0 +1,442 @@
+﻿@inject Microsoft.Extensions.Options.IOptions<AppSettings> AppSettings
+@using Ferpuser.Models.Core
+@using Ferpuser.Models.ViewModels
+@model InformeResumenEmpresaViewModel
+@{
+    ViewData["OcultarBarraTareasLayout"] = true;
+    ViewData["OneCard"] = false;
+    ViewData["Select2"] = true;
+
+    string TipoCosteCode = string.Empty;
+}
+
+@section Styles
+{
+    <link href="/css/site.css" rel="stylesheet" />
+    <style type="text/css" media="print">
+        @@page {
+            size: landscape;
+        }
+
+        #divResultados th, td {
+            font-size: 0.5rem !important;
+            padding: 0px !important;
+        }
+    </style>
+}
+
+<form method="post">
+
+    <div class="card mb-4 wow d-print-none">
+        <div class="card-body row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-4">
+                <h5 class="mb-2 mb-sm-0 pt-1">
+                    Informe resumen de empresa
+                </h5>
+            </div>
+            <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                @if (Model != null)
+                {
+                    <div class="col-12 col-md-8 text-right d-flex justify-content-end">
+                        <button class="btn btn-grey btn-sm text-nowrap" onclick="window.print();">
+                            Imprimir informe <i class="fas fa-print ml-2"></i>
+                        </button>
+                    </div>
+                    @*<button type="submit" class="btn btn-grey btn-sm text-nowrap" asp-action="ExportPdf" asp-controller="InformeTotalHorasPersonal">
+                            Imprimir <i class="fas fa-print ml-2"></i>
+                        </button>
+                        <button type="submit" class="btn btn-grey btn-sm text-nowrap" asp-action="ExportCsv" asp-controller="InformeResumenEmpresa">
+                        Exportar <i class="fas fa-file-csv ml-2"></i>
+                    </button>*@
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row d-print-none">
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.Month, new { @class = "small" })
+            @Html.EditorFor(f => f.Month)
+            @Html.ValidationMessageFor(f => f.Month, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.LabelFor(f => f.Year, new { @class = "small" })
+            @Html.EditorFor(f => f.Year, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+            @Html.ValidationMessageFor(f => f.Year, "", new { @class = "text-danger small" })
+        </div>
+        <div class="form-group col-md-8 text-right">
+            <br />
+            <button type="submit" id="btnFiltrar" class="btn btn-sm btn-blue-grey">Filtrar <i class="fas fa-search ml-2"></i></button>
+            <a href="@Url.Action("Index","InformeResumenEmpresa")" class="btn btn-sm btn-grey">Limpiar <i class="fas fa-eraser ml-2"></i></a>
+        </div>
+    </div>
+
+    <div class="d-none d-print-block small">
+        <div class="row">
+            <div class="col-1">
+                <img src="~/img/logo_informes.png" style="width:100%" />
+            </div>
+            <div class="col-11">
+                <h3 class="font-weight-bold">@AppSettings.Value.Empresa.ToUpper()</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                @if (Model != null && Model.Month.HasValue)
+                {
+                    <span>Mes: @Model.Month</span>
+                }
+                @if (Model != null && Model.Year.HasValue)
+                {
+                    <span>Año: @Model.Year</span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <hr class="d-print-none" />
+
+    <div id="divResultados">
+        @if (Model != null && (Model.ItemsDirectos != null || Model.ItemsIndirectos != null || Model.ItemsEstructuras != null))
+        {
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-striped bg-white small">
+                    <thead>
+                        <tr>
+                            <td class="font-weight-bold border-right-gray">INFORME RESUMEN EMPRESA</td>
+                            <td class="font-weight-bold text-center border border-right-gray" colspan="4">@Model.GetMonthName(Model.Month).ToUpper()</td>
+                            <td class="font-weight-bold text-center border border-right-gray" colspan="4">AÑO @Model.Year (incluido @Model.GetMonthName(Model.Month))</td>
+                            <td class="font-weight-bold text-center border" colspan="4">ORIGEN</td>
+                        </tr>
+                        <tr>
+                            <td class="border-right-gray"></td>
+                            <td class="text-center border">INGRESOS</td>
+                            <td class="text-center border">COSTES</td>
+                            <td class="text-center border">RDTO</td>
+                            <td class="text-center border border-right-gray">%</td>
+                            <td class="text-center border">INGRESOS</td>
+                            <td class="text-center border">COSTES</td>
+                            <td class="text-center border">RDTO</td>
+                            <td class="text-center border border-right-gray">%</td>
+                            <td class="text-center border">INGRESOS</td>
+                            <td class="text-center border">COSTES</td>
+                            <td class="text-center border">RDTO</td>
+                            <td class="text-center border">%</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.ItemsDirectos.OrderBy(f => f.TipoCosteCode).ThenBy(f => f.CentroCosteCode))
+                        {
+                            if (item.TipoCosteCode != TipoCosteCode)
+                            {
+                                decimal totalIngresosMes = Model.ItemsDirectos.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.HaberMes);
+                                decimal totalRdtoMes = Model.ItemsDirectos.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.RTDOMes);
+                                decimal tasaRdtoMes = totalIngresosMes == 0 ? 0 : totalRdtoMes / totalIngresosMes * 100;
+                                decimal totalIngresosAnio = Model.ItemsDirectos.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.HaberAnio);
+                                decimal totalRdtoAnio = Model.ItemsDirectos.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.RTDOAnio);
+                                decimal tasaRdtoAnio = totalIngresosAnio == 0 ? 0 : totalRdtoAnio / totalIngresosAnio * 100;
+
+                                <tr class="d-none d-print-block">                                    
+                                    <td class="d-none d-print-block" colspan="13">&nbsp;</td>                     
+                                </tr>
+                                <tr class="text-muted">
+                                    <td class="font-weight-bold border-right-gray">
+                                        <u class="pl-1">@item.TipoCosteCode @item.TipoCosteNombre</u>
+                                    </td>
+                                    <td class="text-right border font-weight-bold">@totalIngresosMes.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@Model.ItemsDirectos.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.DebeMes).ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@totalRdtoMes.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold border-right-gray">@tasaRdtoMes.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@totalIngresosAnio.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@Model.ItemsDirectos.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.DebeAnio).ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@totalRdtoAnio.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold border-right-gray">@tasaRdtoAnio.ToString("N2")</td>
+                                    <td colspan="4"></td>
+                                </tr>
+                                TipoCosteCode = item.TipoCosteCode;
+                            }
+
+                            <tr>
+                                <td class="pl-3 border-right-gray">@item.CentroCosteCode @item.CentroCosteNombre</td>
+                                <td class="text-right border">@item.HaberMes.ToString("N2")</td>
+                                <td class="text-right border">@item.DebeMes.ToString("N2")</td>
+                                <td class="text-right border">@item.RTDOMes.ToString("N2")</td>
+                                <td class="text-right border border-right-gray">@item.TasaRendimientoMes.ToString("N2")</td>
+                                <td class="text-right border">@item.HaberAnio.ToString("N2")</td>
+                                <td class="text-right border">@item.DebeAnio.ToString("N2")</td>
+                                <td class="text-right border">@item.RTDOAnio.ToString("N2")</td>
+                                <td class="text-right border border-right-gray">@item.TasaRendimientoAnio.ToString("N2")</td>
+
+                                @if (item.AddOrigen)
+                                {
+                                    <td class="text-right border">@item.HaberOrigen.ToString("N2")</td>
+                                    <td class="text-right border">@item.DebeOrigen.ToString("N2")</td>
+                                    <td class="text-right border">@item.RTDOOrigen.ToString("N2")</td>
+                                    <td class="text-right border">@item.TasaRendimientoOrigen.ToString("N2")</td>
+                                }
+                                else
+                                {
+                                    <td colspan="4"></td>
+                                }
+                            </tr>
+                        }
+                        <tr>
+                        <tr>
+                            <td class="font-weight-bold border-right-gray">TOTAL</td>
+                            <td class="text-right border font-weight-bold">@Model.DirectosHaberMesTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold">@Model.DirectosDebeMesTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold">@Model.DirectosRDTOMesTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold border-right-gray">@Model.DirectosTasaMesTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold">@Model.DirectosHaberAnioTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold">@Model.DirectosDebeAnioTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold">@Model.DirectosRDTOAnioTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold border-right-gray">@Model.DirectosTasaAnioTotal.ToString("N2")</td>
+                            <td colspan="4"></td>
+                        </tr>
+                        <tr class="bg-light">
+                            <td colspan="13">&nbsp;</td>
+                        </tr>
+
+                        <tr>
+                            <td class="font-weight-bold text-info" colspan="13">Desviaciones</td>
+                        </tr>
+
+                        @foreach (var item in Model.ItemsIndirectos.OrderBy(f => f.TipoCosteCode).ThenBy(f => f.CentroCosteCode))
+                        {
+                            if (item.TipoCosteCode != TipoCosteCode)
+                            {
+                                decimal totalIngresosMes = Model.ItemsIndirectos.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.HaberMes);
+                                decimal totalRdtoMes = Model.ItemsIndirectos.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.RTDOMes);
+                                decimal tasaRdtoMes = totalIngresosMes == 0 ? 0 : totalRdtoMes / totalIngresosMes * 100;
+                                decimal totalIngresosAnio = Model.ItemsIndirectos.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.HaberAnio);
+                                decimal totalRdtoAnio = Model.ItemsIndirectos.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.RTDOAnio);
+                                decimal tasaRdtoAnio = totalIngresosAnio == 0 ? 0 : totalRdtoAnio / totalIngresosAnio * 100;
+
+                                <tr class="d-none d-print-block">                                    
+                                    <td class="d-none d-print-block" colspan="13">&nbsp;</td>                     
+                                </tr>
+                                <tr class="text-muted">
+                                    <td class="font-weight-bold border-right-gray">
+                                        <u class="pl-1">@item.TipoCosteCode @item.TipoCosteNombre</u>
+                                    </td>
+                                    <td class="text-right border font-weight-bold">@totalIngresosMes.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@Model.ItemsIndirectos.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.DebeMes).ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@totalRdtoMes.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold border-right-gray">@tasaRdtoMes.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@totalIngresosAnio.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@Model.ItemsIndirectos.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.DebeAnio).ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@totalRdtoAnio.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold border-right-gray">@tasaRdtoAnio.ToString("N2")</td>
+                                    <td colspan="4"></td>
+                                </tr>
+                                TipoCosteCode = item.TipoCosteCode;
+                            }
+
+                            <tr>
+                                <td class="pl-3 border-right-gray">@item.CentroCosteCode @item.CentroCosteNombre</td>
+                                <td class="text-right border">@item.HaberMes.ToString("N2")</td>
+                                <td class="text-right border">@item.DebeMes.ToString("N2")</td>
+                                <td class="text-right border">@item.RTDOMes.ToString("N2")</td>
+                                <td class="text-right border border-right-gray">@item.TasaRendimientoMes.ToString("N2")</td>
+                                <td class="text-right border">@item.HaberAnio.ToString("N2")</td>
+                                <td class="text-right border">@item.DebeAnio.ToString("N2")</td>
+                                <td class="text-right border">@item.RTDOAnio.ToString("N2")</td>
+                                <td class="text-right border border-right-gray">@item.TasaRendimientoAnio.ToString("N2")</td>
+                                @if (item.AddOrigen)
+                                {
+                                    <td class="text-right border">@item.HaberOrigen.ToString("N2")</td>
+                                    <td class="text-right border">@item.DebeOrigen.ToString("N2")</td>
+                                    <td class="text-right border">@item.RTDOOrigen.ToString("N2")</td>
+                                    <td class="text-right border">@item.TasaRendimientoOrigen.ToString("N2")</td>
+                                }
+                                else
+                                {
+                                    <td colspan="4"></td>
+                                }
+                            </tr>
+                        }
+                        <tr>
+                            <td class="font-weight-bold px-3 border-right-gray">DESVIACIÓN INDIRECTOS</td>
+                            <td class="text-right border font-weight-bold">@Model.IndirectosHaberMesTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold">@Model.IndirectosDebeMesTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold">@Model.IndirectosRDTOMesTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold border-right-gray">@Model.IndirectosTasaMesTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold">@Model.IndirectosHaberAnioTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold">@Model.IndirectosDebeAnioTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold">@Model.IndirectosRDTOAnioTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold border-right-gray">@Model.IndirectosTasaAnioTotal.ToString("N2")</td>
+                            <td class="border" colspan="4"></td>
+                        </tr>
+
+
+                        @foreach (var item in Model.ItemsEstructuras.OrderBy(f => f.TipoCosteCode).ThenBy(f => f.CentroCosteCode))
+                        {
+                            if (item.TipoCosteCode != TipoCosteCode)
+                            {
+                                decimal totalIngresosMes = Model.ItemsEstructuras.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.HaberMes);
+                                decimal totalRdtoMes = Model.ItemsEstructuras.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.RTDOMes);
+                                decimal tasaRdtoMes = totalIngresosMes == 0 ? 0 : totalRdtoMes / totalIngresosMes * 100;
+                                decimal totalIngresosAnio = Model.ItemsEstructuras.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.HaberAnio);
+                                decimal totalRdtoAnio = Model.ItemsEstructuras.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.RTDOAnio);
+                                decimal tasaRdtoAnio = totalIngresosAnio == 0 ? 0 : totalRdtoAnio / totalIngresosAnio * 100;
+
+                                <tr class="d-none d-print-block">                                    
+                                    <td class="d-none d-print-block" colspan="13">&nbsp;</td>                     
+                                </tr>
+                                <tr class="text-muted">
+                                    <td class="font-weight-bold border-right-gray">
+                                        <u class="pl-1">@item.TipoCosteCode @item.TipoCosteNombre</u>
+                                    </td>
+                                    <td class="text-right border font-weight-bold">@totalIngresosMes.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@Model.ItemsEstructuras.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.DebeMes).ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@totalRdtoMes.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold border-right-gray">@tasaRdtoMes.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@totalIngresosAnio.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@Model.ItemsEstructuras.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.DebeAnio).ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@totalRdtoAnio.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold border-right-gray">@tasaRdtoAnio.ToString("N2")</td>
+                                    <td colspan="4"></td>
+                                </tr>
+                                TipoCosteCode = item.TipoCosteCode;
+                            }
+
+                            <tr>
+                                <td class="pl-3 border-right-gray">@item.CentroCosteCode @item.CentroCosteNombre</td>
+                                <td class="text-right border">@item.HaberMes.ToString("N2")</td>
+                                <td class="text-right border">@item.DebeMes.ToString("N2")</td>
+                                <td class="text-right border">@item.RTDOMes.ToString("N2")</td>
+                                <td class="text-right border border-right-gray">@item.TasaRendimientoMes.ToString("N2")</td>
+                                <td class="text-right border">@item.HaberAnio.ToString("N2")</td>
+                                <td class="text-right border">@item.DebeAnio.ToString("N2")</td>
+                                <td class="text-right border">@item.RTDOAnio.ToString("N2")</td>
+                                <td class="text-right border border-right-gray">@item.TasaRendimientoAnio.ToString("N2")</td>
+                                @if (item.AddOrigen)
+                                {
+                                    <td class="text-right border">@item.HaberOrigen.ToString("N2")</td>
+                                    <td class="text-right border">@item.DebeOrigen.ToString("N2")</td>
+                                    <td class="text-right border">@item.RTDOOrigen.ToString("N2")</td>
+                                    <td class="text-right border">@item.TasaRendimientoOrigen.ToString("N2")</td>
+                                }
+                                else
+                                {
+                                    <td colspan="4"></td>
+                                }
+                            </tr>
+                        }
+                        <tr>
+                            <td class="font-weight-bold px-3 border-right-gray">DESVIACIÓN ESTRUCTURA</td>
+                            <td class="text-right border font-weight-bold">@Model.EstructurasHaberMesTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold">@Model.EstructurasDebeMesTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold">@Model.EstructurasRDTOMesTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold border-right-gray">@Model.EstructurasTasaMesTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold">@Model.EstructurasHaberAnioTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold">@Model.EstructurasDebeAnioTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold">@Model.EstructurasRDTOAnioTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold border-right-gray">@Model.EstructurasTasaAnioTotal.ToString("N2")</td>
+                            <td colspan="4"></td>
+                        </tr>
+
+                        <tr>
+                            <td class="bg-light" colspan="13"></td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">RESULTADO REAL</td>
+                            <td class="text-right border font-weight-bold" colspan="3">@Model.ResultadoRealRDTOMesTotal.ToString("N2")</td>
+                            <td class="text-right border bg-info text-white font-weight-bold">@Model.ResultadoRealTasaMesTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold" colspan="3">@Model.ResultadoRealRDTOAnioTotal.ToString("N2")</td>
+                            <td class="text-right border bg-info text-white font-weight-bold">@Model.ResultadoRealTasaAnioTotal.ToString("N2")</td>
+                            <td colspan="4"></td>
+                        </tr>
+
+                        <tr>
+                            <td class="bg-light" colspan="13"></td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">E9</td>
+                            <td class="text-right border font-weight-bold">@Model.E9HaberMesTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold">@Model.E9DebeMesTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold">@Model.E9RDTOMesTotal.ToString("N2")</td>
+                            <td></td>
+                            <td class="text-right border font-weight-bold">@Model.E9HaberAnioTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold">@Model.E9DebeAnioTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold">@Model.E9RDTOAnioTotal.ToString("N2")</td>
+                            <td colspan="5"></td>
+                        </tr>
+                        @foreach (var item in Model.ItemsE9.OrderBy(f => f.TipoCosteCode).ThenBy(f => f.CentroCosteCode))
+                        {
+                            if (item.TipoCosteCode != TipoCosteCode)
+                            {
+                                decimal totalIngresosMes = Model.ItemsE9.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.HaberMes);
+                                decimal totalRdtoMes = Model.ItemsE9.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.RTDOMes);
+                                decimal tasaRdtoMes = totalIngresosMes == 0 ? 0 : totalRdtoMes / totalIngresosMes * 100;
+                                decimal totalIngresosAnio = Model.ItemsE9.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.HaberAnio);
+                                decimal totalRdtoAnio = Model.ItemsE9.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.RTDOAnio);
+                                decimal tasaRdtoAnio = totalIngresosAnio == 0 ? 0 : totalRdtoAnio / totalIngresosAnio * 100;
+
+                                <tr class="d-none d-print-block">                                    
+                                    <td class="d-none d-print-block" colspan="13">&nbsp;</td>                     
+                                </tr>
+                                <tr class="text-muted">
+                                    <td class="font-weight-bold border-right-gray">
+                                        <u class="pl-1">@item.TipoCosteCode @item.TipoCosteNombre</u>
+                                    </td>
+                                    <td class="text-right border font-weight-bold">@totalIngresosMes.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@Model.ItemsE9.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.DebeMes).ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@totalRdtoMes.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold border-right-gray">@tasaRdtoMes.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@totalIngresosAnio.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@Model.ItemsE9.Where(f => f.TipoCosteCode == item.TipoCosteCode).Sum(f => f.DebeAnio).ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold">@totalRdtoAnio.ToString("N2")</td>
+                                    <td class="text-right border font-weight-bold border-right-gray">@tasaRdtoAnio.ToString("N2")</td>
+                                    <td colspan="4"></td>
+                                </tr>
+                                TipoCosteCode = item.TipoCosteCode.Trim();
+                            }
+                            <tr>
+                                <td class="pl-3 border-right-gray">@item.CentroCosteCode @item.CentroCosteNombre</td>
+                                <td class="text-right border">@item.HaberMes.ToString("N2")</td>
+                                <td class="text-right border">@item.DebeMes.ToString("N2")</td>
+                                <td class="text-right border">@item.RTDOMes.ToString("N2")</td>
+                                <td class="text-right border border-right-gray">@item.TasaRendimientoMes.ToString("N2")</td>
+                                <td class="text-right border">@item.HaberAnio.ToString("N2")</td>
+                                <td class="text-right border">@item.DebeAnio.ToString("N2")</td>
+                                <td class="text-right border">@item.RTDOAnio.ToString("N2")</td>
+                                <td class="text-right border border-right-gray">@item.TasaRendimientoAnio.ToString("N2")</td>
+                                @if (item.AddOrigen)
+                                {
+                                    <td class="text-right border">@item.HaberOrigen.ToString("N2")</td>
+                                    <td class="text-right border">@item.DebeOrigen.ToString("N2")</td>
+                                    <td class="text-right border">@item.RTDOOrigen.ToString("N2")</td>
+                                    <td class="text-right border">@item.TasaRendimientoOrigen.ToString("N2")</td>
+                                }
+                                else
+                                {
+                                    <td colspan="4"></td>
+                                }
+                            </tr>
+
+
+                        }
+                        <tr>
+                            <td class="bg-light" colspan="13"></td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">RESULTADO CONTABLE</td>
+                            <td class="text-right border font-weight-bold" colspan="3">@Model.ResultadoContableRDTOMesTotal.ToString("N2")</td>
+                            <td class="text-right border bg-info text-white font-weight-bold">@Model.ResultadoContableTasaMesTotal.ToString("N2")</td>
+                            <td class="text-right border font-weight-bold" colspan="3">@Model.ResultadoContableRDTOAnioTotal.ToString("N2")</td>
+                            <td class="text-right border bg-info text-white font-weight-bold">@Model.ResultadoContableTasaAnioTotal.ToString("N2")</td>
+                            <td colspan="4"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+           
+            }
+            else
+            {
+            <partial name="_Empty" model="string.Empty" />
+            }
+    </div>
+
+</form>

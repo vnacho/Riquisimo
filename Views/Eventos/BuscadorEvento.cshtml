@@ -1,0 +1,54 @@
+﻿<div class="input-group">
+    <input type="text" class="form-control form-control-sm" value="@ViewBag.EventoNombre" placeholder="-Seleccionar-" disabled data-toggle="modal" data-target="#BuscadorEventoModal" name="BuscadorEventoTexto" id="BuscadorEventoTexto">
+    <div class="input-group-append">
+        <button type="button" data-toggle="modal" data-target="#BuscadorEventoModal" class="btn btn-grey btn-sm m-0">
+            <i class="fas fa-search" aria-hidden="true"></i>
+        </button>
+    </div>
+</div>
+
+<div class="modal fade right vh-100 overflow-hidden" id="BuscadorEventoModal" data-id-input="" data-name-input="" tabindex="-1" role="dialog" aria-labelledby="exampleModalPreviewLabel" aria-hidden="true">
+    <div class="modal-dialog modal-full-height modal-right modal-notify" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Buscar evento</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body row">
+                <div class="col-12 mb-4">
+                    <label for="BuscadorEventoTexto" class="control-label">Código o nombre del evento</label>
+                    <input type="text" id="BuscadorEventoTexto" name="BuscadorEventoTexto" class="form-control form-control-sm" onkeyup="BuscarEvento(this)" placeholder="Escriba algo" />
+                </div>
+                <div class="col-12">
+                    Resultados
+                </div>
+                <div id="divEventosResults" class="col-12 client-list-search-container">
+                    <partial name="~/Views/Eventos/Buscador.cshtml" model="null" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function BuscarEvento(sender) {
+        var value = sender.value;        
+        clearTimeout(timeout);
+        var timeout = setTimeout(function () {
+            $("#divEventosResults").empty();
+            $("#divEventosResults").append('<div class="text-center m-5"><div class="spinner-border text-primary" role="status"><span class="sr-only">Cargando...</span></div></div>')
+            fetch("/Eventos/Buscador?value=" + value)
+                .then(e => {
+                    return e.text()
+                }).then(html => {
+                    $("#divEventosResults").empty();
+                    $("#divEventosResults").append(html);
+                });
+        }, 1000);
+    }
+</script>
+
+
+

@@ -1,0 +1,16 @@
+﻿@model CompraPedido
+
+<div class="table-responsive">
+    <table class="table table-sm table-hover table-striped">
+        <tr>
+            <td class="text-right">
+                Base Imponible: <b>@Model.BaseImponible.ToString("C")</b><br />
+                Total IVA: <b>@Model.PedidoLineas.Sum(f => f.ImporteIVA).ToString("C")</b><br />
+                @*@if (Model != null && Model.TieneRetencion && Model.Retencion_Porcentaje.HasValue && Model.TotalRetencion.HasValue)
+                {
+                    <span>Total Retención (@Model.Retencion_Porcentaje %): <b>@Model.TotalRetencion.Value.ToString("C")</b></span><br />
+                }*@
+                Total:<b>@Model.Total.ToString("C")</b>
+            </tr>
+    </table>
+</div>

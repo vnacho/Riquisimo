@@ -1,0 +1,39 @@
+﻿@model Congress
+@{
+    Layout = "_LayoutRestauracion";
+    bool continuar = (bool)ViewBag.Continuar; 
+}
+
+<partial name="_CabeceraRestauracion" model="@Model" />
+
+<form method="post">
+
+    @Html.HiddenFor(f => f.Id)
+
+    <h4>Bienvenido a la web de reservas de asistencia</h4>
+    <p>
+        <b>@Model.Name</b><br />
+    </p>
+    <hr />    
+
+    @if (!continuar)
+    {
+        <p class="font-italic">
+            Para el buen funcionamiento del Congreso, es necesario saber si va a asistir o no a cada una de las actividades de restauración.<br />
+            Reserve con antelación su plaza.<br />
+            El hecho de no reservar la misma supone el deseo expreso de no asistir. <br />        
+        </p>
+        <p>
+            <button type="submit" name="Continuar" value="true" class="btn btn-info">Continuar</button>
+        </p>
+    }
+    else
+    {
+        <label>Por favor seleccione lo que quiere hacer:</label>    
+        <p>
+            <a asp-action="Encuentros" asp-controller="Restauracion" asp-route-CongressId="@Model.Id">Deseo realizar una reserva</a><br />
+            <a asp-action="Nif" asp-controller="Restauracion" asp-route-CongressId="@Model.Id">Quiero ver mis reservas o dar de baja alguna de ellas</a>
+        </p>
+    }
+    
+</form>

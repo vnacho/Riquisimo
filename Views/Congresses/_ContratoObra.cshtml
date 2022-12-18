@@ -1,0 +1,20 @@
+﻿@using Ferpuser.Models.Core
+@model Congress
+
+<div class="modal fade" id="ContratoObraModal" tabindex="-1" aria-labelledby="NuevaLineaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content ui-front">
+            <div id="divLineaContrato">
+                <div class="row">
+                    <div class="col text-center">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-blue-grey btn-sm text-nowrap" onclick="SaveContrato();">Guardar <i class="fas fa-plus ml-2"></i></a>
+                <a class="btn btn-grey btn-sm text-nowrap" data-dismiss="modal">Cancelar <i class="fas fa-times ml-2"></i></a>
+            </div>
+        </div>
+    </div>
+</div>

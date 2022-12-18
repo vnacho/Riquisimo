@@ -1,0 +1,15 @@
+﻿@model string
+
+@{
+    string message = Model;
+}
+@if (string.IsNullOrWhiteSpace(message))
+{
+    message = "No hay resultados.";
+}
+
+<div class="alert alert-secondary text-center" role="alert">
+    <i class="fas fa-info-circle mr-2" aria-hidden="true"></i>&nbsp;@message
+</div>
+
+

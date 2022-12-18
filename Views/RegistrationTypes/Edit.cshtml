@@ -1,0 +1,79 @@
+﻿@model Ferpuser.Models.RegistrationType
+
+@{
+    ViewData["Title"] = "Editar tipo de inscripción";
+    ViewData["Swal"] = true;
+}
+
+<form asp-action="Edit">
+    <div class="row">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="col-md-4 form-group">
+            <label asp-for="Name" class="control-label"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 form-group">
+            <label asp-for="Description" class="control-label"></label>
+            <input asp-for="Description" class="form-control" />
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+    </div>
+
+    <input asp-for="Created" class="form-control" />
+    <input asp-for="Modified" class="form-control" />
+    <input asp-for="Deleted" class="form-control" />
+    <input hidden asp-for="Id" class="form-control" />
+    <div class="form-group">
+        @*@if (ViewBag.CanRemove)
+        {
+            
+        }*@
+        <button id="remove" role="button" class="btn btn-outline-danger">
+            Borrar
+        </button>
+        <input type="submit" value="Guardar" class="btn btn-primary" />
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        $(e => {
+            $("#remove").click(e => {
+                e.preventDefault();
+                Swal.fire({
+                    title: "No podrás deshacer esta acción",
+                    text: "¿Desea borrar este tipo de inscripción?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Borrar",
+                    cancelButtonText: "Cancelar"
+                }).then((result) => {
+                    if (result.value) {
+                        const myHeaders = new Headers();
+                        var token = $('form').find("input[name='af_token']").val();
+                        myHeaders.append('RequestVerificationToken', token);
+                        myHeaders.append('Content-Type', 'application/json');
+                        
+                        ga('send', 'pageview', '/RegistrationTypes/Delete/@Model.Id');
+                        fetch("/RegistrationTypes/Delete/@Model.Id", {
+                            method: "POST",
+                            headers: myHeaders
+                        }).then(pr => {
+                            console.log(pr);
+                            if (pr.ok) {
+                                Swal.fire(
+                                    'Borrado',
+                                    'El tipo de inscripción ha sido borrado.',
+                                    'success'
+                                ).then(e => {
+                                    window.location = "/RegistrationTypes";
+                                });
+                            }
+                        });
+                    }
+                })
+            })
+        })
+    </script>
+}
